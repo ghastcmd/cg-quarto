@@ -26,8 +26,7 @@ includes = $(addprefix -I,$(inc_dir))
 flags = -Isrc/include
 
 build:
-	$(call fmt,Compiling target with 4 threads)
-	$(SS)$(MAKE) --no-print-directory -j 4 compile
+	$(SS)$(MAKE) -s --no-print-directory -j 4 compile
 
 run: build
 	$(SS)$(target)
@@ -57,4 +56,4 @@ clean:
 
 clean_pch:
 	$(call fmt,Deleting the precompiled header)
-	$(SS)rm -f src/include/pch.h
+	$(SS)rm -f $(gch)
