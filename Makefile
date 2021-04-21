@@ -20,10 +20,21 @@ gch = $(pch:.h=.h.gch)
 source = $(wildcard $(src)/*.cpp)
 object = $(patsubst %,$(obj)/%.o,$(basename $(notdir $(source))))
 
-inc_dir = src/include vendor/glut
-includes = $(addprefix -I,$(inc_dir))
+inc_dir = src/include
+lib_dir = libs
+includes = $(addprefix -I,$(inc_dir)) $(addprefix -L,$(lib_dir))
+def_d = FREEGLUT_STATIC
+defines = $(addprefix -D,$(def_d))
 
-flags = -Isrc/include
+flags = 
+
+ifeq ($(OS),Windows_NT)
+	libs_d = freeglut_static glu32 gdi32 opengl32 winmm
+else
+	libs_d = freeglut_static
+endif
+
+libs = $(addprefix -l,$(libs_d))
 
 build:
 	$(SS)$(MAKE) -s --no-print-directory -j 4 compile
@@ -39,12 +50,12 @@ $(gch): $(pch)
 
 $(target): $(object)
 	$(call fmt,Compiling $(target))
-	$(SS)$(CC) $^ -o $@ $(flags) $(includes)
+	$(SS)$(CC) $^ -o $@ $(includes) $(libs)
 
 vpath %.cpp $(src)
 bin/%.o: %.cpp
 	$(call fmt,Compiling $< into $@)
-	$(SS)$(CC) -c $< -o $@ $(includes)
+	$(SS)$(CC) -c $< -o $@ $(defines) $(includes) $(libs)
 
 bin:
 	$(call fmt,Creating $(obj) directory)
@@ -52,7 +63,7 @@ bin:
 
 clean:
 	$(call fmt,Cleaning the entire $(obj) folder)
-	$(SS)rm -Force $(wildcard $(obj)/*)
+	$(SS)rm -f $(wildcard $(obj)/*)
 
 clean_pch:
 	$(call fmt,Deleting the precompiled header)
