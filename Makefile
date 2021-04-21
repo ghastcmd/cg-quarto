@@ -23,7 +23,13 @@ object = $(patsubst %,$(obj)/%.o,$(basename $(notdir $(source))))
 inc_dir = src/include
 lib_dir = libs
 includes = $(addprefix -I,$(inc_dir)) $(addprefix -L,$(lib_dir))
-def_d = FREEGLUT_STATIC
+
+ifeq ($(OS), Windows_NT)
+	def_d = FREEGLUT_STATIC
+else
+	def_d = 
+endif
+
 defines = $(addprefix -D,$(def_d))
 
 flags = 
@@ -31,7 +37,7 @@ flags =
 ifeq ($(OS),Windows_NT)
 	libs_d = freeglut_static glu32 gdi32 opengl32 winmm
 else
-	libs_d = freeglut_static
+	libs_d = glut GL
 endif
 
 libs = $(addprefix -l,$(libs_d))
