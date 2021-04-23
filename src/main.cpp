@@ -130,7 +130,7 @@ void mouse(int button, int state, int x, int y)
     }
 }
 
-int main(int argc, char **argv)
+int _main(int argc, char **argv)
 {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
@@ -154,4 +154,5 @@ int main(int argc, char **argv)
     glutTimerFunc(0, timer, 0);
 
     glutMainLoop();
+    return 0;
 }

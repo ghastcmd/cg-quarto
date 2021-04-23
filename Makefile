@@ -31,7 +31,6 @@ else
 endif
 
 defines = $(addprefix -D,$(def_d))
-
 flags = 
 
 ifeq ($(OS),Windows_NT)
@@ -56,7 +55,7 @@ $(gch): $(pch)
 
 $(target): $(object)
 	$(call fmt,Compiling $(target))
-	$(SS)$(CC) $^ -o $@ $(includes) $(libs)
+	$(SS)$(CC) $^ -o $@ $(includes) $(libs) $(flags)
 
 vpath %.cpp $(src)
 bin/%.o: %.cpp
