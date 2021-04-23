@@ -9,6 +9,12 @@ define fmt
 endef
 
 ifeq ($(OS),Windows_NT)
+	dos = Windows
+else
+	dos = $(shell uname -s)
+endif
+
+ifeq ($(dos),Windows)
 	target:=$(target).exe
 endif
 
@@ -24,19 +30,23 @@ inc_dir = src/include
 lib_dir = libs
 includes = $(addprefix -I,$(inc_dir)) $(addprefix -L,$(lib_dir))
 
-ifeq ($(OS), Windows_NT)
+ifeq ($(dos),Windows)
 	def_d = FREEGLUT_STATIC
 else
+ifeq ($(dos),linux)
 	def_d = 
+endif
 endif
 
 defines = $(addprefix -D,$(def_d))
 flags = 
 
-ifeq ($(OS),Windows_NT)
+ifeq ($(dos),Windows_NT)
 	libs_d = freeglut_static glu32 gdi32 opengl32 winmm
 else
-	libs_d = glut GL
+ifeq ($(dos),Linux)
+	libs_d = glut GL GLU
+endif
 endif
 
 libs = $(addprefix -l,$(libs_d))

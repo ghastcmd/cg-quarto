@@ -81,7 +81,8 @@ void motion(int x, int y)
     cam.yaw += xoffset;
     cam.pitch += yoffset;
 
-    cam.pitch = std::clamp(cam.pitch, -89.0f, 89.0f);
+    // cam.pitch = std::clamp(cam.pitch, -89.0f, 89.0f); // not working on linux ??
+    cam.pitch = cam.pitch < -89.0f ? -89.0f : cam.pitch > 89.0f ? 89.0f : cam.pitch;
 
     vec3 direction {
         cos(radians(cam.yaw)) * cos(radians(cam.pitch)),
@@ -154,5 +155,9 @@ int _main(int argc, char **argv)
     glutTimerFunc(0, timer, 0);
 
     glutMainLoop();
+<<<<<<< HEAD
     return 0;
 }
+=======
+}
+>>>>>>> main
