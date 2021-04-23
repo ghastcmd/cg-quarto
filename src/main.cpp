@@ -15,28 +15,32 @@ struct camera
     vec3 pos;
     vec3 front;
     vec3 up;
-    float yaw, pitch;
+    struct {
+        float yaw, pitch, roll;
+    };
 };
 
-camera cam{ {0.0f, 0.0f, 5.0f}, {0.0f, 0.0f, -3.0f}, {0.0f, 1.0f, 0.0f}, -90.0f, 0 };
+camera cam{ {0.0f, 0.0f, 5.0f}, {0.0f, 0.0f, -3.0f}, {0.0f, 1.0f, 0.0f}, {-90.0f, 0.0f, 0.0f} };
 
 #define dist(vec) vec.x, vec.y, vec.z
 
-float last_frame;
+float last_frame, dt;
 float fov = 75.0f;
 float speed = 4.8f;
 float mouse_sensitivity = 0.1f;
 
 void timer(int count)
-{    
+{
+    float current_frame = glutGet(GLUT_ELAPSED_TIME);
+    dt = current_frame - last_frame;
+    last_frame = current_frame;
+
     glutPostRedisplay();
     glutTimerFunc(1000 / 60, timer, 0);
 }
 
 void display()
 {
-    last_frame = glutGet(GLUT_ELAPSED_TIME);
-
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -90,10 +94,7 @@ void motion(int x, int y)
 
 void keyboard(unsigned char key, int x, int y)
 {
-    float current_frame = glutGet(GLUT_ELAPSED_TIME);
-    float delta_time = current_frame - last_frame;
-    last_frame = current_frame;
-    float cam_speed = speed * delta_time / 1000;
+    float cam_speed = speed * dt / 1000;
     switch (key)
     {
         case 'w':
