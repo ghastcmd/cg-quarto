@@ -60,3 +60,13 @@
     * No glut, a medição do tempo é feita com a função
         * glutGet(GLUT_ELAPSED_TIME)
         * Retorna um valor em milisegundos desde que a função glutInit() foi chamada
+* Para obter a movimentação pelo mouse
+    * É necessário conseguir o offset de movimentação do mouse na tela
+    * Depois de somada o offset ao pitch e ao yaw
+        * Yaw: movimentação no eixo horizontal
+        * Pitch: movimentação no eixo vertical
+        * Roll: movimentação na rotação
+    * Como queremos obter um novo vetor de direção da câmera, utilizaremos da trignometria
+        * Iremos mover somente os eixos x e y
+        * Para mover o eixo yaw, devemos calcular as posições relativas ao eixo z e x
+        * Para mover o eixo pitch, devemos calcular as posições relativas ao eixo y e x,z

@@ -2,28 +2,47 @@
 
 #include "vec.h"
 
-void timer(int count)
+template <typename _ty>
+constexpr _ty PI = (_ty)3.14159265358979323846;
+
+float radians(float val)
 {
-    glutPostRedisplay();
-    glutTimerFunc(1000 / 60, timer, 0);
+    return val * (PI<float> / 180.0f);
 }
 
-vec3 cam{0.0f, 0.0f, 5.0f};
-vec3 cam_front{0.0f, 0.0f, -3.0f};
+struct camera
+{
+    vec3 pos;
+    vec3 front;
+    vec3 up;
+    float yaw, pitch;
+};
+
+camera cam{ {0.0f, 0.0f, 5.0f}, {0.0f, 0.0f, -3.0f}, {0.0f, 1.0f, 0.0f}, -90.0f, 0 };
 
 #define dist(vec) vec.x, vec.y, vec.z
 
 float last_frame;
 float fov = 75.0f;
+float speed = 4.8f;
+float mouse_sensitivity = 0.1f;
+
+void timer(int count)
+{    
+    glutPostRedisplay();
+    glutTimerFunc(1000 / 60, timer, 0);
+}
 
 void display()
 {
+    last_frame = glutGet(GLUT_ELAPSED_TIME);
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    vec3 look = cam + cam_front;
-    gluLookAt(dist(cam), dist(look), 0.0f, 1.0f, 0.0f);
+    vec3 look = cam.pos + cam.front;
+    gluLookAt(dist(cam.pos), dist(look), dist(cam.up));
 
     glPushMatrix();
     glScalef(2.0f, 1.0f, 1.0f);
@@ -50,19 +69,23 @@ void reshape(int width, int height)
 
 void motion(int x, int y)
 {
-    static int bef_x = 0, bef_y = 0;
-    float dir_x = (x > bef_x) - (x < bef_x);
-    float dir_y = (y < bef_y) - (y > bef_y);
-    dir_x /= 10;
-    dir_y /= 10;
+    static float prevx = glutGet(GLUT_WINDOW_WIDTH) / 2, prevy = glutGet(GLUT_WINDOW_HEIGHT) / 2;
+    float xoffset = x - prevx, yoffset = prevy - y;
+    xoffset *= mouse_sensitivity, yoffset *= mouse_sensitivity;
+    prevx = x, prevy = y;
 
-    cam_front.x = (cam_front.x + dir_x);
-    cam_front.x -= 360 * (cam_front.x > 360); 
-    cam_front.y = (cam_front.y + dir_y);
-    cam_front.y -= 360 * (cam_front.y > 360);
+    cam.yaw += xoffset;
+    cam.pitch += yoffset;
 
-    printf("%i %i %f %f %f %f\n", x, y, dir_x, dir_y, cam_front.x, cam_front.y);
-    bef_x = x, bef_y = y;
+    cam.pitch = std::clamp(cam.pitch, -89.0f, 89.0f);
+
+    vec3 direction {
+        cos(radians(cam.yaw)) * cos(radians(cam.pitch)),
+        sin(radians(cam.pitch)),
+        sin(radians(cam.yaw)) * cos(radians(cam.pitch))
+    };
+
+    cam.front = vec3::normalize(direction);
 }
 
 void keyboard(unsigned char key, int x, int y)
@@ -70,21 +93,39 @@ void keyboard(unsigned char key, int x, int y)
     float current_frame = glutGet(GLUT_ELAPSED_TIME);
     float delta_time = current_frame - last_frame;
     last_frame = current_frame;
-    float cam_speed = 0.5f * delta_time / 1000;
+    float cam_speed = speed * delta_time / 1000;
     switch (key)
     {
         case 'w':
-            cam += cam_front * cam_speed;
+            cam.pos += cam.front * cam_speed / 2.0f;
         break;
         case 's':
-            cam -= cam_front * cam_speed;
+            cam.pos -= cam.front * cam_speed / 2.0f;
         break;
         case 'a':
-            cam -= vec3::normalize(vec3::cross(cam_front, {0,1,0})) * cam_speed;
+            cam.pos -= vec3::normalize(vec3::cross(cam.front, cam.up)) * cam_speed;
         break;
         case 'd':
-            cam += vec3::normalize(vec3::cross(cam_front, {0,1,0})) * cam_speed;
+            cam.pos += vec3::normalize(vec3::cross(cam.front, cam.up)) * cam_speed;
         break;
+        case ' ':
+            cam.pos += vec3{0, cam_speed, 0};
+        break;
+        case 'b':
+            cam.pos -= vec3{0, cam_speed, 0};
+        break;
+    }
+}
+
+void mouse(int button, int state, int x, int y)
+{
+    if (button == 3) // wheel up
+    {
+
+    }
+    else if (button == 4) // wheel down
+    {
+        
     }
 }
 
@@ -94,7 +135,7 @@ int main(int argc, char **argv)
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
     int width = 700, height = 700;
     glutInitWindowSize(width, width);
-    glutCreateWindow("simple title");
+    glutCreateWindow("CG Work");
 
     glViewport(0, 0, (GLsizei)width, (GLsizei)height);
     glMatrixMode(GL_PROJECTION);
@@ -106,20 +147,10 @@ int main(int argc, char **argv)
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
     glutKeyboardFunc(keyboard);
+    glutMouseFunc(mouse);
+    
     glutPassiveMotionFunc(motion);
     glutTimerFunc(0, timer, 0);
 
     glutMainLoop();
 }
-
-/**
-void motion(int x, int y){
-	//cam_rotation[X] += dt;
-	static int last[2];
-	cam_rotation[Y] -= (x - last[X]) * sensibility[X] * dt;
-	cam_rotation[X] -= (y - last[Y]) * sensibility[Y] * dt;
-
-	last[X] = x;
-	last[Y] = y;
-}
- */
