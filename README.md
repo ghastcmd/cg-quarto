@@ -11,4 +11,5 @@ O programa funciona tanto no Windows quanto no Linux, mas no linux as biblioteca
 
 Referências:
 
-[Camera - Começando a usar](https://learnopengl.com/Getting-started/Camera)
+[Referência do monitor da disciplina](https://github.com/valeriojr/COMP269/blob/master/opengl.c)
+[Camera - Getting started](https://learnopengl.com/Getting-started/Camera)
