@@ -44,3 +44,19 @@
     * Define-se uma função no formato:
         * void keyboard_handle(unsigned char key, int x, int y)
     * Geralmente só se utiliza o valor da key em um switch
+* Para a movimentação pelo teclado:
+    * No caso da movimentação para frente e para trás
+        * Basta somar o vetor de posição da câmera com um outro vetor
+        * Esse outro vetor será o vetor que indica a frente da câmera
+        * E então, quando somado a câmera vai para frente e quando subtraído, para trás
+    * No caso da movimentação para os lados
+        * Basta conseguir um vetor que seja horizontal para os lados
+        * Para conseguir tal vetor, é necessário encontrar um vetor perpendicular
+        * Este vetor deve ser perpendicular ao vetor de cima e o vetor da frente da câmera
+        * E então se consegue um vetor de unidade e multiplica pelo escalonamento
+* Para velocidades regulares
+    * Quando se trabalha com velocidades por frame, um valor constante é variável
+    * Devido à alta variação dos quadros por segundo, é necessário uma mensuração de tempo
+    * No glut, a medição do tempo é feita com a função
+        * glutGet(GLUT_ELAPSED_TIME)
+        * Retorna um valor em milisegundos desde que a função glutInit() foi chamada

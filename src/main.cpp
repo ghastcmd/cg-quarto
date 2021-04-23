@@ -1,12 +1,19 @@
 #include "pch.h"
 
+#include "vec.h"
+
 void timer(int count)
 {
     glutPostRedisplay();
     glutTimerFunc(1000 / 60, timer, 0);
 }
 
-float caml_x = 0, caml_y = 0, caml_z = 0;
+vec3 cam{0.0f, 0.0f, 5.0f};
+vec3 cam_front{0.0f, 0.0f, -3.0f};
+
+#define dist(vec) vec.x, vec.y, vec.z
+
+float last_frame;
 float fov = 75.0f;
 
 void display()
@@ -15,7 +22,8 @@ void display()
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    gluLookAt(0.0f, 1.3f, 5.0f, caml_x, caml_y, caml_z, 0.0f, 1.0f, 0.0f);
+    vec3 look = cam + cam_front;
+    gluLookAt(dist(cam), dist(look), 0.0f, 1.0f, 0.0f);
 
     glPushMatrix();
     glScalef(2.0f, 1.0f, 1.0f);
@@ -48,13 +56,36 @@ void motion(int x, int y)
     dir_x /= 10;
     dir_y /= 10;
 
-    caml_x = (caml_x + dir_x);
-    caml_x -= 360 * (caml_x > 360); 
-    caml_y = (caml_y + dir_y);
-    caml_y -= 360 * (caml_y > 360);
+    cam_front.x = (cam_front.x + dir_x);
+    cam_front.x -= 360 * (cam_front.x > 360); 
+    cam_front.y = (cam_front.y + dir_y);
+    cam_front.y -= 360 * (cam_front.y > 360);
 
-    printf("%i %i %f %f %f %f\n", x, y, dir_x, dir_y, caml_x, caml_y);
+    printf("%i %i %f %f %f %f\n", x, y, dir_x, dir_y, cam_front.x, cam_front.y);
     bef_x = x, bef_y = y;
+}
+
+void keyboard(unsigned char key, int x, int y)
+{
+    float current_frame = glutGet(GLUT_ELAPSED_TIME);
+    float delta_time = current_frame - last_frame;
+    last_frame = current_frame;
+    float cam_speed = 0.5f * delta_time / 1000;
+    switch (key)
+    {
+        case 'w':
+            cam += cam_front * cam_speed;
+        break;
+        case 's':
+            cam -= cam_front * cam_speed;
+        break;
+        case 'a':
+            cam -= vec3::normalize(vec3::cross(cam_front, {0,1,0})) * cam_speed;
+        break;
+        case 'd':
+            cam += vec3::normalize(vec3::cross(cam_front, {0,1,0})) * cam_speed;
+        break;
+    }
 }
 
 int main(int argc, char **argv)
@@ -74,6 +105,7 @@ int main(int argc, char **argv)
 
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
+    glutKeyboardFunc(keyboard);
     glutPassiveMotionFunc(motion);
     glutTimerFunc(0, timer, 0);
 
