@@ -155,9 +155,5 @@ int _main(int argc, char **argv)
     glutTimerFunc(0, timer, 0);
 
     glutMainLoop();
-<<<<<<< HEAD
     return 0;
 }
-=======
-}
->>>>>>> main
