@@ -18,7 +18,7 @@ ifeq ($(dos),Windows)
 	target:=$(target).exe
 endif
 
-CC = g++
+CC = g++ -std=c++2a
 
 pch = src/include/pch.h
 gch = $(pch:.h=.h.gch)
