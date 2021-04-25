@@ -164,8 +164,7 @@ struct obj_file
                         while (!isspace(*stri)) stri++;
                         idxs[i] = atoi(stri++);
                     }
-                    int len = 0;
-                    for (int i = 0; idxs[i] != 0; ++i, ++len);
+                    int len = i-1;
                     unsigned int final_idx[64];
                     final_idx[0] = idxs[0];
                     final_idx[1] = idxs[1];
