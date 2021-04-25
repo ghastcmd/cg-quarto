@@ -82,11 +82,11 @@ void display()
     models[2].draw_mesh();
     glEnd();
 
-    glPushMatrix();
-    glColor3f(0.3, 0.5f, 1.0f);
-    glTranslatef(-10.0f, 0.0f, 0.0f);
-    models[3].draw_mesh();
-    glEnd();
+    // glPushMatrix();
+    // glColor3f(0.3, 0.5f, 1.0f);
+    // glTranslatef(-10.0f, 0.0f, 0.0f);
+    // models[3].draw_mesh();
+    // glEnd();
 
     glPopMatrix();
 
@@ -191,11 +191,13 @@ int main(int argc, char **argv)
     models.emplace_back(obj_file{"objs/object export.obj"});
     models.emplace_back(obj_file{"objs/quad_square.obj"});
     models.emplace_back(obj_file{"objs/cuboid.obj"});
-    models.emplace_back(obj_file{"objs/quarto.obj"});
+    // models.emplace_back(obj_file{"objs/quarto.obj"});
     
+    puts("before");
+
     for (auto val : models[2].indices)
     {
-        printf("%i ", val+1);
+        printf("%i ", val.vertex+1);
     }
     puts("");
 
