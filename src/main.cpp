@@ -1,6 +1,7 @@
 #include "pch.h"
 
 #include "vec.h"
+#include "reader.h"
 
 template <typename _ty>
 constexpr _ty PI = (_ty)3.14159265358979323846;
@@ -39,6 +40,8 @@ void timer(int count)
     glutTimerFunc(1000 / 60, timer, 0);
 }
 
+std::vector<obj_file> models;
+
 void display()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -58,6 +61,33 @@ void display()
     glTranslatef(0.0f, 1.0f, 0.0f);
     glColor3f(1, 0, 0);
     glutSolidSphere(0.5, 20, 10);
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(0.0f, -1.0f, 3.0f);
+    glColor3f(0, 0, 1);
+    models[0].draw_mesh();
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(2.0f, -1.0f, 3.0f);
+    glColor3f(0, 0, 1);
+    models[1].draw_mesh();
+    glPopMatrix();
+
+    glPushMatrix();
+    glColor3f(1, 0, 0);
+    glTranslatef(3.0f, -1.0f, 0.0f);
+    glScalef(0.5f, 0.5f, 0.5f);
+    models[2].draw_mesh();
+    glEnd();
+
+    glPushMatrix();
+    glColor3f(0.3, 0.5f, 1.0f);
+    glTranslatef(-10.0f, 0.0f, 0.0f);
+    models[3].draw_mesh();
+    glEnd();
+
     glPopMatrix();
 
     glutSwapBuffers();
@@ -131,7 +161,9 @@ void mouse(int button, int state, int x, int y)
     }
 }
 
-int _main(int argc, char **argv)
+#ifndef TEST
+
+int main(int argc, char **argv)
 {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
@@ -154,6 +186,21 @@ int _main(int argc, char **argv)
     glutPassiveMotionFunc(motion);
     glutTimerFunc(0, timer, 0);
 
+    // obj_file square("objs/object export.obj");
+    // models[0].open("objs/object export.obj");
+    models.emplace_back(obj_file{"objs/object export.obj"});
+    models.emplace_back(obj_file{"objs/quad_square.obj"});
+    models.emplace_back(obj_file{"objs/cuboid.obj"});
+    models.emplace_back(obj_file{"objs/quarto.obj"});
+    
+    for (auto val : models[2].indices)
+    {
+        printf("%i ", val+1);
+    }
+    puts("");
+
     glutMainLoop();
     return 0;
 }
+
+#endif

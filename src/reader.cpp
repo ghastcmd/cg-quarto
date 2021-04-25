@@ -118,10 +118,11 @@ void obj_file::open(const char *path)
     std::ifstream file(path, std::ios::in | std::ios::binary);
     while (file.peek() != -1)
     {
-        auto ret = translate(file);
+        const auto ret = translate(file);
+        constexpr size_t max_strl = 64;
         // print_ret(ret);
-        char str[32];
-        file.getline(str, 32, '\x0a');
+        char str[max_strl];
+        file.getline(str, max_strl, '\x0a');
         switch (ret)
         {
             case comment:
@@ -129,7 +130,7 @@ void obj_file::open(const char *path)
             case object_name:
             case smooth_shading:
             case usemtl:
-                file.ignore(32, '\x0a');
+                file.ignore(max_strl, '\x0a');
                 break;
             break;
             case vertex_coord: {
@@ -150,25 +151,27 @@ void obj_file::open(const char *path)
             case face: {
                 unsigned int idxs[20] = {0};
                 idxs[0] = atoi(str);
-                int i, j;
+                int i = 0, j = 0;
                 char *stri = str;
                 for (i = 1; *stri != '\0'; ++i)
                 {
-                    while (!isspace(*stri)) stri++;
+                    while (!isspace(*stri) && *stri) stri++;
                     idxs[i] = atoi(stri++);
                 }
-                int len = i-1;
-                unsigned int final_idx[64];
+                int len = 0;
+                for (; idxs[len] != 0; len++);
+                unsigned int final_idx[128];
                 final_idx[0] = idxs[0];
                 final_idx[1] = idxs[1];
                 final_idx[2] = idxs[2];
-                for (i = 0, j = 3; i + 3 < len; ++i, j+=3)
+                for (i = 0, j = 3; i + 3 <= len; ++i, j+=3)
                 {
                     final_idx[j] = idxs[i];
                     final_idx[j+1] = idxs[i+2];
                     final_idx[j+2] = idxs[i+3];
                 }
-                for (int len = j, i = 0; i < len; ++i)
+                len = j - 3;
+                for (int i = 0; i < len; ++i)
                 {
                     indices.push_back(final_idx[i]-1);
                 }
@@ -210,10 +213,16 @@ void obj_file::draw_mesh()
 {
     //glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
     glBegin(GL_TRIANGLES);
-    for (int i = 0, len = indices.size(); i < len; ++i)
+    for (auto id: indices)
+    // for (int i = 0, len = indices.size(); i < len; ++i)
     {
-        vec3 vec = vcoords[indices[i]];
+        // vec3 vec = vcoords[indices[i]];
+        vec3 &vec = vcoords[id];
         glVertex3f(vec.x, vec.y, vec.z);
+        // vec = vnormal[id];
+        // glNormal3f(vec.x, vec.y, vec.z);
+        // vec2 &v2 = vtexture[id];
+        // glTexCoord2f(v2.x, v2.y);
     }
     glEnd();
 }
@@ -225,15 +234,14 @@ void obj_file::draw_mesh()
 
 int main()
 {
-    obj_file file("objs/object export.obj");
+    obj_file file("objs/cuboid.obj");
 
-    printf("%i\n", cnt);
+    // printf("%i\n", cnt);
 
-    for (auto val: file.indices)
+    for (auto val: file.vcoords)
     {
-        printf("%i ", val);
+        printf("%f %f %f\n", val.x, val.y, val.z);
     }
-    puts("");
 
     return 0;
 }
