@@ -41,6 +41,7 @@ void timer(int count)
 }
 
 std::vector<obj_file> models;
+obj_file simple;
 
 void display()
 {
@@ -51,17 +52,17 @@ void display()
     vec3 look = cam.pos + cam.front;
     gluLookAt(dist(cam.pos), dist(look), dist(cam.up));
 
-    glPushMatrix();
-    glScalef(2.0f, 1.0f, 1.0f);
-    glColor3f(0, 1, 0);
-    glutSolidCube(1.0f);
-    glPopMatrix();
+    // glPushMatrix();
+    // glScalef(2.0f, 1.0f, 1.0f);
+    // glColor3f(0, 1, 0);
+    // glutSolidCube(1.0f);
+    // glPopMatrix();
 
-    glPushMatrix();
-    glTranslatef(0.0f, 1.0f, 0.0f);
-    glColor3f(1, 0, 0);
-    glutSolidSphere(0.5, 20, 10);
-    glPopMatrix();
+    // glPushMatrix();
+    // glTranslatef(0.0f, 1.0f, 0.0f);
+    // glColor3f(1, 0, 0);
+    // glutSolidSphere(0.5, 20, 10);
+    // glPopMatrix();
 
     glPushMatrix();
     glTranslatef(0.0f, -1.0f, 3.0f);
@@ -81,14 +82,48 @@ void display()
     glScalef(0.5f, 0.5f, 0.5f);
     models[2].draw_mesh();
     glEnd();
-
-    // glPushMatrix();
-    // glColor3f(0.3, 0.5f, 1.0f);
-    // glTranslatef(-10.0f, 0.0f, 0.0f);
-    // models[3].draw_mesh();
-    // glEnd();
-
     glPopMatrix();
+
+    glPushMatrix();
+    glColor3f(0, 1, 1);
+    glTranslatef(0.0f, -1.0f, 0.0f);
+    models[3].draw_mesh();
+    glPopMatrix();
+
+    glPushMatrix();
+    glColor3f(1, 0, 0);
+    glTranslatef(-5.0f, -1.0f, 0.0f);
+    models[4].draw_mesh();
+    glPopMatrix();
+
+    glPushMatrix();
+    glColor3f(0, 0, 1);
+    glTranslatef(0.0f, 1.0f, 0.0f);
+    glBegin(GL_TRIANGLES);
+    
+    glVertex3f(-1.0f, 0.0f, 1.0f);
+    glTexCoord2f(0.0f, 0.0f);
+    glNormal3f(0.0f, 1.0f, 0.0f);
+
+    glVertex3f(1.0f, 0.0f, 1.0f);
+    glTexCoord2f(0.0f, 0.0f);
+    glNormal3f(0.0f, 1.0f, 0.0f);
+
+    glVertex3f(-1.0f, 0.0f, -1.0f);
+    glTexCoord2f(0.0f, 0.0f);
+    glNormal3f(0.0f, 1.0f, 0.0f);
+
+    glEnd();
+    glPopMatrix();
+
+    glColor3f(1.0f, 0.8f, 0.9f);
+    simple.draw_mesh();
+
+    glPushMatrix();
+    glColor3f(0.3, 0.5f, 1.0f);
+    glTranslatef(-10.0f, 0.0f, 0.0f);
+    models[3].draw_mesh();
+    glEnd();
 
     glutSwapBuffers();
 }
@@ -191,15 +226,50 @@ int main(int argc, char **argv)
     models.emplace_back(obj_file{"objs/object export.obj"});
     models.emplace_back(obj_file{"objs/quad_square.obj"});
     models.emplace_back(obj_file{"objs/cuboid.obj"});
-    // models.emplace_back(obj_file{"objs/quarto.obj"});
-    
-    puts("before");
+    models.emplace_back(obj_file{"objs/triangle.obj"});
 
-    for (auto val : models[2].indices)
+    // puts("printing model");
+    models.emplace_back(obj_file{"objs/quarto.obj"});
+    // puts("after emplaced model");
+
+    puts("triangle");
+
+    puts("coords");
+    for (auto &val: models[3].vcoords)
     {
-        printf("%i ", val.vertex+1);
+        printf("%9f %9f %9f\n", val.x, val.y, val.z);
     }
-    puts("");
+    
+    puts("texture");
+    for (auto &val: models[3].vtexture)
+    {
+        printf("%9f %9f\n", val.x, val.y);
+    }
+
+    puts("normal");
+    for (auto &val: models[3].vnormal)
+    {
+        printf("%9f %9f %9f\n", val.x, val.y, val.z);
+    }
+
+    for (auto &vec: models[3].indices)
+    {
+        printf("%i %i %i\n", vec.vertex, vec.texture, vec.normal);
+    }
+
+    simple.vcoords.push_back({-1, 0, 1});
+    simple.vcoords.push_back({ 1, 0, 1});
+    simple.vcoords.push_back({-1, 0,-1});
+
+    simple.vtexture.push_back({0, 0});
+    simple.vtexture.push_back({0, 0});
+    simple.vtexture.push_back({0, 0});
+
+    simple.vnormal.push_back({0, 1, 0});
+
+    simple.indices.push_back({0, 0, 0});
+    simple.indices.push_back({1, 1, 0});
+    simple.indices.push_back({2, 2, 0});
 
     glutMainLoop();
     return 0;
