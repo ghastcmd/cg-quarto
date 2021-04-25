@@ -81,7 +81,6 @@ void display()
     glTranslatef(3.0f, -1.0f, 0.0f);
     glScalef(0.5f, 0.5f, 0.5f);
     models[2].draw_mesh();
-    glEnd();
     glPopMatrix();
 
     glPushMatrix();
@@ -124,6 +123,7 @@ void display()
     glTranslatef(-10.0f, 0.0f, 0.0f);
     models[3].draw_mesh();
     glEnd();
+    glPopMatrix();
 
     glutSwapBuffers();
 }
@@ -225,13 +225,13 @@ int main(int argc, char **argv)
     // models[0].open("objs/object export.obj");
     models.emplace_back(obj_file{"objs/object export.obj"});
     models.emplace_back(obj_file{"objs/quad_square.obj"});
-    models.emplace_back(obj_file{"objs/cuboid.obj"});
+    //models.emplace_back(obj_file{"objs/cuboid.obj"});
     models.emplace_back(obj_file{"objs/triangle.obj"});
 
     // puts("printing model");
     models.emplace_back(obj_file{"objs/quarto.obj"});
     // puts("after emplaced model");
-
+    /*
     puts("triangle");
 
     puts("coords");
@@ -255,7 +255,7 @@ int main(int argc, char **argv)
     for (auto &vec: models[3].indices)
     {
         printf("%i %i %i\n", vec.vertex, vec.texture, vec.normal);
-    }
+    }*/
 
     simple.vcoords.push_back({-1, 0, 1});
     simple.vcoords.push_back({ 1, 0, 1});
