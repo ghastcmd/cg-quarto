@@ -195,6 +195,45 @@ struct obj_file
         file.close();
     }
 
+    void data_buffer(unsigned int idx)
+    {
+        /*m_idx = idx;
+        unsigned int buffer;
+        glGenBuffers(1, &buffer);
+        glBindBuffer(GL_ARRAY_BUFFER, buffer);
+        glBufferData(
+            GL_ARRAY_BUFFER,
+            vcoords.size() * 3 * sizeof(float), 
+            vcoords.data(), 
+            GL_STATIC_DRAW
+        );
+
+        glEnableVertexAttribArray(idx);
+        glVertexAttribPointer(idx, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
+
+        unsigned int ibo;
+        glGenBuffers(1, &ibo);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+        glBufferData(
+            GL_ELEMENT_ARRAY_BUFFER, 
+            indices.size() * sizeof(unsigned int), 
+            indices, 
+            GL_STATIC_DRAW
+        );*/
+    }
+
+    void draw_mesh()
+    {
+        //glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
+        for (int i = 0, len = indices.size(); i < len; ++i)
+        {
+            vec3 vec = vcoords[indices[i]];
+            glVertex3f(vec.x, vec.y, vec.z);
+        }
+    }
+
+    //unsigned int m_idx;
+
     std::vector<vec3> vcoords;
     std::vector<vec3> vnormal;
     std::vector<vec2> vtexture;
@@ -205,6 +244,8 @@ struct obj_file
 int main()
 {
     obj_file file("objs/object export.obj");
+
+    printf("%i\n", cnt);
 
     for (auto val: file.indices)
     {

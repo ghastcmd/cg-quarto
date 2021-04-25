@@ -45,7 +45,7 @@ ifeq ($(dos),Windows_NT)
 	libs_d = freeglut_static glu32 gdi32 opengl32 winmm
 else
 ifeq ($(dos),Linux)
-	libs_d = glut GL GLU
+	libs_d = GL GLU glut
 endif
 endif
 
