@@ -105,16 +105,16 @@ void print_val(std::ifstream& fstream)
 void stovec3(vec3& vec, char * str)
 {
     vec.x = atof(str);
-    while (*str != ' ') str++;
+    while (!isspace(*str)) str++;
     vec.y = atof(str++);
-    while (*str != ' ') str++;
+    while (!isspace(*str)) str++;
     vec.z = atof(str);
 }
 
 void stovec2(vec2& vec, char * str)
 {
     vec.x = atof(str);
-    while(*str != ' ') str++;
+    while(!isspace(*str)) str++;
     vec.y = atof(str);
 }
 
@@ -126,7 +126,7 @@ struct obj_file
         while (file.peek() != -1)
         {
             auto ret = translate(file);
-            print_ret(ret);
+            // print_ret(ret);
             char str[32];
             file.getline(str, 32, '\x0a');
             switch (ret)
@@ -139,36 +139,29 @@ struct obj_file
                     file.ignore(32, '\x0a');
                     break;
                 break;
-                case vertex_coord:
-                {
+                case vertex_coord: {
                     vec3 vec;
                     stovec3(vec, str);
                     vcoords.push_back(vec);
-                }
-                break;
-                case vertex_texture:
-                {
+                } break;
+                case vertex_texture: {
                     vec2 vec;
                     stovec2(vec, str);
                     vtexture.push_back(vec);
-                }
-                break;
-                case vertex_normal:
-                {
+                } break;
+                case vertex_normal: {
                     vec3 vec;
                     stovec3(vec, str);
                     vnormal.push_back(vec);
-                }
-                break;
-                case face:
-                {
+                } break;
+                case face: {
                     unsigned int idxs[20] = {0};
                     idxs[0] = atoi(str);
                     int i, j;
                     char *stri = str;
-                    for (i = 1; i < 32 && *stri; ++i)
+                    for (i = 1; *stri != '\0'; ++i)
                     {
-                        while (*stri != ' ') stri++;
+                        while (!isspace(*stri)) stri++;
                         idxs[i] = atoi(stri++);
                     }
                     int len = 0;
@@ -187,8 +180,7 @@ struct obj_file
                     {
                         indices.push_back(final_idx[i]-1);
                     }
-                }
-                break;
+                } break;
             }
         }
         file.close();
