@@ -1,21 +1,6 @@
 #include "pch.h"
 #include "vec.h"
-
-int cnt = 0;
-void * i_malloc(size_t size)
-{
-    cnt += 1;
-    return malloc(size);
-}
-
-void *operator new(size_t size)
-{
-    cnt += 1;
-    return malloc(size);
-}
-
-#undef malloc
-#define malloc(size) i_malloc(size)
+#include "reader.h"
 
 enum type_ret
 {
@@ -118,72 +103,81 @@ void stovec2(vec2& vec, char * str)
     vec.y = atof(str);
 }
 
-struct obj_file
+// struct obj_file
+// {
+obj_file::obj_file(const char *path)
 {
-    obj_file(const char *path)
+    if (m_initialized) return;
+    open(path);
+    m_initialized = true;
+}
+
+void obj_file::open(const char *path)
+{
+    if (m_initialized) return;
+    std::ifstream file(path, std::ios::in | std::ios::binary);
+    while (file.peek() != -1)
     {
-        std::ifstream file(path, std::ios::in | std::ios::binary);
-        while (file.peek() != -1)
+        auto ret = translate(file);
+        // print_ret(ret);
+        char str[32];
+        file.getline(str, 32, '\x0a');
+        switch (ret)
         {
-            auto ret = translate(file);
-            // print_ret(ret);
-            char str[32];
-            file.getline(str, 32, '\x0a');
-            switch (ret)
-            {
-                case comment:
-                case mtllib:
-                case object_name:
-                case smooth_shading:
-                case usemtl:
-                    file.ignore(32, '\x0a');
-                    break;
+            case comment:
+            case mtllib:
+            case object_name:
+            case smooth_shading:
+            case usemtl:
+                file.ignore(32, '\x0a');
                 break;
-                case vertex_coord: {
-                    vec3 vec;
-                    stovec3(vec, str);
-                    vcoords.push_back(vec);
-                } break;
-                case vertex_texture: {
-                    vec2 vec;
-                    stovec2(vec, str);
-                    vtexture.push_back(vec);
-                } break;
-                case vertex_normal: {
-                    vec3 vec;
-                    stovec3(vec, str);
-                    vnormal.push_back(vec);
-                } break;
-                case face: {
-                    unsigned int idxs[20] = {0};
-                    idxs[0] = atoi(str);
-                    int i, j;
-                    char *stri = str;
-                    for (i = 1; *stri != '\0'; ++i)
-                    {
-                        while (!isspace(*stri)) stri++;
-                        idxs[i] = atoi(stri++);
-                    }
-                    int len = i-1;
-                    unsigned int final_idx[64];
-                    final_idx[0] = idxs[0];
-                    final_idx[1] = idxs[1];
-                    final_idx[2] = idxs[2];
-                    for (i = 0, j = 3; i + 3 < len; ++i, j+=3)
-                    {
-                        final_idx[j] = idxs[i];
-                        final_idx[j+1] = idxs[i+2];
-                        final_idx[j+2] = idxs[i+3];
-                    }
-                    for (int len = j, i = 0; i < len; ++i)
-                    {
-                        indices.push_back(final_idx[i]-1);
-                    }
-                } break;
-            }
+            break;
+            case vertex_coord: {
+                vec3 vec;
+                stovec3(vec, str);
+                vcoords.push_back(vec);
+            } break;
+            case vertex_texture: {
+                vec2 vec;
+                stovec2(vec, str);
+                vtexture.push_back(vec);
+            } break;
+            case vertex_normal: {
+                vec3 vec;
+                stovec3(vec, str);
+                vnormal.push_back(vec);
+            } break;
+            case face: {
+                unsigned int idxs[20] = {0};
+                idxs[0] = atoi(str);
+                int i, j;
+                char *stri = str;
+                for (i = 1; *stri != '\0'; ++i)
+                {
+                    while (!isspace(*stri)) stri++;
+                    idxs[i] = atoi(stri++);
+                }
+                int len = i-1;
+                unsigned int final_idx[64];
+                final_idx[0] = idxs[0];
+                final_idx[1] = idxs[1];
+                final_idx[2] = idxs[2];
+                for (i = 0, j = 3; i + 3 < len; ++i, j+=3)
+                {
+                    final_idx[j] = idxs[i];
+                    final_idx[j+1] = idxs[i+2];
+                    final_idx[j+2] = idxs[i+3];
+                }
+                for (int len = j, i = 0; i < len; ++i)
+                {
+                    indices.push_back(final_idx[i]-1);
+                }
+            } break;
         }
-        file.close();
     }
+    file.close();
+    m_initialized = true;
+}
 
     // void data_buffer(unsigned int idx)
     // {
@@ -212,24 +206,22 @@ struct obj_file
         );*/
     // }
 
-    void draw_mesh()
+void obj_file::draw_mesh()
+{
+    //glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
+    glBegin(GL_TRIANGLES);
+    for (int i = 0, len = indices.size(); i < len; ++i)
     {
-        //glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
-        for (int i = 0, len = indices.size(); i < len; ++i)
-        {
-            vec3 vec = vcoords[indices[i]];
-            glVertex3f(vec.x, vec.y, vec.z);
-        }
+        vec3 vec = vcoords[indices[i]];
+        glVertex3f(vec.x, vec.y, vec.z);
     }
+    glEnd();
+}
 
     //unsigned int m_idx;
+// };
 
-    std::vector<vec3> vcoords;
-    std::vector<vec3> vnormal;
-    std::vector<vec2> vtexture;
-
-    std::vector<unsigned int> indices; 
-};
+#ifdef READER_TEST
 
 int main()
 {
@@ -245,3 +237,5 @@ int main()
 
     return 0;
 }
+
+#endif
