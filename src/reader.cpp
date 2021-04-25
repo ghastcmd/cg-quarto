@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "vec.h"
-#include <stdlib.h>
 
 int cnt = 0;
 void * i_malloc(size_t size)
