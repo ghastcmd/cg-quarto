@@ -18,7 +18,7 @@ ifeq ($(dos),Windows)
 	target:=$(target).exe
 endif
 
-CC = g++
+CC = g++ -std=c++2a
 
 pch = src/include/pch.h
 gch = $(pch:.h=.h.gch)
@@ -39,14 +39,13 @@ endif
 endif
 
 defines = $(addprefix -D,$(def_d))
-
 flags = 
 
-ifeq ($(dos),Windows_NT)
+ifeq ($(dos),Windows)
 	libs_d = freeglut_static glu32 gdi32 opengl32 winmm
 else
 ifeq ($(dos),Linux)
-	libs_d = glut GL GLU
+	libs_d = GL GLU glut
 endif
 endif
 
@@ -66,7 +65,7 @@ $(gch): $(pch)
 
 $(target): $(object)
 	$(call fmt,Compiling $(target))
-	$(SS)$(CC) $^ -o $@ $(includes) $(libs)
+	$(SS)$(CC) $^ -o $@ $(includes) $(libs) $(flags)
 
 vpath %.cpp $(src)
 bin/%.o: %.cpp
