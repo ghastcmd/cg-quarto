@@ -43,6 +43,10 @@ void timer(int count)
 std::vector<obj_file> models;
 obj_file simple;
 
+vec3 test = {-3.62f, 0.055f, 2.5f}, test_scale = {0.95f, 0.94f, 1.0f}, test_rotation = {0};
+float test_angle = 0;
+float d_angle = 0;
+
 void display()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -52,17 +56,16 @@ void display()
     vec3 look = cam.pos + cam.front;
     gluLookAt(dist(cam.pos), dist(look), dist(cam.up));
 
-    // glPushMatrix();
-    // glScalef(2.0f, 1.0f, 1.0f);
-    // glColor3f(0, 1, 0);
-    // glutSolidCube(1.0f);
-    // glPopMatrix();
-
-    // glPushMatrix();
-    // glTranslatef(0.0f, 1.0f, 0.0f);
-    // glColor3f(1, 0, 0);
-    // glutSolidSphere(0.5, 20, 10);
-    // glPopMatrix();
+    glPushMatrix();
+        glTranslatef(test.x, test.y, test.z);
+        glRotatef(test_angle, test_rotation.x, test_rotation.y, test_rotation.z);
+        glScalef(test_scale.x, test_scale.y, test_scale.z);
+        float door_width = 0.8f;
+        glRotatef(d_angle, 0, 1, 0);
+        glTranslatef(door_width / 2, 0, 0);
+        glScalef(door_width, 2.1f, 0.03f);
+        glutSolidCube(1.0f);
+    glPopMatrix();
 
     glPushMatrix();
     glTranslatef(0.0f, -1.0f, 3.0f);
@@ -84,35 +87,29 @@ void display()
     glPopMatrix();
 
     glPushMatrix();
-    glColor3f(0, 1, 1);
-    glTranslatef(0.0f, -1.0f, 0.0f);
-    models[3].draw_mesh();
-    glPopMatrix();
-
-    glPushMatrix();
     glColor3f(1, 0, 0);
     glTranslatef(-5.0f, -1.0f, 0.0f);
     models[4].draw_mesh();
     glPopMatrix();
 
     glPushMatrix();
-    glColor3f(0, 0, 1);
-    glTranslatef(0.0f, 1.0f, 0.0f);
-    glBegin(GL_TRIANGLES);
-    
-    glVertex3f(-1.0f, 0.0f, 1.0f);
-    glTexCoord2f(0.0f, 0.0f);
-    glNormal3f(0.0f, 1.0f, 0.0f);
+        glColor3f(0, 0, 1);
+        glTranslatef(0.0f, 1.0f, 0.0f);
+        glBegin(GL_TRIANGLES);
+        
+        glVertex3f(-1.0f, 0.0f, 1.0f);
+        glTexCoord2f(0.0f, 0.0f);
+        glNormal3f(0.0f, 1.0f, 0.0f);
 
-    glVertex3f(1.0f, 0.0f, 1.0f);
-    glTexCoord2f(0.0f, 0.0f);
-    glNormal3f(0.0f, 1.0f, 0.0f);
+        glVertex3f(1.0f, 0.0f, 1.0f);
+        glTexCoord2f(0.0f, 0.0f);
+        glNormal3f(0.0f, 1.0f, 0.0f);
 
-    glVertex3f(-1.0f, 0.0f, -1.0f);
-    glTexCoord2f(0.0f, 0.0f);
-    glNormal3f(0.0f, 1.0f, 0.0f);
+        glVertex3f(-1.0f, 0.0f, -1.0f);
+        glTexCoord2f(0.0f, 0.0f);
+        glNormal3f(0.0f, 1.0f, 0.0f);
 
-    glEnd();
+        glEnd();
     glPopMatrix();
 
     glColor3f(1.0f, 0.8f, 0.9f);
@@ -181,6 +178,29 @@ void keyboard(unsigned char key, int x, int y)
         case 'b':
             cam.pos -= vec3{0, cam_speed, 0};
         break;
+        case 'r':
+            printf("%f %f %f\n", test.x, test.y, test.z);
+            printf("%f %f %f\n", test_scale.x, test_scale.y, test_scale.z);
+            printf("%f %f %f %f\n", test_angle, test_rotation.x, test_rotation.y, test_rotation.z);
+        break;
+        case 'u':
+            test.z += 0.1f;
+        break;
+        case 'j':
+            test.z -= 0.1f;
+        break;
+        case 'k':
+            test.x += 0.1f;
+        break;
+        case 'h':
+            test.x -= 0.1f;
+        break;
+        case 'm':
+            test.y += 0.1f;
+        break;
+        case 'n':
+            test.y -= 0.1f;
+        break;
     }
 }
 
@@ -188,11 +208,13 @@ void mouse(int button, int state, int x, int y)
 {
     if (button == 3) // wheel up
     {
-
+        d_angle += 1.0f;
+        d_angle = d_angle > 90.0f ? 90.0f : d_angle;
     }
     else if (button == 4) // wheel down
     {
-        
+        d_angle -= 1.0f;
+        d_angle = d_angle < 0.0f ? 0.0f : d_angle;
     }
 }
 
@@ -225,37 +247,11 @@ int main(int argc, char **argv)
     // models[0].open("objs/object export.obj");
     models.emplace_back(obj_file{"objs/object export.obj"});
     models.emplace_back(obj_file{"objs/quad_square.obj"});
-    //models.emplace_back(obj_file{"objs/cuboid.obj"});
+    models.emplace_back(obj_file{"objs/cuboid.obj"});
     models.emplace_back(obj_file{"objs/triangle.obj"});
 
     // puts("printing model");
     models.emplace_back(obj_file{"objs/quarto.obj"});
-    // puts("after emplaced model");
-    /*
-    puts("triangle");
-
-    puts("coords");
-    for (auto &val: models[3].vcoords)
-    {
-        printf("%9f %9f %9f\n", val.x, val.y, val.z);
-    }
-    
-    puts("texture");
-    for (auto &val: models[3].vtexture)
-    {
-        printf("%9f %9f\n", val.x, val.y);
-    }
-
-    puts("normal");
-    for (auto &val: models[3].vnormal)
-    {
-        printf("%9f %9f %9f\n", val.x, val.y, val.z);
-    }
-
-    for (auto &vec: models[3].indices)
-    {
-        printf("%i %i %i\n", vec.vertex, vec.texture, vec.normal);
-    }*/
 
     simple.vcoords.push_back({-1, 0, 1});
     simple.vcoords.push_back({ 1, 0, 1});
