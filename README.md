@@ -10,14 +10,10 @@ O programa funciona tanto no Windows quanto no Linux, mas no linux as biblioteca
 
 Os controles de movimento são com as teclas `wasd`, e o mouse.
 
-Para se locomover para cima, utilize a barra de espaço.
-
-Para se locomover para baixo, utilize a tecla `b`.
+Para movimentação vertical, utilize `barra de espaço` para ir para cima e `b` para ir para baixo.
 
 Referências:
 
-[Referência do monitor da disciplina](https://github.com/valeriojr/COMP269/blob/master/opengl.c)
-
-[Camera - Getting started](https://learnopengl.com/Getting-started/Camera)
-
-[Viewing obj file format](https://en.wikipedia.org/wiki/Wavefront_.obj_file)
+* [Referência do monitor da disciplina](https://github.com/valeriojr/COMP269/blob/master/opengl.c)
+* [Camera - Getting started](https://learnopengl.com/Getting-started/Camera)
+* [Viewing obj file format](https://en.wikipedia.org/wiki/Wavefront_.obj_file)
