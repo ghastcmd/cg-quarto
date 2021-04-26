@@ -9,10 +9,15 @@ Para compilar sem mensagens de log, utilize o comand `make silent <comando>`.
 O programa funciona tanto no Windows quanto no Linux, mas no linux as bibliotecas devem ser instaladas utilizando o comando `sudo apt install freeglut3 freeglut3-dev`.
 
 Os controles de movimento são com as teclas `wasd`, e o mouse.
-Para se locomover para cima, utiliza-se a barra de espaço e para baixo, utiliza-se a tecla `b`.
+
+Para se locomover para cima, utilize a barra de espaço.
+
+Para se locomover para baixo, utilize a tecla `b`.
 
 Referências:
 
 [Referência do monitor da disciplina](https://github.com/valeriojr/COMP269/blob/master/opengl.c)
+
 [Camera - Getting started](https://learnopengl.com/Getting-started/Camera)
+
 [Viewing obj file format](https://en.wikipedia.org/wiki/Wavefront_.obj_file)
