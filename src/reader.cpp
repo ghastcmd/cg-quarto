@@ -71,8 +71,6 @@ void stovec2(vec2& vec, char * str)
     vec.y = atof(str);
 }
 
-// struct obj_file
-// {
 obj_file::obj_file(const char *path)
 {
     if (m_initialized) return;
@@ -182,38 +180,9 @@ void obj_file::open(const char *path)
     m_initialized = true;
 }
 
-    // void data_buffer(unsigned int idx)
-    // {
-        /*m_idx = idx;
-        unsigned int buffer;
-        glGenBuffers(1, &buffer);
-        glBindBuffer(GL_ARRAY_BUFFER, buffer);
-        glBufferData(
-            GL_ARRAY_BUFFER,
-            vcoords.size() * 3 * sizeof(float), 
-            vcoords.data(), 
-            GL_STATIC_DRAW
-        );
-
-        glEnableVertexAttribArray(idx);
-        glVertexAttribPointer(idx, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
-
-        unsigned int ibo;
-        glGenBuffers(1, &ibo);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-        glBufferData(
-            GL_ELEMENT_ARRAY_BUFFER, 
-            indices.size() * sizeof(unsigned int), 
-            indices, 
-            GL_STATIC_DRAW
-        );*/
-    // }
-
 void obj_file::draw_mesh()
 {
-    //glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
     glBegin(GL_TRIANGLES);
-    // for (auto id: indices)
     for (int i = 0, len = indices.size(); i < len; i++)
     {
         auto &id = indices[i];
