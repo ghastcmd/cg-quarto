@@ -2,13 +2,12 @@
 #include "vec.hpp"
 #include "reader.hpp"
 
-enum type_ret
+enum objtypes
 {
     invalid,
     comment,
     mtllib,
     object_name,
-    vertex,
     vertex_coord,
     vertex_texture,
     vertex_normal,
@@ -18,7 +17,9 @@ enum type_ret
     line
 };
 
-type_ret translate(std::ifstream& file)
+
+
+objtypes translate(std::ifstream& file)
 {
     char str[15];
     file.getline(str, 15, ' ');
@@ -46,44 +47,59 @@ type_ret translate(std::ifstream& file)
     return invalid;
 }
 
-void print_ret(type_ret ret)
+void print_ret(objtypes ret)
 {
-    switch (ret)
-    {
-        case comment:
-            puts("comment");
-        break;
-        case mtllib:
-            puts("mtllib");
-        break;
-        case object_name:
-            puts("object_name");
-        break;
-        case vertex_normal:
-            puts("vertex_normal");
-        break;
-        case vertex_texture:
-            puts("vertex_texture");
-        break;
-        case vertex_coord:
-            puts("vertex_coord");
-        break;
-        case usemtl:
-            puts("usemtl");
-        break;
-        case smooth_shading:
-            puts("smooth_shading");
-        break;
-        case face:
-            puts("face");
-        break;
-        case line:
-            puts("line");
-        break;
-        case invalid:
-            puts("invalid");
-        break;
-    }
+    const char *objtypes_str[] {
+        "invalid",
+        "comment",
+        "mtllib",
+        "object_name",
+        "vertex_coord",
+        "vertex_texture",
+        "vertex_normal",
+        "usemtl",
+        "smooth_shading",
+        "face",
+        "line"
+    };
+
+    puts(objtypes_str[ret]);
+    // switch (ret)
+    // {
+    //     case comment:
+    //         puts("comment");
+    //     break;
+    //     case mtllib:
+    //         puts("mtllib");
+    //     break;
+    //     case object_name:
+    //         puts("object_name");
+    //     break;
+    //     case vertex_normal:
+    //         puts("vertex_normal");
+    //     break;
+    //     case vertex_texture:
+    //         puts("vertex_texture");
+    //     break;
+    //     case vertex_coord:
+    //         puts("vertex_coord");
+    //     break;
+    //     case usemtl:
+    //         puts("usemtl");
+    //     break;
+    //     case smooth_shading:
+    //         puts("smooth_shading");
+    //     break;
+    //     case face:
+    //         puts("face");
+    //     break;
+    //     case line:
+    //         puts("line");
+    //     break;
+    //     case invalid:
+    //         puts("invalid");
+    //     break;
+    // }
 }
 
 void print_val(std::ifstream& fstream)
