@@ -1,4 +1,4 @@
-src/include/*.gch
+*.gch
 bin/*
 .vscode/*
 *.mtl

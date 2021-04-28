@@ -20,34 +20,28 @@ endif
 
 CC = g++ -std=c++2a
 
-pch = src/include/pch.h
+pch = include/pch.h
 gch = $(pch:.h=.h.gch)
 
 source = $(wildcard $(src)/*.cpp)
 object = $(patsubst %,$(obj)/%.o,$(basename $(notdir $(source))))
 
-inc_dir = src/include
+inc_dir = include
 lib_dir = libs
 includes = $(addprefix -I,$(inc_dir)) $(addprefix -L,$(lib_dir))
 
 ifeq ($(dos),Windows)
 	def_d = FREEGLUT_STATIC
+	libs_d = freeglut_static glu32 gdi32 opengl32 winmm
 else
 ifeq ($(dos),linux)
 	def_d = 
+	libs_d = GL GLU glut
 endif
 endif
 
 defines = $(addprefix -D,$(def_d))
 flags = 
-
-ifeq ($(dos),Windows)
-	libs_d = freeglut_static glu32 gdi32 opengl32 winmm
-else
-ifeq ($(dos),Linux)
-	libs_d = GL GLU glut
-endif
-endif
 
 libs = $(addprefix -l,$(libs_d))
 

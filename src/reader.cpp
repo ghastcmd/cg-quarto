@@ -1,6 +1,6 @@
 #include "pch.h"
-#include "vec.h"
-#include "reader.h"
+#include "vec.hpp"
+#include "reader.hpp"
 
 enum type_ret
 {

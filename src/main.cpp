@@ -1,7 +1,6 @@
 #include "pch.h"
-
-#include "vec.h"
-#include "reader.h"
+#include "vec.hpp"
+#include "reader.hpp"
 
 template <typename _ty>
 constexpr _ty PI = (_ty)3.14159265358979323846;
