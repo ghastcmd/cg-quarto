@@ -1,7 +1,7 @@
 #pragma once
 
-// #define READER_TEST
-// #define TEST
+#define READER_TEST
+#define TEST
 
 struct obj_file
 {
