@@ -17,35 +17,17 @@ enum objtypes
     line
 };
 
-
-
-objtypes translate(std::ifstream& file)
-{
-    char str[15];
-    file.getline(str, 15, ' ');
-    if (!strcmp(str, "#"))
-        return comment;
-    else if (!strcmp(str, "mtllib"))
-        return mtllib;
-    else if (!strcmp(str, "o"))
-        return object_name;
-    else if (!strcmp(str, "vn"))
-        return vertex_normal;
-    else if (!strcmp(str, "vt"))
-        return vertex_texture;
-    else if (!strcmp(str, "v"))
-        return vertex_coord;
-    else if (!strcmp(str, "usemtl"))
-        return usemtl;
-    else if (!strcmp(str, "s"))
-        return smooth_shading;
-    else if (!strcmp(str, "f"))
-        return face;
-    else if (!strcmp(str, "l"))
-        return line;
-
-    return invalid;
-}
+static std::map<std::string_view, objtypes> objtypes_map {
+    {"#", comment},
+    {"mtllib", mtllib},
+    {"o", object_name},
+    {"v", vertex_coord},
+    {"vn", vertex_normal},
+    {"vt", vertex_texture},
+    {"usemtl", usemtl},
+    {"f", face},
+    {"l", line}
+};
 
 void print_ret(objtypes ret)
 {
@@ -64,42 +46,6 @@ void print_ret(objtypes ret)
     };
 
     puts(objtypes_str[ret]);
-    // switch (ret)
-    // {
-    //     case comment:
-    //         puts("comment");
-    //     break;
-    //     case mtllib:
-    //         puts("mtllib");
-    //     break;
-    //     case object_name:
-    //         puts("object_name");
-    //     break;
-    //     case vertex_normal:
-    //         puts("vertex_normal");
-    //     break;
-    //     case vertex_texture:
-    //         puts("vertex_texture");
-    //     break;
-    //     case vertex_coord:
-    //         puts("vertex_coord");
-    //     break;
-    //     case usemtl:
-    //         puts("usemtl");
-    //     break;
-    //     case smooth_shading:
-    //         puts("smooth_shading");
-    //     break;
-    //     case face:
-    //         puts("face");
-    //     break;
-    //     case line:
-    //         puts("line");
-    //     break;
-    //     case invalid:
-    //         puts("invalid");
-    //     break;
-    // }
 }
 
 void print_val(std::ifstream& fstream)
@@ -152,7 +98,9 @@ void obj_file::open(const char *path)
     std::ifstream file(path, std::ios::in | std::ios::binary);
     while (file.peek() != -1)
     {
-        const auto ret = translate(file);
+        char stype[16] = {0};
+        file.getline(stype, 16, ' ');
+        const auto ret = objtypes_map[stype];
         constexpr size_t max_strl = 256;
         // print_ret(ret);
         char str[max_strl];
