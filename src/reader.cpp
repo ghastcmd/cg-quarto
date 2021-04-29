@@ -2,6 +2,46 @@
 #include "vec.hpp"
 #include "reader.hpp"
 
+#ifdef READER_TEST
+
+static unsigned int alloc_count = 0;
+
+void * malloc_i(size_t size)
+{
+    alloc_count += 1;
+    return malloc(size);
+}
+
+void * calloc_i(size_t count, size_t size)
+{
+    alloc_count += 1;
+    return calloc(count, size);
+}
+
+void * realloc_i(void *ptr, size_t size)
+{
+    alloc_count += 1;
+    return realloc(ptr, size);
+}
+
+void * operator new(size_t size)
+{
+    alloc_count += 1;
+    return malloc(size);
+}
+
+// void * operator new(size_t size, void *ptr)
+// {
+//     alloc_count += 1;
+//     return realloc(ptr, size);
+// }
+
+#define malloc(size) malloc_i(size)
+#define calloc(count, size) calloc_i(count, size)
+#define realloc(ptr, size) realloc(ptr, size)
+
+#endif
+
 enum objtypes
 {
     invalid,
@@ -17,7 +57,7 @@ enum objtypes
     line
 };
 
-static std::map<std::string_view, objtypes> objtypes_map {
+static std::unordered_map<std::string_view, objtypes> objtypes_map {
     {"#", comment},
     {"mtllib", mtllib},
     {"o", object_name},
@@ -90,6 +130,53 @@ char * take_tuple(unsigned int &v, unsigned int &t, unsigned int &n, char *str)
     return str;
 }
 
+void obj_file::get_faces_index(char *str)
+{
+    unsigned int vindexes[20] = {0};
+    unsigned int tindexes[20] = {0};
+    unsigned int nindexes[20] = {0};
+    int i = 0, j = 0;
+    for (i = 0; *str != '\0'; ++i)
+    {
+        str = take_tuple(vindexes[i], tindexes[i], nindexes[i], str);
+    }
+    int len = i;
+    unsigned int fvertex [128] = {0};
+    unsigned int ftexture[128] = {0};
+    unsigned int fnormals[128] = {0};
+    fvertex[0] = vindexes[0];
+    fvertex[1] = vindexes[1];
+    fvertex[2] = vindexes[2];
+
+    ftexture[0] = tindexes[0];
+    ftexture[1] = tindexes[1];
+    ftexture[2] = tindexes[2];
+
+    fnormals[0] = nindexes[0];
+    fnormals[1] = nindexes[1];
+    fnormals[2] = nindexes[2];
+    for (i = 0, j = 3; i + 3 <= len; ++i, j+=3)
+    { // Converting n edge faces to triangles
+        fvertex[j]   = vindexes[i];
+        fvertex[j+1] = vindexes[i+2];
+        fvertex[j+2] = vindexes[i+3];
+
+        ftexture[j]   = tindexes[i];
+        ftexture[j+1] = tindexes[i+2];
+        ftexture[j+2] = tindexes[i+3];
+
+        fnormals[j]   = nindexes[i];
+        fnormals[j+1] = nindexes[i+2];
+        fnormals[j+2] = nindexes[i+3];
+    }
+    len = j - 3;
+    indices.reserve(len);
+    for (i = 0; i < len; ++i)
+    {
+        indices.push_back({fvertex[i]-1, ftexture[i]-1, fnormals[i]-1});
+    }
+}
+
 void obj_file::open(const char *path)
 {
     if (m_initialized) return;
@@ -103,17 +190,14 @@ void obj_file::open(const char *path)
         // print_ret(ret);
         char str[max_strl];
         file.getline(str, max_strl, '\x0a');
-        switch (ret)
-        {
+        switch (ret) {
             case comment:
             case mtllib:
             case object_name:
             case smooth_shading:
             case usemtl:
             case line:
-                file.ignore(max_strl, '\x0a');
                 break;
-            break;
             case vertex_coord: {
                 vec3 vec;
                 stovec3(vec, str);
@@ -130,49 +214,7 @@ void obj_file::open(const char *path)
                 vnormal.push_back(vec);
             } break;
             case face: {
-                unsigned int vindexes[20] = {0};
-                unsigned int tindexes[20] = {0};
-                unsigned int nindexes[20] = {0};
-                int i = 0, j = 0;
-                char *stri = str;
-                for (i = 0; *stri != '\0'; ++i)
-                {
-                    stri = take_tuple(vindexes[i], tindexes[i], nindexes[i], stri);
-                }
-                int len = i;
-                unsigned int fvertex [128] = {0};
-                unsigned int ftexture[128] = {0};
-                unsigned int fnormals[128] = {0};
-                fvertex[0] = vindexes[0];
-                fvertex[1] = vindexes[1];
-                fvertex[2] = vindexes[2];
-
-                ftexture[0] = tindexes[0];
-                ftexture[1] = tindexes[1];
-                ftexture[2] = tindexes[2];
-
-                fnormals[0] = nindexes[0];
-                fnormals[1] = nindexes[1];
-                fnormals[2] = nindexes[2];
-                for (i = 0, j = 3; i + 3 <= len; ++i, j+=3)
-                {
-                    fvertex[j]   = vindexes[i];
-                    fvertex[j+1] = vindexes[i+2];
-                    fvertex[j+2] = vindexes[i+3];
-
-                    ftexture[j]   = tindexes[i];
-                    ftexture[j+1] = tindexes[i+2];
-                    ftexture[j+2] = tindexes[i+3];
-
-                    fnormals[j]   = nindexes[i];
-                    fnormals[j+1] = nindexes[i+2];
-                    fnormals[j+2] = nindexes[i+3];
-                }
-                len = j - 3;
-                for (int i = 0; i < len; ++i)
-                {
-                    indices.push_back({fvertex[i]-1, ftexture[i]-1, fnormals[i]-1});
-                }
+                get_faces_index(str);
             } break;
         }
     }
@@ -205,7 +247,7 @@ int main()
 {
     obj_file file("objs/cuboid.obj");
 
-    // printf("%i\n", cnt);
+    unsigned int error_count = 0;
 
     for (auto val: file.vcoords)
     {
@@ -221,7 +263,7 @@ int main()
     for (int i = 0, max = file.indices.size(); i < max; ++i)
     {
         auto &vec = file.indices[i];
-        if (vec.vertex != test[i]-1) puts("inconsistent value");
+        if (vec.vertex != test[i]-1) puts("inconsistent value"), error_count += 1;
         printf("%2i ", vec.vertex + 1);
     }
     puts("");
@@ -240,6 +282,7 @@ int main()
         if (vertexes[j] != vec.x || vertexes[j + 1] != vec.y || vertexes[j + 2] != vec.z)
         {
             puts("inconsistent value");
+            error_count += 1;
         }
     }
 
@@ -250,6 +293,7 @@ int main()
         if (textures[j] != vec.x || textures[j+1] != vec.y)
         {
             puts("inconsistent value");
+            error_count += 1;
         }
         printf("%f %f | %f %f\n", textures[j], textures[j+1], vec.x, vec.y);
     }
@@ -261,9 +305,22 @@ int main()
         if (normals[j] != vec.x || normals[j+1] != vec.y || normals[j+2] != vec.z)
         {
             puts("inconsistent value");
+            error_count += 1;
         }
         printf("%9f %9f %9f | %9f %9f %9f\n", normals[j], normals[j+1], normals[j+2], vec.x, vec.y, vec.z);
     }
+
+    const char *fmt_status_error[] {
+        "Error count >> %i\n",
+        "Tets runned without an error\n"
+    };
+    printf(fmt_status_error[error_count == 0], error_count);
+
+    const char *fmt_alloc_count[] {
+        "Allocation count >> %i\n",
+        "No allocations were executed in the runnig of the program\n"
+    };
+    printf(fmt_alloc_count[alloc_count == 0], alloc_count);
 
     return 0;
 }

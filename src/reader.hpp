@@ -9,6 +9,7 @@ struct obj_file
     obj_file(const char *path);
     void open(const char *path);
 
+
     void draw_mesh();
 
     bool m_initialized = false;
@@ -23,4 +24,6 @@ struct obj_file
     };
 
     std::vector<index> indices;
+private:
+    void get_faces_index(char *str);
 };
