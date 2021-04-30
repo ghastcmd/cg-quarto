@@ -28,6 +28,8 @@ inc_dir  = include
 lib_dir  = libs
 includes = $(addprefix -I,$(inc_dir)) $(addprefix -L,$(lib_dir))
 
+make_dep = -MMD -MT $@ -MP -MF $(dep_dir)/$*.d
+
 ifeq ($(dos),Windows)
 	target  := $(target).exe
 	def_d    = FREEGLUT_STATIC
@@ -44,8 +46,7 @@ defines = $(addprefix -D,$(def_d))
 libs    = $(addprefix -l,$(libs_d))
 flags   = 
 
-build:
-	$(SS)$(MAKE) -s --no-print-directory -j 4 compile
+build: ; $(SS)$(MAKE) -s --no-print-directory -j 4 compile
 
 run: build ; $(SS)$(target)
 
@@ -62,7 +63,7 @@ $(target): $(object)
 vpath %.cpp $(src)
 $(obj)/%.o: %.cpp $(dep_dir)/%.d
 	$(call fmt,Compiling $< into $@)
-	$(SS)$(CC) -MMD -MT $@ -MP -MF $(dep_dir)/$*.d -c $< -o $@ $(defines) $(includes)
+	$(SS)$(CC) $(make_dep) -c $< -o $@ $(defines) $(includes)
 
 $(depend):
 include $(depend)
