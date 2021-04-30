@@ -1,5 +1,6 @@
 src = src
 obj = bin
+dep_dir := $(obj)/deps
 
 target = bin/binary
 SS = @
@@ -14,10 +15,6 @@ else
 	dos = $(shell uname -s)
 endif
 
-ifeq ($(dos),Windows)
-	target:=$(target).exe
-endif
-
 CC = g++ -std=c++2a
 
 pch = include/pch.h
@@ -25,33 +22,34 @@ gch = $(pch:.h=.h.gch)
 
 source = $(wildcard $(src)/*.cpp)
 object = $(patsubst %,$(obj)/%.o,$(basename $(notdir $(source))))
+depend = $(patsubst %,$(dep_dir)/%.d,$(basename $(notdir $(source))))
 
-inc_dir = include
-lib_dir = libs
+inc_dir  = include
+lib_dir  = libs
 includes = $(addprefix -I,$(inc_dir)) $(addprefix -L,$(lib_dir))
 
 ifeq ($(dos),Windows)
-	def_d = FREEGLUT_STATIC
-	libs_d = freeglut_static glu32 gdi32 opengl32 winmm
+	target  := $(target).exe
+	def_d    = FREEGLUT_STATIC
+	libs_d   = freeglut_static glu32 gdi32 opengl32 winmm
+	dep_dir := $(subst /,\,$(dep_dir))
 else
 ifeq ($(dos),linux)
-	def_d = 
+	def_d  = 
 	libs_d = GL GLU glut
 endif
 endif
 
 defines = $(addprefix -D,$(def_d))
-flags = 
-
-libs = $(addprefix -l,$(libs_d))
+libs    = $(addprefix -l,$(libs_d))
+flags   = 
 
 build:
 	$(SS)$(MAKE) -s --no-print-directory -j 4 compile
 
-run: build
-	$(SS)$(target)
+run: build ; $(SS)$(target)
 
-compile: bin $(gch) $(target)
+compile: $(gch) $(target) | $(dep_dir)
 
 $(gch): $(pch)
 	$(call fmt,Compiling the precompiled header)
@@ -59,21 +57,24 @@ $(gch): $(pch)
 
 $(target): $(object)
 	$(call fmt,Compiling $(target))
-	$(SS)$(CC) $^ -o $@ $(includes) $(libs) $(flags)
+	$(SS)$(CC) $^ -o $@ $(libs) $(flags)
 
 vpath %.cpp $(src)
-bin/%.o: %.cpp
+$(obj)/%.o: %.cpp $(dep_dir)/%.d
 	$(call fmt,Compiling $< into $@)
-	$(SS)$(CC) -c $< -o $@ $(defines) $(includes) $(libs)
+	$(SS)$(CC) -MMD -MT $@ -MP -MF $(dep_dir)/$*.d -c $< -o $@ $(defines) $(includes)
 
-bin:
-	$(call fmt,Creating $(obj) directory)
-	$(SS)mkdir $(obj)
+$(depend):
+include $(depend)
 
-clean:
+$(obj): ; $(SS)mkdir $@
+	$(call fmt,Creating $@ directory)
+
+$(dep_dir): | $(obj) ; $(SS)mkdir $@
+	$(call fmt,Creating $@ directory)
+
+clean: ; $(SS)rm -f $(object) $(target)
 	$(call fmt,Cleaning the entire $(obj) folder)
-	$(SS)rm -f $(wildcard $(obj)/*)
 
-clean_pch:
+clean_pch: ; $(SS)rm -f $(gch)
 	$(call fmt,Deleting the precompiled header)
-	$(SS)rm -f $(gch)
