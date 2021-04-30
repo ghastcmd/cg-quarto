@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "vec.h"
+#include "vec.hpp"
 
 const float vec3::modulus(const vec3& vec)
 {
