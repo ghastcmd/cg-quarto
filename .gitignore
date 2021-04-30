@@ -1,4 +1,3 @@
 *.gch
 bin/*
 .vscode/*
-*.mtl
