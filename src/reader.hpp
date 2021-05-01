@@ -1,13 +1,14 @@
 #pragma once
 
-// #define READER_TEST
-// #define TEST
+#define READER_TEST
+#define TEST
 
 struct obj_file
 {
     obj_file() = default;
     obj_file(const char *path);
     void open(const char *path);
+
 
     void draw_mesh();
 
@@ -23,4 +24,6 @@ struct obj_file
     };
 
     std::vector<index> indices;
+private:
+    void get_faces_index(char *str);
 };
