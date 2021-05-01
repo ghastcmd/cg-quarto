@@ -36,7 +36,7 @@ ifeq ($(dos),Windows)
 	libs_d   = freeglut_static glu32 gdi32 opengl32 winmm
 	dep_dir := $(subst /,\,$(dep_dir))
 else
-ifeq ($(dos),linux)
+ifeq ($(dos),Linux)
 	def_d  = 
 	libs_d = GL GLU glut
 endif
