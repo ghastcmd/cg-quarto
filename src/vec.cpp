@@ -12,6 +12,12 @@ vec4 vec4::normalize(const vec4& vec)
     return {vec.x / val, vec.y / val, vec.z / val};
 }
 
+vec4 vec4::cross(const vec4& v1, const vec4& v2)
+{
+    const vec3 _ret = vec3::cross({v1.x, v1.y, v1.z}, {v2.x, v2.y, v2.z});
+    return {_ret.x, _ret.y, _ret.z, 1};
+}
+
 const float vec3::modulus(const vec3& vec)
 {
     return sqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z);

@@ -7,6 +7,8 @@ struct vec4
     static const float modulus(const vec4& vec);
 
     static vec4 normalize(const vec4& vec);
+ 
+    static vec4 cross(const vec4& v1, const vec4& v2);
 
     vec4 operator+(const vec4& other)
     {
