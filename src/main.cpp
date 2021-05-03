@@ -217,6 +217,17 @@ void mouse(int button, int state, int x, int y)
     }
 }
 
+void light_enable()
+{
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
+
+    float light_ambient[] = {0.2f, 0.2f, 0.2f};
+    float light_specular[] = {1.0f, 0.0f, 0.0f};
+    glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
+}
+
 #ifndef TEST
 
 int main(int argc, char **argv)
@@ -231,6 +242,8 @@ int main(int argc, char **argv)
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluPerspective(fov, (GLfloat)width / (GLfloat)height, 0.001f, 1000.0f);
+
+    light_enable();
 
     glEnable(GL_DEPTH_TEST);
 
