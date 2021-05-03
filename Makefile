@@ -26,7 +26,8 @@ depend = $(patsubst %,$(dep_dir)/%.d,$(basename $(notdir $(source))))
 
 inc_dir  = include
 lib_dir  = libs
-includes = $(addprefix -I,$(inc_dir)) $(addprefix -L,$(lib_dir))
+include_lib = $(addprefix -L,$(lib_dir))
+includes = $(addprefix -I,$(inc_dir))
 
 make_dep = -MMD -MT $@ -MP -MF $(dep_dir)/$*.d
 
@@ -58,7 +59,7 @@ $(gch): $(pch)
 
 $(target): $(object)
 	$(call fmt,Compiling $(target))
-	$(SS)$(CC) $^ -o $@ $(libs) $(flags)
+	$(SS)$(CC) $^ -o $@ $(include_lib) $(libs) $(flags)
 
 vpath %.cpp $(src)
 $(obj)/%.o: %.cpp $(dep_dir)/%.d
