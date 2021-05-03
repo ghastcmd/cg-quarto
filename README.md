@@ -13,6 +13,9 @@ Os controles de movimento são com as teclas `wasd`, e o mouse.
 
 Para movimentação vertical, utilize `barra de espaço` para ir para cima e `b` para ir para baixo.
 
+Para abrir e fechar as portas e a janela, pressione a tecla `p` para abrir, `o` para fechar, para trocar entre os objetos que podem abrir ou fechar, utilize a tecla `l`.
+    No total são 3 objetos que podem ser abertos/fechados, sendo eles duas portas e uma janela.
+
 ## Requisitos da AB1
 
 * Poder navegar pelo quarto utilizando o mouse e teclado
