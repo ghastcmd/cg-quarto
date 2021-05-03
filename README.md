@@ -18,19 +18,19 @@ Para abrir e fechar as portas e a janela, pressione a tecla `p` para abrir, `o` 
 
 ## Requisitos da AB1
 
-* Poder navegar pelo quarto utilizando o mouse e teclado
-* A modelagem e apresentação do quarto, cama, mesa, ventilador e quadro
-* Além de mais 5 objetos à sua escolha
-* Uma porta deverá poder abrir e fechar com o teclado
-* Uma janela deverá abrir e fechar como teclado
+ - [x] Poder navegar pelo quarto utilizando o mouse e teclado
+ - [ ] A modelagem e apresentação do quarto, cama, mesa, ventilador e quadro
+ - [ ] Além de mais 5 objetos à sua escolha
+ - [x] Uma porta deverá poder abrir e fechar com o teclado
+ - [x] Uma janela deverá abrir e fechar como teclado
 
 ## Requisitos da AB2
 
-* Modelar e apresentar um quadro de Vincent Van Gogh
-* Ventilador de mesa com hélice girando no sentido horário em velocidade baixa
-* Luminária spot em cima da mesa
-* Iluminação especular e difusa na modelagem
-* Aplicar mapeamento de textura em 5 objetos
+ - [ ] Modelar e apresentar um quadro de Vincent Van Gogh
+ - [ ] Ventilador de mesa com hélice girando no sentido horário em velocidade baixa
+ - [ ] Luminária spot em cima da mesa
+ - [ ] Iluminação especular e difusa na modelagem
+ - [ ] Aplicar mapeamento de textura em 5 objetos
 
 ## Referências:
 
