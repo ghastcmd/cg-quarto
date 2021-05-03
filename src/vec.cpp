@@ -1,6 +1,17 @@
 #include "pch.h"
 #include "vec.hpp"
 
+const float vec4::modulus(const vec4& vec)
+{
+    return sqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z + vec.w * vec.w);
+}
+
+vec4 vec4::normalize(const vec4& vec)
+{
+    const float val = modulus(vec);
+    return {vec.x / val, vec.y / val, vec.z / val};
+}
+
 const float vec3::modulus(const vec3& vec)
 {
     return sqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z);
