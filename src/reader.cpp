@@ -132,18 +132,19 @@ char * take_tuple(unsigned int &v, unsigned int &t, unsigned int &n, char *str)
 
 void obj_file::get_faces_index(char *str)
 {
-    unsigned int vindexes[20] = {0};
-    unsigned int tindexes[20] = {0};
-    unsigned int nindexes[20] = {0};
+    constexpr unsigned int buffer_size = 30;
+    unsigned int vindexes[buffer_size] = {0};
+    unsigned int tindexes[buffer_size] = {0};
+    unsigned int nindexes[buffer_size] = {0};
     int i = 0, j = 0;
     for (i = 0; *str != '\0'; ++i)
     {
         str = take_tuple(vindexes[i], tindexes[i], nindexes[i], str);
     }
     int len = i;
-    unsigned int fvertex [128] = {0};
-    unsigned int ftexture[128] = {0};
-    unsigned int fnormals[128] = {0};
+    unsigned int fvertex [buffer_size * 3] = {0};
+    unsigned int ftexture[buffer_size * 3] = {0};
+    unsigned int fnormals[buffer_size * 3] = {0};
     fvertex[0] = vindexes[0];
     fvertex[1] = vindexes[1];
     fvertex[2] = vindexes[2];
@@ -186,7 +187,7 @@ void obj_file::open(const char *path)
         char stype[16] = {0};
         file.getline(stype, 16, ' ');
         const auto ret = objtypes_map[stype];
-        constexpr size_t max_strl = 256;
+        constexpr size_t max_strl = 1024;
         // print_ret(ret);
         char str[max_strl];
         file.getline(str, max_strl, '\x0a');
