@@ -301,8 +301,8 @@ int main(int argc, char **argv)
     models["cubo"]        = obj_file("objs/cubo.obj");
     models["caderno"]     = obj_file("objs/caderno.obj");
     models["cadeira"]     = obj_file("objs/cadeira.obj");
-    // models["ventilador2"] = obj_file("objs/ventilador2.obj");
     models["ventilador"]  = obj_file("objs/ventilador.obj");
+    // models["ventilador2"] = obj_file("objs/ventilador2.obj");
 
     // models.emplace_back(obj_file{"objs/quarto.obj"});
     // models.emplace_back(obj_file{"objs/cama.obj"});
@@ -313,8 +313,8 @@ int main(int argc, char **argv)
     // models.emplace_back(obj_file{"objs/cubo.obj"});
     // models.emplace_back(obj_file{"objs/caderno.obj"});
     // models.emplace_back(obj_file{"objs/cadeira.obj"});
-    // models.emplace_back(obj_file{"objs/ventilador2.obj"});
     // models.emplace_back(obj_file{"objs/ventilador.obj"});
+    // models.emplace_back(obj_file{"objs/ventilador2.obj"});
 
     glutMainLoop();
     return 0;

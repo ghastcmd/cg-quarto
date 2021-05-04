@@ -194,11 +194,13 @@ void obj_file::open(const char *path)
         switch (ret) {
             case comment:
             case mtllib:
-            case object_name:
             case smooth_shading:
             case usemtl:
             case line:
                 break;
+            case object_name:
+                optrs[str] = indices.data() + indices.size();
+            break;
             case vertex_coord: {
                 vec3 vec;
                 stovec3(vec, str);
@@ -237,6 +239,28 @@ void obj_file::draw_mesh()
         glNormal3f(normal.x, normal.y, normal.z);
     }
     glEnd();
+}
+
+void obj_file::draw_mesh(obj_file::iter &begin, obj_file::iter &end)
+{
+    glBegin(GL_TRIANGLES);
+    using iter = obj_file::iter;
+    for (iter current = begin; current < end; current++)
+    {
+        auto &id = *current;
+        auto &vec = vcoords[id.vertex];
+        glVertex3f(vec.x, vec.y, vec.z);
+        auto &v2 = vtexture[id.texture];
+        glTexCoord2f(v2.x, v2.y);
+        auto &normal = vnormal[id.normal];
+        glNormal3f(normal.x, normal.y, normal.z);
+    }
+    glEnd();
+}
+
+obj_file::iter obj_file::get_iter(char *object_name)
+{
+    return optrs[object_name];
 }
 
     //unsigned int m_idx;
