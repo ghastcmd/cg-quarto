@@ -95,6 +95,86 @@ void display()
         glPopMatrix();
     glPopMatrix();
 
+
+    glPushMatrix(); // cama
+        glPushMatrix(); 
+            glScalef(2.0f, 2.0f, 2.0f);
+            glTranslatef(5.0f, 0.0f, 2.0f);
+            glTranslatef(-7.1f, -0.5f, 0.8f);
+            glColor3f(0, 0, 1);
+            models[1].draw_mesh();
+        glPopMatrix();
+
+        glPushMatrix(); // notebook
+            glScalef(2.0f, 2.0f, 2.0f);
+            glTranslatef(5.0f, 0.0f, 2.0f);
+            glTranslatef(-6.8f, -0.22f, -0.2f);
+            glColor3f(0, 0, 1);
+            models[2].draw_mesh();
+        glPopMatrix();
+
+        glPushMatrix(); //guarda-roupa
+            glScalef(2.0f, 2.0f, 2.0f);
+            glTranslatef(5.0f, 0.0f, 2.0f);
+            glTranslatef(-3.5f, -0.1f, -0.2f);
+            glColor3f(0, 0, 1);
+            models[3].draw_mesh();
+        glPopMatrix();
+
+        glPushMatrix(); //mesa
+            glScalef(2.0f, 2.0f, 2.0f);
+            glTranslatef(5.0f, 0.0f, 2.0f);
+            glTranslatef(-3.4f, -1.0f, 1.1f);
+            glColor3f(0, 0, 1);
+            models[4].draw_mesh();
+        glPopMatrix();
+
+
+        glPushMatrix(); // caneca
+            glScalef(2.0f, 2.0f, 2.0f);
+            glTranslatef(5.0f, 0.0f, 2.0f);
+            glTranslatef(-6.9f, -0.16f, -0.5f);
+            glColor3f(0, 0, 1);
+            models[5].draw_mesh();
+        glPopMatrix();
+
+        glPushMatrix(); // cubo
+            glScalef(2.0f, 2.0f, 2.0f);
+            glTranslatef(5.0f, 0.0f, 2.0f);
+            glTranslatef(-3.6f, -0.13f, 1.1f);
+            glColor3f(0, 0, 1);
+            models[6].draw_mesh();
+        glPopMatrix();
+
+        glPushMatrix(); // caderno
+            glScalef(2.0f, 2.0f, 2.0f);
+            glTranslatef(5.0f, 0.0f, 2.0f);
+            glTranslatef(-6.9f, -0.19f, -0.8f);
+            glColor3f(0, 0, 1);
+            models[7].draw_mesh();
+        glPopMatrix();
+
+        glPushMatrix(); 
+            glScalef(2.0f, 2.0f, 2.0f);
+            glTranslatef(5.0f, 0.0f, 2.0f);
+            glTranslatef(-6.3f, -0.5f, -0.5f);
+            glColor3f(0, 0, 1);
+            models[8].draw_mesh();
+        glPopMatrix();
+
+
+        /*
+        glPushMatrix(); //ventilador
+            glScalef(2.0f, 2.0f, 2.0f);
+            glTranslatef(5.0f, 0.0f, 2.0f);
+            glTranslatef(-3.4f, -1.0f, 1.1f);
+            glColor3f(0, 0, 1);
+            models[9].draw_mesh();
+        glPopMatrix();
+        */
+
+    glPopMatrix();
+
     glutSwapBuffers();
 }
 
@@ -179,7 +259,9 @@ void mouse(int button, int state, int x, int y)
 }
 
 void light_enable()
+
 {
+	/*
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
 
@@ -187,6 +269,7 @@ void light_enable()
     float light_specular[] = {1.0f, 0.0f, 0.0f};
     glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
     glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
+    */
 }
 
 #ifndef TEST
@@ -224,6 +307,18 @@ int main(int argc, char **argv)
     // models.emplace_back(obj_file{"objs/triangle.obj"});
 
     models.emplace_back(obj_file{"objs/quarto.obj"});
+    models.emplace_back(obj_file{"objs/cama.obj"});
+    models.emplace_back(obj_file{"objs/notebook.obj"});
+    models.emplace_back(obj_file{"objs/guardaroupa.obj"});
+    models.emplace_back(obj_file{"objs/mesa.obj"});
+    models.emplace_back(obj_file{"objs/caneca.obj"});
+    models.emplace_back(obj_file{"objs/cubo.obj"});
+    models.emplace_back(obj_file{"objs/caderno.obj"});
+    models.emplace_back(obj_file{"objs/cadeira2.obj"});
+    //models.emplace_back(obj_file{"objs/ventilador.obj"});
+
+
+
 
     glutMainLoop();
     return 0;
