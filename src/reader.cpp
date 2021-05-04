@@ -167,8 +167,8 @@ void obj_file::get_faces_index(char *str)
         ftexture[j+2] = tindexes[i+3];
 
         fnormals[j]   = nindexes[i];
-        fnormals[j+1] = nindexes[i+2];
-        fnormals[j+2] = nindexes[i+3];
+        fnormals[j+1] = nindexes[i+1];
+        fnormals[j+2] = nindexes[i+2];
     }
     len = j - 3;
     indices.reserve(len);
