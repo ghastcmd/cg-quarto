@@ -39,7 +39,8 @@ void timer(int count)
     glutTimerFunc(1000 / 60, timer, 0);
 }
 
-std::vector<obj_file> models;
+// std::vector<obj_file> models;
+std::unordered_map<const char*, obj_file> models;
 obj_file simple;
 
 float test_angle = 0;
@@ -91,7 +92,7 @@ void display()
         glPushMatrix(); // drawing the bedroom
             glColor3f(1, 0, 0);
             glTranslatef(-5.0f, -1.0f, 0.0f);
-            models[0].draw_mesh();
+            models["quarto"].draw_mesh();
         glPopMatrix();
     glPopMatrix();
 
@@ -101,7 +102,7 @@ void display()
         glTranslatef(5.0f, 0.0f, 2.0f);
         glTranslatef(-7.1f, -0.5f, 0.8f);
         glColor3f(0, 0, 1);
-        models[1].draw_mesh();
+        models["cama"].draw_mesh();
     glPopMatrix();
 
     glPushMatrix(); // notebook
@@ -109,7 +110,7 @@ void display()
         glTranslatef(5.0f, 0.0f, 2.0f);
         glTranslatef(-6.8f, -0.22f, -0.2f);
         glColor3f(0, 0, 1);
-        models[2].draw_mesh();
+        models["notebook"].draw_mesh();
     glPopMatrix();
 
     glPushMatrix(); //guarda-roupa
@@ -117,7 +118,7 @@ void display()
         glTranslatef(5.0f, 0.0f, 2.0f);
         glTranslatef(-3.5f, -0.1f, -0.2f);
         glColor3f(0, 0, 1);
-        models[3].draw_mesh();
+        models["guardaroupa"].draw_mesh();
     glPopMatrix();
 
     glPushMatrix(); //mesa
@@ -125,7 +126,7 @@ void display()
         glTranslatef(5.0f, 0.0f, 2.0f);
         glTranslatef(-3.4f, -1.0f, 1.1f);
         glColor3f(0, 0, 1);
-        models[4].draw_mesh();
+        models["mesa"].draw_mesh();
     glPopMatrix();
 
 
@@ -134,7 +135,7 @@ void display()
         glTranslatef(5.0f, 0.0f, 2.0f);
         glTranslatef(-6.9f, -0.16f, -0.5f);
         glColor3f(0, 0, 1);
-        models[5].draw_mesh();
+        models["caneca"].draw_mesh();
     glPopMatrix();
 
     glPushMatrix(); // cubo
@@ -142,7 +143,7 @@ void display()
         glTranslatef(5.0f, 0.0f, 2.0f);
         glTranslatef(-3.6f, -0.13f, 1.1f);
         glColor3f(0, 0, 1);
-        models[6].draw_mesh();
+        models["cubo"].draw_mesh();
     glPopMatrix();
 
     glPushMatrix(); // caderno
@@ -150,7 +151,7 @@ void display()
         glTranslatef(5.0f, -0.19f, 1.2f);
         glTranslatef(-6.9f, 0.0f, 0.0f);
         glColor3f(0, 0, 1);
-        models[7].draw_mesh();
+        models["caderno"].draw_mesh();
     glPopMatrix();
 
     glPushMatrix(); // cadeira
@@ -158,15 +159,15 @@ void display()
         glTranslatef(-1.3f, -0.71f, 1.5f);
         glRotatef(-90.0f, 0.0f, 1.0f, 0.0f);
         glColor3f(0, 0, 1);
-        models[8].draw_mesh();
+        models["cadeira"].draw_mesh();
     glPopMatrix();
 
-    glPushMatrix(); //ventilador
-        glScalef(2.0f, 2.0f, 2.0f);
-        glTranslatef(-1.8f, -0.19f, 0.7f);
+    glPushMatrix(); // ventilador
+        glTranslatef(-3.6f, -0.39f, 1.5f);
         glRotatef(200.0f, 0.0f, 1.0f, 0.0f);
+        glScalef(3.3f, 3.3f, 3.3f);
         glColor3f(0, 0, 1);
-        models[9].draw_mesh();
+        models["ventilador"].draw_mesh();
     glPopMatrix();
     
     glutSwapBuffers();
@@ -291,16 +292,28 @@ int main(int argc, char **argv)
     glutPassiveMotionFunc(motion);
     glutTimerFunc(0, timer, 0);
 
-    models.emplace_back(obj_file{"objs/quarto.obj"});
-    models.emplace_back(obj_file{"objs/cama.obj"});
-    models.emplace_back(obj_file{"objs/notebook.obj"});
-    models.emplace_back(obj_file{"objs/guardaroupa.obj"});
-    models.emplace_back(obj_file{"objs/mesa.obj"});
-    models.emplace_back(obj_file{"objs/caneca.obj"});
-    models.emplace_back(obj_file{"objs/cubo.obj"});
-    models.emplace_back(obj_file{"objs/caderno.obj"});
-    models.emplace_back(obj_file{"objs/cadeira.obj"});
-    models.emplace_back(obj_file{"objs/ventilador2.obj"});
+    models["quarto"]      = obj_file("objs/quarto.obj");
+    models["cama"]        = obj_file("objs/cama.obj");
+    models["notebook"]    = obj_file("objs/notebook.obj");
+    models["guardaroupa"] = obj_file("objs/guardaroupa.obj");
+    models["mesa"]        = obj_file("objs/mesa.obj");
+    models["caneca"]      = obj_file("objs/caneca.obj");
+    models["cubo"]        = obj_file("objs/cubo.obj");
+    models["caderno"]     = obj_file("objs/caderno.obj");
+    models["cadeira"]     = obj_file("objs/cadeira.obj");
+    // models["ventilador2"] = obj_file("objs/ventilador2.obj");
+    models["ventilador"]  = obj_file("objs/ventilador.obj");
+
+    // models.emplace_back(obj_file{"objs/quarto.obj"});
+    // models.emplace_back(obj_file{"objs/cama.obj"});
+    // models.emplace_back(obj_file{"objs/notebook.obj"});
+    // models.emplace_back(obj_file{"objs/guardaroupa.obj"});
+    // models.emplace_back(obj_file{"objs/mesa.obj"});
+    // models.emplace_back(obj_file{"objs/caneca.obj"});
+    // models.emplace_back(obj_file{"objs/cubo.obj"});
+    // models.emplace_back(obj_file{"objs/caderno.obj"});
+    // models.emplace_back(obj_file{"objs/cadeira.obj"});
+    // models.emplace_back(obj_file{"objs/ventilador2.obj"});
     // models.emplace_back(obj_file{"objs/ventilador.obj"});
 
     glutMainLoop();
