@@ -19,8 +19,8 @@ Para abrir e fechar as portas e a janela, pressione a tecla `p` para abrir, `o` 
 ## Requisitos da AB1
 
  - [x] Poder navegar pelo quarto utilizando o mouse e teclado
- - [ ] A modelagem e apresentação do quarto, cama, mesa, ventilador e quadro
- - [ ] Além de mais 5 objetos à sua escolha
+ - [x] A modelagem e apresentação do quarto, cama, mesa, ventilador e quadro
+ - [x] Além de mais 5 objetos à sua escolha
  - [x] Uma porta deverá poder abrir e fechar com o teclado
  - [x] Uma janela deverá abrir e fechar como teclado
 
