@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "window.hpp"
 #include "vec.hpp"
 #include "reader.hpp"
 
@@ -15,12 +16,28 @@ struct camera
     vec3 pos;
     vec3 front;
     vec3 up;
-    struct {
-        float yaw, pitch, roll;
-    };
+
+    float yaw, pitch, roll;
+
+    camera(vec3 pos, vec3 front, vec3 up, vec3 angle)
+        : pos(pos), front(front), up(up)
+    {
+        yaw = angle.x, pitch = angle.y, roll = angle.z;
+    }
+
+    void look_at()
+    {
+        vec3 look = pos + front;
+        gluLookAt(pos.x, pos.y, pos.z, look.x, look.y, look.z, up.x, up.y, up.z);
+    }
 };
 
-camera cam{ {0.0f, 0.0f, 5.0f}, {0.0f, 0.0f, -3.0f}, {0.0f, 1.0f, 0.0f}, {-90.0f, 0.0f, 0.0f} };
+static camera cam {
+    {0.0f, 0.0f, 5.0f},
+    {0.0f, 0.0f, -3.0f},
+    {0.0f, 1.0f, 0.0f},
+    {-90.0f, 0.0f, 0.0f}
+};
 
 #define dist(vec) vec.x, vec.y, vec.z
 
@@ -52,8 +69,7 @@ void display()
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    vec3 look = cam.pos + cam.front;
-    gluLookAt(dist(cam.pos), dist(look), dist(cam.up));
+    cam.look_at();
 
     glPushMatrix();
         glScalef(2.0f, 2.0f, 2.0f);
@@ -178,8 +194,12 @@ void mouse(int button, int state, int x, int y)
     }
 }
 
-void light_enable()
+#ifndef TEST
+
+int main(int argc, char **argv)
 {
+    window main_window(argc, argv, "CG Work");
+
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
 
@@ -187,28 +207,10 @@ void light_enable()
     float light_specular[] = {1.0f, 0.0f, 0.0f};
     glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
     glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
-}
-
-#ifndef TEST
-
-int main(int argc, char **argv)
-{
-    glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-    int width = 700, height = 700;
-    glutInitWindowSize(width, width);
-    glutCreateWindow("CG Work");
-
-    glViewport(0, 0, (GLsizei)width, (GLsizei)height);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluPerspective(fov, (GLfloat)width / (GLfloat)height, 0.001f, 1000.0f);
-
-    light_enable();
 
     glEnable(GL_DEPTH_TEST);
 
-    glutDisplayFunc(display);
+    main_window.set_display_func(display);
     glutReshapeFunc(reshape);
     glutKeyboardFunc(keyboard);
     glutMouseFunc(mouse);
@@ -225,7 +227,8 @@ int main(int argc, char **argv)
 
     models.emplace_back(obj_file{"objs/quarto.obj"});
 
-    glutMainLoop();
+    // main_window.create_window();
+    main_window.run();
     return 0;
 }
 

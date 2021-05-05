@@ -9,7 +9,6 @@ struct obj_file
     obj_file(const char *path);
     void open(const char *path);
 
-
     void draw_mesh();
 
     bool m_initialized = false;
@@ -24,6 +23,15 @@ struct obj_file
     };
 
     std::vector<index> indices;
+    std::vector<unsigned int> optrs;
 private:
     void get_faces_index(char *str);
+};
+
+struct material
+{
+    vec3 ambient, diffuse, specular, emmisive;
+    float highlights, optical_density, dissolve;
+    unsigned int illum_model;
+    std::string diffuse_map;
 };
