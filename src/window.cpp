@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "window.hpp"
+#include "vec.hpp"
 
 void window::init(
     int& argc, char **&argv, const char *window_name, size_t width, size_t height
@@ -53,4 +54,11 @@ void window::run()
         return;
     }
     glutMainLoop();
+}
+
+
+void camera::look_at()
+{
+    vec3 look = pos + front;
+    gluLookAt(pos.x, pos.y, pos.z, look.x, look.y, look.z, up.x, up.y, up.z);
 }

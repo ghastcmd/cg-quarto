@@ -11,27 +11,6 @@ float radians(float val)
     return val * (PI<float> / 180.0f);
 }
 
-struct camera
-{
-    vec3 pos;
-    vec3 front;
-    vec3 up;
-
-    float yaw, pitch, roll;
-
-    camera(vec3 pos, vec3 front, vec3 up, vec3 angle)
-        : pos(pos), front(front), up(up)
-    {
-        yaw = angle.x, pitch = angle.y, roll = angle.z;
-    }
-
-    void look_at()
-    {
-        vec3 look = pos + front;
-        gluLookAt(pos.x, pos.y, pos.z, look.x, look.y, look.z, up.x, up.y, up.z);
-    }
-};
-
 static camera cam {
     {0.0f, 0.0f, 5.0f},
     {0.0f, 0.0f, -3.0f},

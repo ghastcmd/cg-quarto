@@ -1,5 +1,7 @@
 #pragma once
 
+#include "vec.hpp"
+
 struct window {
     window() = default;
     void init(
@@ -23,4 +25,21 @@ struct window {
     float m_fov = 75.0f;
     float m_min_dist = 0.001f, m_max_dist = 1000.0f;
     bool m_setted_display = false, m_init = false;
+};
+
+struct camera
+{
+    vec3 pos;
+    vec3 front;
+    vec3 up;
+
+    float yaw, pitch, roll;
+
+    camera(vec3 pos, vec3 front, vec3 up, vec3 angle)
+        : pos(pos), front(front), up(up)
+    {
+        yaw = angle.x, pitch = angle.y, roll = angle.z;
+    }
+
+    void look_at();
 };
