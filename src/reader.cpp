@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "vec.hpp"
 #include "reader.hpp"
+#include "window.hpp"
 
 #ifdef READER_TEST
 
@@ -268,11 +269,40 @@ obj_file::iter obj_file::get_iter(unsigned int index)
     //unsigned int m_idx;
 // };
 
+
 #ifdef READER_TEST
 
-int main()
+static std::vector<obj_file> models;
+static std::vector<window> windows;
+
+static void display(void)
 {
-    obj_file file("objs/cuboid.obj");
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+    glPushMatrix();
+        models[0].draw_mesh();
+    glPopMatrix();
+}
+
+static void reshape(int width, int height)
+{
+    windows[0].set_dimensions_values(width, height);
+    windows[0].run_perspective();
+}
+
+int main(int argc, char **argv)
+{
+    windows.emplace_back(window{argc, argv, "Test Window", 900, 700});
+    auto &main_window = windows[0];
+    main_window.set_display_func(display);
+    glutReshapeFunc(reshape);
+    glEnable(GL_DEPTH_TEST);
+
+    // obj_file file("objs/cuboid.obj");
+    models.push_back({"obj/cuboid.obj"});
+    auto &file = models[0];
 
     unsigned int error_count = 0;
 
@@ -290,15 +320,18 @@ int main()
     for (int i = 0, max = file.indices.size(); i < max; ++i)
     {
         auto &vec = file.indices[i];
-        if (vec.vertex != test[i]-1) puts("inconsistent value"), error_count += 1;
-        printf("%2i ", vec.vertex + 1);
+        if (vec.vertex != test[i]-1)
+        {
+            puts("inconsistent value"), error_count += 1;
+            printf("%2i ", vec.vertex + 1);
+        }
     }
     puts("");
 
-    for (auto &vec: file.vcoords)
-    {
-        printf("%9f %9f %9f\n", vec.x, vec.y, vec.z);
-    }
+    // for (auto &vec: file.vcoords)
+    // {
+    //     printf("%9f %9f %9f\n", vec.x, vec.y, vec.z);
+    // }
 
     float vertexes[] = {1, 1, -1, 1, -1, -1, 1, 1, 1, 1, -1, 1, -1, 1, -1, -1, -1, -1, -1, 1, 1, -1, -1, 1, 0, 1, 1, 1, 1, 0, -1, 1, 0, 0, 1, -1, 0, 2.575958, 0};
 
@@ -310,6 +343,7 @@ int main()
         {
             puts("inconsistent value");
             error_count += 1;
+            printf("%9f %9f %9f\n", vertexes[j], vertexes[j+1], vertexes[j+2]);
         }
     }
 
@@ -321,8 +355,8 @@ int main()
         {
             puts("inconsistent value");
             error_count += 1;
+            printf("%f %f | %f %f\n", textures[j], textures[j+1], vec.x, vec.y);
         }
-        printf("%f %f | %f %f\n", textures[j], textures[j+1], vec.x, vec.y);
     }
 
     float normals[] = {-0.5263, 0.6679, 0.5263, 0.0, 0.0, 1.0, -1.0, 0.0, 0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.5263, 0.6679, 0.5263, 0.5263, 0.6679, -0.5263, -0.5263, 0.6679, -0.5263};
@@ -333,8 +367,8 @@ int main()
         {
             puts("inconsistent value");
             error_count += 1;
+            printf("%9f %9f %9f | %9f %9f %9f\n", normals[j], normals[j+1], normals[j+2], vec.x, vec.y, vec.z);
         }
-        printf("%9f %9f %9f | %9f %9f %9f\n", normals[j], normals[j+1], normals[j+2], vec.x, vec.y, vec.z);
     }
 
     const char *fmt_status_error[] {
@@ -349,6 +383,7 @@ int main()
     };
     printf(fmt_alloc_count[alloc_count == 0], alloc_count);
 
+    main_window.run();
     return 0;
 }
 

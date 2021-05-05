@@ -39,13 +39,11 @@ static camera cam {
     {-90.0f, 0.0f, 0.0f}
 };
 
-#define dist(vec) vec.x, vec.y, vec.z
-
 float last_frame, dt;
-float fov = 75.0f;
 float speed = 4.8f * 2.0f;
 float mouse_sensitivity = 0.22f;
 
+float fov = 75.0f;
 float rot_angle = 0.0f, rot_speed = 0.4f;
 float dw_angle_n_pos[] = {0.0f, 0.0f, 0.0f};
 unsigned int control_index = 0;
@@ -64,11 +62,10 @@ void timer(int count)
 }
 
 // std::vector<obj_file> models;
-std::unordered_map<const char*, obj_file> models;
+static std::unordered_map<const char*, obj_file> models;
 obj_file simple;
 
-
-void display()
+static void display()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
