@@ -206,7 +206,7 @@ void reshape(int width, int height)
 
 void motion(int x, int y)
 {
-    static float prevx = glutGet(GLUT_WINDOW_WIDTH) / 2, prevy = glutGet(GLUT_WINDOW_HEIGHT) / 2;
+    static float prevx = mwindow.m_width / 2, prevy = mwindow.m_height / 2;
     float xoffset = x - prevx, yoffset = prevy - y;
     xoffset *= mouse_sensitivity, yoffset *= mouse_sensitivity;
     prevx = x, prevy = y;
