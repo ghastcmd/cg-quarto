@@ -1,8 +1,10 @@
 #pragma once
 
 struct window {
-    window() = delete;
-    window(int& argc, char **&argv, const char *window_name, size_t width, size_t height);
+    window() = default;
+    void init(
+        int& argc, char **&argv, const char *window_name, size_t width, size_t height
+    );
 
     void set_perspective_values(float fov, float min_dist, float max_dist);
 
@@ -20,5 +22,5 @@ struct window {
     unsigned int m_width, m_height;
     float m_fov = 75.0f;
     float m_min_dist = 0.001f, m_max_dist = 1000.0f;
-    bool m_setted_display = false;
+    bool m_setted_display = false, m_init = false;
 };

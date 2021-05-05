@@ -67,7 +67,6 @@ void timer(int count)
 std::unordered_map<const char*, obj_file> models;
 obj_file simple;
 
-
 void display()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -197,12 +196,12 @@ void display()
     glutSwapBuffers();
 }
 
+window mwindow;
+
 void reshape(int width, int height)
 {
-    glViewport(0, 0, (GLsizei)width, (GLsizei)height);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluPerspective(fov, (GLfloat)width / (GLfloat)height, 0.001f, 1000.0f);
+    mwindow.set_dimensions_values(width, height);
+    mwindow.run_perspective();
 }
 
 void motion(int x, int y)
@@ -284,7 +283,7 @@ void mouse(int button, int state, int x, int y)
 
 int main(int argc, char **argv)
 {
-    window main_window(argc, argv, "CG Work", 700, 700);
+    mwindow.init(argc, argv, "CG Work", 700, 700);
 
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
@@ -298,7 +297,7 @@ int main(int argc, char **argv)
 
     glEnable(GL_DEPTH_TEST);
 
-    main_window.set_display_func(display);
+    mwindow.set_display_func(display);
     glutReshapeFunc(reshape);
     glutKeyboardFunc(keyboard);
     glutMouseFunc(mouse);
@@ -332,7 +331,7 @@ int main(int argc, char **argv)
     // models.emplace_back(obj_file{"objs/ventilador2.obj"});
 
     // main_window.create_window();
-    main_window.run();
+    mwindow.run();
     return 0;
 }
 
