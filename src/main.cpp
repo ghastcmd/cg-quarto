@@ -270,10 +270,11 @@ void light_enable()
     glEnable(GL_LIGHT0);
 
     float light_ambient[] = {0.2f, 0.2f, 0.2f};
-    // float light_specular[] = {1.0f, 0.0f, 0.0f};
+    float light_diffuse[] = {0.2f, 0.2f, 0.2f};
+    float light_specular[] = {1.0f, 0.0f, 0.0f};
     glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
-    // glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
-    
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);   
 }
 
 #ifndef TEST
