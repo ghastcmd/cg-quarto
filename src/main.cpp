@@ -284,7 +284,7 @@ void mouse(int button, int state, int x, int y)
 
 int main(int argc, char **argv)
 {
-    window main_window(argc, argv, "CG Work");
+    window main_window(argc, argv, "CG Work", 700, 700);
 
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);

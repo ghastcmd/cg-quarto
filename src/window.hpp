@@ -2,10 +2,7 @@
 
 struct window {
     window() = delete;
-    window(
-        int& argc, char ** argv, const char *window_name,
-        size_t width = 700, size_t height = 700
-    );
+    window(int& argc, char **&argv, const char *window_name, size_t width, size_t height);
 
     void set_perspective_values(float fov, float min_dist, float max_dist);
 

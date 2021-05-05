@@ -1,10 +1,7 @@
 #include "pch.h"
 #include "window.hpp"
 
-window::window(
-    int& argc, char ** argv, const char *window_name,
-    size_t width = 700, size_t height = 700
-)
+window::window(int& argc, char **&argv, const char *window_name, size_t width, size_t height)
     : m_wname(window_name), m_width(width), m_height(height)
 {
     glutInit(&argc, argv);
