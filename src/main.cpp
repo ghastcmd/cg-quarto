@@ -3,26 +3,15 @@
 #include "vec.hpp"
 #include "reader.hpp"
 
-template <typename _ty>
-constexpr _ty PI = (_ty)3.14159265358979323846;
-
-float radians(float val)
-{
-    return val * (PI<float> / 180.0f);
-}
-
 static camera cam {
     {0.0f, 0.0f, 5.0f},
     {0.0f, 0.0f, -3.0f},
     {0.0f, 1.0f, 0.0f},
-    {-90.0f, 0.0f, 0.0f}
 };
 
 float last_frame, dt;
-float speed = 4.8f * 2.0f;
-float mouse_sensitivity = 0.22f;
+float speed = 9.6f;
 
-float fov = 75.0f;
 float rot_angle = 0.0f, rot_speed = 0.4f;
 float dw_angle_n_pos[] = {0.0f, 0.0f, 0.0f};
 unsigned int control_index = 0;
@@ -183,29 +172,12 @@ void reshape(int width, int height)
 
 void motion(int x, int y)
 {
-    static float prevx = mwindow.m_width / 2, prevy = mwindow.m_height / 2;
-    float xoffset = x - prevx, yoffset = prevy - y;
-    xoffset *= mouse_sensitivity, yoffset *= mouse_sensitivity;
-    prevx = x, prevy = y;
-
-    cam.yaw += xoffset;
-    cam.pitch += yoffset;
-
-    // cam.pitch = std::clamp(cam.pitch, -89.0f, 89.0f); // not working on linux ??
-    cam.pitch = cam.pitch < -89.0f ? -89.0f : cam.pitch > 89.0f ? 89.0f : cam.pitch;
-
-    vec3 direction {
-        cos(radians(cam.yaw)) * cos(radians(cam.pitch)),
-        sin(radians(cam.pitch)),
-        sin(radians(cam.yaw)) * cos(radians(cam.pitch))
-    };
-
-    cam.front = vec3::normalize(direction);
+    cam.motion(x, y, 0.22f);
 }
 
 void keyboard(unsigned char key, int x, int y)
 {
-    float cam_speed = speed * dt / 1000;
+    float cam_speed = speed * dt / 1000.0f;
     float &ct_var = dw_angle_n_pos[control_index];
     switch (key)
     {
@@ -216,10 +188,10 @@ void keyboard(unsigned char key, int x, int y)
             cam.pos -= cam.front * cam_speed / 2.0f;
         break;
         case 'a':
-            cam.pos -= vec3::normalize(vec3::cross(cam.front, cam.up)) * cam_speed;
+            cam.pos -= cam.side_vector() * cam_speed;
         break;
         case 'd':
-            cam.pos += vec3::normalize(vec3::cross(cam.front, cam.up)) * cam_speed;
+            cam.pos += cam.side_vector() * cam_speed;
         break;
         case ' ':
             cam.pos += vec3{0, cam_speed, 0};
@@ -275,6 +247,7 @@ int main(int argc, char **argv)
     glEnable(GL_DEPTH_TEST);
 
     mwindow.set_display_func(display);
+    cam.center_camera_angle(mwindow);
     glutReshapeFunc(reshape);
     glutKeyboardFunc(keyboard);
     glutMouseFunc(mouse);

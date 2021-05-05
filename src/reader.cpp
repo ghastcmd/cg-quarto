@@ -272,8 +272,15 @@ obj_file::iter obj_file::get_iter(unsigned int index)
 
 #ifdef READER_TEST
 
+static camera cam {
+    {0.0f, 0.0f, 5.0f},
+    {0.0f, 0.0f, -3.0f},
+    {0.0f, 1.0f, 0.0f}
+};
+
+
 static std::vector<obj_file> models;
-static std::vector<window> windows;
+window windows;
 
 static void display(void)
 {
@@ -281,26 +288,50 @@ static void display(void)
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
+    cam.look_at();
+
     glPushMatrix();
         models[0].draw_mesh();
+        glutSolidCube(1.0f);
     glPopMatrix();
+
+    glutSwapBuffers();
 }
 
 static void reshape(int width, int height)
 {
-    windows[0].set_dimensions_values(width, height);
-    windows[0].run_perspective();
+    windows.set_dimensions_values(width, height);
+    windows.run_perspective();
+}
+
+static void motion(int x, int y)
+{
+    cam.motion(x, y, 0.22f);
+}
+
+static float dt, last_frame;
+
+static void timer(int count)
+{
+    float current_frame = glutGet(GLUT_ELAPSED_TIME);
+    dt = current_frame - last_frame;
+    last_frame = current_frame;
+
+    glutPostRedisplay();
+    glutTimerFunc(0, timer, 0);
 }
 
 int main(int argc, char **argv)
 {
-    windows.emplace_back(window{argc, argv, "Test Window", 900, 700});
-    auto &main_window = windows[0];
-    main_window.set_display_func(display);
+    windows.init(argc, argv, "Test Window", 900, 700);
+    windows.set_display_func(display);
+    cam.center_camera_angle(windows);
+
     glutReshapeFunc(reshape);
+    glutPassiveMotionFunc(motion);
+    glutTimerFunc(0, timer, 0);
     glEnable(GL_DEPTH_TEST);
 
-    // obj_file file("objs/cuboid.obj");
     models.push_back({"obj/cuboid.obj"});
     auto &file = models[0];
 
@@ -383,7 +414,7 @@ int main(int argc, char **argv)
     };
     printf(fmt_alloc_count[alloc_count == 0], alloc_count);
 
-    main_window.run();
+    windows.run();
     return 0;
 }
 

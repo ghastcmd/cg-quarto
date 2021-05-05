@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "window.hpp"
 #include "vec.hpp"
+#include "math.hpp"
 
 void window::init(
     int& argc, char **&argv, const char *window_name, size_t width, size_t height
@@ -56,9 +57,29 @@ void window::run()
     glutMainLoop();
 }
 
-
 void camera::look_at()
 {
     vec3 look = pos + front;
     gluLookAt(pos.x, pos.y, pos.z, look.x, look.y, look.z, up.x, up.y, up.z);
+}
+
+void camera::motion(int x, int y, float sensitivity)
+{
+    float xoffset = x - prevx, yoffset = prevy - y;
+    xoffset *= sensitivity, yoffset *= sensitivity;
+    prevx = x, prevy = y;
+
+    yaw += xoffset;
+    pitch += yoffset;
+
+    // cam.pitch = std::clamp(cam.pitch, -89.0f, 89.0f); // not working on linux ??
+    pitch = pitch < -89.0f ? -89.0f : pitch > 89.0f ? 89.0f : pitch;
+
+    vec3 direction {
+        cos(radians(yaw)) * cos(radians(pitch)),
+        sin(radians(pitch)),
+        sin(radians(yaw)) * cos(radians(pitch))
+    };
+
+    front = vec3::normalize(direction);
 }

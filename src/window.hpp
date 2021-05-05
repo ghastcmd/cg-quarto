@@ -33,13 +33,29 @@ struct camera
     vec3 front;
     vec3 up;
 
-    float yaw, pitch, roll;
+    float yaw = -90.0f, pitch = 0.0f, roll = 0.0f;
 
-    camera(vec3 pos, vec3 front, vec3 up, vec3 angle)
+    camera(vec3 pos, vec3 front, vec3 up)
         : pos(pos), front(front), up(up)
     {
-        yaw = angle.x, pitch = angle.y, roll = angle.z;
+
+    }
+
+    void center_camera_angle(window wnd)
+    {
+        prevx = wnd.m_width / 2;
+        prevy = wnd.m_height / 2;
+    }
+
+    vec3 side_vector()
+    {
+        return vec3::normalize(vec3::cross(front, up));
     }
 
     void look_at();
+
+    void motion(int x, int y, float sensitivity);
+
+private:
+    float prevx, prevy;
 };
