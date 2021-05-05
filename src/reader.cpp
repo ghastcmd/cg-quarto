@@ -167,8 +167,8 @@ void obj_file::get_faces_index(char *str)
         ftexture[j+2] = tindexes[i+3];
 
         fnormals[j]   = nindexes[i];
-        fnormals[j+1] = nindexes[i+2];
-        fnormals[j+2] = nindexes[i+3];
+        fnormals[j+1] = nindexes[i+1];
+        fnormals[j+2] = nindexes[i+2];
     }
     len = j - 3;
     indices.reserve(len);
@@ -189,16 +189,20 @@ void obj_file::open(const char *path)
         const auto ret = objtypes_map[stype];
         constexpr size_t max_strl = 1024;
         // print_ret(ret);
-        char str[max_strl];
+        char str[max_strl] = {0};
         file.getline(str, max_strl, '\x0a');
         switch (ret) {
             case comment:
             case mtllib:
-            case object_name:
             case smooth_shading:
             case usemtl:
             case line:
                 break;
+            case object_name:
+                optrs.push_back(indices.size());
+                // printf(">%s<\n", str);
+                // printf("%i\n", optrs[str]);
+            break;
             case vertex_coord: {
                 vec3 vec;
                 stovec3(vec, str);
@@ -226,9 +230,9 @@ void obj_file::open(const char *path)
 void obj_file::draw_mesh()
 {
     glBegin(GL_TRIANGLES);
-    for (int i = 0, len = indices.size(); i < len; i++)
+    for (auto begin = indices.data(), end = begin + indices.size(); begin < end; begin++)
     {
-        auto &id = indices[i];
+        auto &id = *begin;
         auto &vec = vcoords[id.vertex];
         glVertex3f(vec.x, vec.y, vec.z);
         auto &v2 = vtexture[id.texture];
@@ -237,6 +241,28 @@ void obj_file::draw_mesh()
         glNormal3f(normal.x, normal.y, normal.z);
     }
     glEnd();
+}
+
+void obj_file::draw_mesh(obj_file::iter &begin, obj_file::iter &end)
+{
+    glBegin(GL_TRIANGLES);
+    // auto iptr = indices.data();
+    for (auto current = begin; current < end; current++)
+    {
+        auto &id = *current;
+        auto &vec = vcoords[id.vertex];
+        glVertex3f(vec.x, vec.y, vec.z);
+        auto &v2 = vtexture[id.texture];
+        glTexCoord2f(v2.x, v2.y);
+        auto &normal = vnormal[id.normal];
+        glNormal3f(normal.x, normal.y, normal.z);
+    }
+    glEnd();
+}
+
+obj_file::iter obj_file::get_iter(unsigned int index)
+{
+    return indices.data() + optrs[index];
 }
 
     //unsigned int m_idx;
