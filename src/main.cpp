@@ -11,27 +11,6 @@ float radians(float val)
     return val * (PI<float> / 180.0f);
 }
 
-struct camera
-{
-    vec3 pos;
-    vec3 front;
-    vec3 up;
-
-    float yaw, pitch, roll;
-
-    camera(vec3 pos, vec3 front, vec3 up, vec3 angle)
-        : pos(pos), front(front), up(up)
-    {
-        yaw = angle.x, pitch = angle.y, roll = angle.z;
-    }
-
-    void look_at()
-    {
-        vec3 look = pos + front;
-        gluLookAt(pos.x, pos.y, pos.z, look.x, look.y, look.z, up.x, up.y, up.z);
-    }
-};
-
 static camera cam {
     {0.0f, 0.0f, 5.0f},
     {0.0f, 0.0f, -3.0f},
@@ -194,17 +173,17 @@ static void display()
     glutSwapBuffers();
 }
 
+window mwindow;
+
 void reshape(int width, int height)
 {
-    glViewport(0, 0, (GLsizei)width, (GLsizei)height);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluPerspective(fov, (GLfloat)width / (GLfloat)height, 0.001f, 1000.0f);
+    mwindow.set_dimensions_values(width, height);
+    mwindow.run_perspective();
 }
 
 void motion(int x, int y)
 {
-    static float prevx = glutGet(GLUT_WINDOW_WIDTH) / 2, prevy = glutGet(GLUT_WINDOW_HEIGHT) / 2;
+    static float prevx = mwindow.m_width / 2, prevy = mwindow.m_height / 2;
     float xoffset = x - prevx, yoffset = prevy - y;
     xoffset *= mouse_sensitivity, yoffset *= mouse_sensitivity;
     prevx = x, prevy = y;
@@ -281,7 +260,7 @@ void mouse(int button, int state, int x, int y)
 
 int main(int argc, char **argv)
 {
-    window main_window(argc, argv, "CG Work", 700, 700);
+    mwindow.init(argc, argv, "CG Work", 700, 700);
 
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
@@ -295,7 +274,7 @@ int main(int argc, char **argv)
 
     glEnable(GL_DEPTH_TEST);
 
-    main_window.set_display_func(display);
+    mwindow.set_display_func(display);
     glutReshapeFunc(reshape);
     glutKeyboardFunc(keyboard);
     glutMouseFunc(mouse);
@@ -329,7 +308,7 @@ int main(int argc, char **argv)
     // models.emplace_back(obj_file{"objs/ventilador2.obj"});
 
     // main_window.create_window();
-    main_window.run();
+    mwindow.run();
     return 0;
 }
 

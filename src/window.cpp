@@ -1,9 +1,14 @@
 #include "pch.h"
 #include "window.hpp"
+#include "vec.hpp"
 
-window::window(int& argc, char **&argv, const char *window_name, size_t width, size_t height)
-    : m_wname(window_name), m_width(width), m_height(height)
+void window::init(
+    int& argc, char **&argv, const char *window_name, size_t width, size_t height
+)
 {
+    if (m_init) return;
+    m_init = true;
+    m_wname = window_name, m_width = width, m_height = height;
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
     glutInitWindowSize(width, height);
@@ -32,9 +37,13 @@ void window::run_perspective()
 
 void window::set_display_func(void (*fptr)(void))
 {
+    if (!m_init)
+    {
+        puts("Need to run init function before.");
+        return;
+    }
     m_setted_display = true;
     glutDisplayFunc(fptr);
-    // glutReshapeFunc(*(void(*)(int, int))&_reshape_callback);
 }
 
 void window::run()
@@ -45,4 +54,11 @@ void window::run()
         return;
     }
     glutMainLoop();
+}
+
+
+void camera::look_at()
+{
+    vec3 look = pos + front;
+    gluLookAt(pos.x, pos.y, pos.z, look.x, look.y, look.z, up.x, up.y, up.z);
 }
