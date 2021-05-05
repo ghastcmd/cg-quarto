@@ -189,7 +189,7 @@ void obj_file::open(const char *path)
         const auto ret = objtypes_map[stype];
         constexpr size_t max_strl = 1024;
         // print_ret(ret);
-        char str[max_strl];
+        char str[max_strl] = {0};
         file.getline(str, max_strl, '\x0a');
         switch (ret) {
             case comment:
@@ -199,7 +199,9 @@ void obj_file::open(const char *path)
             case line:
                 break;
             case object_name:
-                optrs[str] = indices.data() + indices.size();
+                optrs.push_back(indices.size());
+                // printf(">%s<\n", str);
+                // printf("%i\n", optrs[str]);
             break;
             case vertex_coord: {
                 vec3 vec;
@@ -228,9 +230,9 @@ void obj_file::open(const char *path)
 void obj_file::draw_mesh()
 {
     glBegin(GL_TRIANGLES);
-    for (int i = 0, len = indices.size(); i < len; i++)
+    for (auto begin = indices.data(), end = begin + indices.size(); begin < end; begin++)
     {
-        auto &id = indices[i];
+        auto &id = *begin;
         auto &vec = vcoords[id.vertex];
         glVertex3f(vec.x, vec.y, vec.z);
         auto &v2 = vtexture[id.texture];
@@ -244,8 +246,8 @@ void obj_file::draw_mesh()
 void obj_file::draw_mesh(obj_file::iter &begin, obj_file::iter &end)
 {
     glBegin(GL_TRIANGLES);
-    using iter = obj_file::iter;
-    for (iter current = begin; current < end; current++)
+    // auto iptr = indices.data();
+    for (auto current = begin; current < end; current++)
     {
         auto &id = *current;
         auto &vec = vcoords[id.vertex];
@@ -258,9 +260,9 @@ void obj_file::draw_mesh(obj_file::iter &begin, obj_file::iter &end)
     glEnd();
 }
 
-obj_file::iter obj_file::get_iter(char *object_name)
+obj_file::iter obj_file::get_iter(unsigned int index)
 {
-    return optrs[object_name];
+    return indices.data() + optrs[index];
 }
 
     //unsigned int m_idx;

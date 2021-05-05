@@ -29,11 +29,18 @@ float fov = 75.0f;
 float speed = 4.8f * 2.0f;
 float mouse_sensitivity = 0.22f;
 
+float rot_angle = 0.0f, rot_speed = 0.4f;
+float dw_angle_n_pos[] = {0.0f, 0.0f, 0.0f};
+unsigned int control_index = 0;
+
 void timer(int count)
 {
     float current_frame = glutGet(GLUT_ELAPSED_TIME);
     dt = current_frame - last_frame;
     last_frame = current_frame;
+
+    rot_angle = (rot_angle + rot_speed * dt);
+    rot_angle -= 360.0f * (rot_angle >= 360.0f);
 
     glutPostRedisplay();
     glutTimerFunc(1000 / 60, timer, 0);
@@ -43,9 +50,6 @@ void timer(int count)
 std::unordered_map<const char*, obj_file> models;
 obj_file simple;
 
-float test_angle = 0;
-float dw_angle_n_pos[] = {0.0f, 0.0f, 0.0f};
-unsigned int control_index = 0;
 
 void display()
 {
@@ -167,7 +171,11 @@ void display()
         glRotatef(200.0f, 0.0f, 1.0f, 0.0f);
         glScalef(3.3f, 3.3f, 3.3f);
         glColor3f(0, 0, 1);
-        models["ventilador"].draw_mesh();
+        models["ventiladorc"].draw_mesh();
+        glTranslatef(0.0f, 0.175f, -0.11f);
+        glRotatef(-rot_angle, 0.0f, 0.0f, 1.0f);
+        glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
+        models["ventiladorh"].draw_mesh();
     glPopMatrix();
     
     glutSwapBuffers();
@@ -238,6 +246,9 @@ void keyboard(unsigned char key, int x, int y)
         case 'l':
             control_index = (control_index + 1) % 3;
         break;
+        case 'r':
+            printf("%f %f %f\n", cam.front.x, cam.front.y, cam.front.z);
+        break;
     }
 }
 
@@ -301,7 +312,8 @@ int main(int argc, char **argv)
     models["cubo"]        = obj_file("objs/cubo.obj");
     models["caderno"]     = obj_file("objs/caderno.obj");
     models["cadeira"]     = obj_file("objs/cadeira.obj");
-    models["ventilador"]  = obj_file("objs/ventilador.obj");
+    models["ventiladorc"]  = obj_file("objs/ventilador_corpo.obj");
+    models["ventiladorh"]  = obj_file("objs/ventilador_helice.obj");
     // models["ventilador2"] = obj_file("objs/ventilador2.obj");
 
     // models.emplace_back(obj_file{"objs/quarto.obj"});

@@ -27,7 +27,7 @@ Para abrir e fechar as portas e a janela, pressione a tecla `p` para abrir, `o` 
 ## Requisitos da AB2
 
  - [ ] Modelar e apresentar um quadro de Vincent Van Gogh
- - [ ] Ventilador de mesa com hélice girando no sentido horário em velocidade baixa
+ - [x] Ventilador de mesa com hélice girando no sentido horário em velocidade baixa
  - [ ] Luminária spot em cima da mesa
  - [ ] Iluminação especular e difusa na modelagem
  - [ ] Aplicar mapeamento de textura em 5 objetos

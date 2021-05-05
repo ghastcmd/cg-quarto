@@ -18,7 +18,7 @@ struct obj_file
 
     void draw_mesh();
     void draw_mesh(iter &begin, iter &end);
-    iter get_iter(char *object_name);
+    iter get_iter(unsigned int index);
 
     bool m_initialized = false;
 
@@ -27,7 +27,8 @@ struct obj_file
     std::vector<vec2> vtexture;
 
     std::vector<index> indices;
-    std::unordered_map<char *, iter> optrs;
+    // std::unordered_map<std::string_view, unsigned int> optrs;
+    std::vector<unsigned int> optrs;
 private:
     void get_faces_index(char *str);
 };
