@@ -35,5 +35,7 @@ Para abrir e fechar as portas e a janela, pressione a tecla `p` para abrir, `o` 
 ## Referências:
 
 * [Referência do monitor da disciplina](https://github.com/valeriojr/COMP269/blob/master/opengl.c)
+* [Básicos do opengl](https://github.com/valeriojr/monitoria-cg/blob/master/material/book.pdf)
 * [Camera - Getting started](https://learnopengl.com/Getting-started/Camera)
 * [Viewing obj file format](https://en.wikipedia.org/wiki/Wavefront_.obj_file)
+* [Wavefront material template](https://www.loc.gov/preservation/digital/formats/fdd/fdd000508.shtml)
