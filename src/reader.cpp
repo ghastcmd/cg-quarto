@@ -233,12 +233,12 @@ void obj_file::draw_mesh()
     for (auto begin = indices.data(), end = begin + indices.size(); begin < end; begin++)
     {
         auto &id = *begin;
+        auto &normal = vnormal[id.normal];
+        glNormal3f(normal.x, normal.y, normal.z);
         auto &vec = vcoords[id.vertex];
         glVertex3f(vec.x, vec.y, vec.z);
         auto &v2 = vtexture[id.texture];
         glTexCoord2f(v2.x, v2.y);
-        auto &normal = vnormal[id.normal];
-        glNormal3f(normal.x, normal.y, normal.z);
     }
     glEnd();
 }
