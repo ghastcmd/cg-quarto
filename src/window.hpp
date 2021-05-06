@@ -10,16 +10,16 @@ struct window {
 
     void set_perspective_values(float fov, float min_dist, float max_dist);
 
-    void set_dimensions_values(int width, int height);
+    void run_perspective() const;
 
-    void run_perspective();
+    void set_dimensions_values(int width, int height);
 
     void set_display_func(void (*fptr)(void));
 
-    void run();
+    void run() const;
 
     const char *get_name() { return m_wname; }
-
+    
     const char *m_wname;
     unsigned int m_width, m_height;
     float m_fov = 75.0f;

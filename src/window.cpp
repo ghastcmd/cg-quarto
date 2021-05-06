@@ -11,7 +11,7 @@ void window::init(
     m_init = true;
     m_wname = window_name, m_width = width, m_height = height;
     glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH | GLUT_MULTISAMPLE);
     glutInitWindowSize(width, height);
     glutCreateWindow(m_wname);
 
@@ -28,7 +28,7 @@ void window::set_dimensions_values(int width, int height)
     m_width = width, m_height = height;
 }
 
-void window::run_perspective()
+void window::run_perspective() const
 {
     glViewport(0, 0, (GLsizei)m_width, (GLsizei)m_height);
     glMatrixMode(GL_PROJECTION);
@@ -47,7 +47,7 @@ void window::set_display_func(void (*fptr)(void))
     glutDisplayFunc(fptr);
 }
 
-void window::run()
+void window::run() const
 {
     if (!m_setted_display)
     {

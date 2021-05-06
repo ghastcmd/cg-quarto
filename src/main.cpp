@@ -215,11 +215,9 @@ void mouse(int button, int state, int x, int y)
 {
     if (button == 3) // wheel up
     {
-        
     }
     else if (button == 4) // wheel down
     {
-        
     }
 }
 
@@ -245,12 +243,13 @@ int main(int argc, char **argv)
     glEnable(GL_COLOR_MATERIAL);
     
     mwindow.set_display_func(display);
-    cam.center_camera_angle(mwindow);
     glutReshapeFunc(reshape);
     glutKeyboardFunc(keyboard);
     glutMouseFunc(mouse);
     glutIdleFunc(idle);
     glutPassiveMotionFunc(motion);
+
+    cam.center_camera_angle(mwindow);
 
     models["quarto"]      = obj_file("objs/quarto.obj");
     models["cama"]        = obj_file("objs/cama.obj");

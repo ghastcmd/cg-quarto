@@ -39,3 +39,4 @@ Para abrir e fechar as portas e a janela, pressione a tecla `p` para abrir, `o` 
 * [Camera - Getting started](https://learnopengl.com/Getting-started/Camera)
 * [Viewing obj file format](https://en.wikipedia.org/wiki/Wavefront_.obj_file)
 * [Wavefront material template](https://www.loc.gov/preservation/digital/formats/fdd/fdd000508.shtml)
+* [Applying MSAA](https://learnopengl.com/Advanced-OpenGL/Anti-Aliasing)
