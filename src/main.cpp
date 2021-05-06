@@ -31,6 +31,8 @@ static void idle()
 
 static std::unordered_map<const char*, obj_file> models;
 
+material mat1 {{0.2f, 0.2f, 0.2f}, {0.45f, 0.30f, 0.0f}, {1.0f, 1.0f, 1.0f}, 80.0f};
+
 static void display()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -38,6 +40,9 @@ static void display()
     glLoadIdentity();
 
     cam.look_at();
+
+    mat1.apply_material();
+    glutSolidSphere(2.0f, 20, 20);
 
     glPushMatrix();
         glScalef(2.0f, 2.0f, 2.0f);

@@ -35,6 +35,12 @@ private:
 
 struct material
 {
+    material(vec3 ambient, vec3 diffuse, vec3 specular, float shininess)
+        : ambient(ambient), diffuse(diffuse), specular(specular), highlights(shininess)
+    {}
+    
+    void apply_material() const;
+
     vec3 ambient, diffuse, specular, emmisive;
     float highlights, optical_density, dissolve;
     unsigned int illum_model;

@@ -226,5 +226,15 @@ obj_file::iter obj_file::get_iter(unsigned int index)
     return indices.data() + optrs[index];
 }
 
-    //unsigned int m_idx;
-// };
+void material::apply_material() const
+{
+    const float fambient[] {ambient.x, ambient.y, ambient.z, 1.0f};
+    const float fdiffuse[] {diffuse.x, diffuse.y, diffuse.z, 1.0f};
+    const float fspecular[] {specular.x, specular.y, specular.z, 1.0f};
+    const float fshininess[] {highlights};
+
+    glLightfv(GL_FRONT_AND_BACK, GL_AMBIENT, fambient);
+    glLightfv(GL_FRONT_AND_BACK, GL_DIFFUSE, fdiffuse);
+    glLightfv(GL_FRONT_AND_BACK, GL_SPECULAR, fspecular);
+    glLightfv(GL_FRONT_AND_BACK, GL_SHININESS, fshininess);
+}
