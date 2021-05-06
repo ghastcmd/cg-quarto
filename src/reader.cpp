@@ -3,7 +3,7 @@
 #include "reader.hpp"
 #include "window.hpp"
 
-enum objtypes
+enum class objtypes : unsigned int
 {
     invalid,
     comment,
@@ -19,15 +19,15 @@ enum objtypes
 };
 
 static std::unordered_map<std::string_view, objtypes> objtypes_map {
-    {"#", comment},
-    {"mtllib", mtllib},
-    {"o", object_name},
-    {"v", vertex_coord},
-    {"vn", vertex_normal},
-    {"vt", vertex_texture},
-    {"usemtl", usemtl},
-    {"f", face},
-    {"l", line}
+    {"#", objtypes::comment},
+    {"mtllib", objtypes::mtllib},
+    {"o", objtypes::object_name},
+    {"v", objtypes::vertex_coord},
+    {"vn", objtypes::vertex_normal},
+    {"vt", objtypes::vertex_texture},
+    {"usemtl", objtypes::usemtl},
+    {"f", objtypes::face},
+    {"l", objtypes::line}
 };
 
 void print_ret(objtypes ret)
@@ -46,7 +46,7 @@ void print_ret(objtypes ret)
         "line"
     };
 
-    puts(objtypes_str[ret]);
+    puts(objtypes_str[(unsigned int)ret]);
 }
 
 void print_val(std::ifstream& fstream)
@@ -135,7 +135,7 @@ void obj_file::get_faces_index(char *str)
     indices.reserve(len);
     for (i = 0; i < len; ++i)
     {
-        indices.push_back({fvertex[i]-1, ftexture[i]-1, fnormals[i]-1});
+        indices.push_back({fnormals[i]-1, ftexture[i]-1, fvertex[i]-1});
     }
 }
 
@@ -153,31 +153,31 @@ void obj_file::open(const char *path)
         char str[max_strl] = {0};
         file.getline(str, max_strl, '\x0a');
         switch (ret) {
-            case comment:
-            case mtllib:
-            case smooth_shading:
-            case usemtl:
-            case line:
+            case objtypes::comment:
+            case objtypes::mtllib:
+            case objtypes::smooth_shading:
+            case objtypes::usemtl:
+            case objtypes::line:
                 break;
-            case object_name:
+            case objtypes::object_name:
                 optrs.push_back(indices.size());
             break;
-            case vertex_coord: {
+            case objtypes::vertex_coord: {
                 vec3 vec;
                 stovec3(vec, str);
                 vcoords.push_back(vec);
             } break;
-            case vertex_texture: {
+            case objtypes::vertex_texture: {
                 vec2 vec;
                 stovec2(vec, str);
                 vtexture.push_back(vec);
             } break;
-            case vertex_normal: {
+            case objtypes::vertex_normal: {
                 vec3 vec;
                 stovec3(vec, str);
                 vnormal.push_back(vec);
             } break;
-            case face: {
+            case objtypes::face: {
                 get_faces_index(str);
             } break;
         }
@@ -194,10 +194,10 @@ void obj_file::draw_mesh()
         auto &id = *begin;
         auto &normal = vnormal[id.normal];
         glNormal3f(normal.x, normal.y, normal.z);
-        auto &vec = vcoords[id.vertex];
-        glVertex3f(vec.x, vec.y, vec.z);
         auto &v2 = vtexture[id.texture];
         glTexCoord2f(v2.x, v2.y);
+        auto &vec = vcoords[id.vertex];
+        glVertex3f(vec.x, vec.y, vec.z);
     }
     glEnd();
 }
@@ -209,12 +209,12 @@ void obj_file::draw_mesh(obj_file::iter &begin, obj_file::iter &end)
     for (auto current = begin; current < end; current++)
     {
         auto &id = *current;
-        auto &vec = vcoords[id.vertex];
-        glVertex3f(vec.x, vec.y, vec.z);
-        auto &v2 = vtexture[id.texture];
-        glTexCoord2f(v2.x, v2.y);
         auto &normal = vnormal[id.normal];
         glNormal3f(normal.x, normal.y, normal.z);
+        auto &v2 = vtexture[id.texture];
+        glTexCoord2f(v2.x, v2.y);
+        auto &vec = vcoords[id.vertex];
+        glVertex3f(vec.x, vec.y, vec.z);
     }
     glEnd();
 }
@@ -237,4 +237,88 @@ void material::apply_material() const
     glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, fspecular);
     glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, femission);
     glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, highlights);
+}
+
+enum class mtltypes : unsigned int
+{
+    invalid,
+    comment,
+    new_material,
+    ambient,
+    diffuse,
+    specular,
+    shininess,
+    dissolve,
+    inverse_dissolve,
+    transmission_filter,
+    optical_density,
+    illumination_mode,
+    map_ambient,
+    map_diffuse,
+    map_specular,
+    map_highlight,
+    map_alpha,
+    map_bump,
+    map_displacement
+};
+
+static std::unordered_map<const char*, mtltypes> mtltypes_map
+{
+    {"#", mtltypes::comment},
+    {"newmtl", mtltypes::new_material},
+    {"Ka", mtltypes::ambient},
+    {"Kd", mtltypes::diffuse},
+    {"Ks", mtltypes::specular},
+    {"Ns", mtltypes::shininess},
+    {"d", mtltypes::dissolve},
+    {"Tr", mtltypes::inverse_dissolve},
+    {"Tf", mtltypes::transmission_filter},
+    {"Ni", mtltypes::optical_density},
+    {"illum", mtltypes::illumination_mode},
+    {"map_Ka", mtltypes::map_ambient},
+    {"map_Kd", mtltypes::map_diffuse},
+    {"map_Ks", mtltypes::map_specular},
+    {"map_Ns", mtltypes::map_highlight},
+    {"map_d", mtltypes::map_alpha},
+    {"map_bump", mtltypes::map_bump},
+    {"bump", mtltypes::map_bump},
+    {"disp", mtltypes::map_displacement},
+};
+
+mtl_file::mtl_file(const char *path)
+{
+    // if (m_initialized) return;
+    std::ifstream file(path, std::ios::in | std::ios::binary);
+    while (file.peek() != -1)
+    {
+        char stype[16] = {0};
+        file.getline(stype, 16, ' ');
+        // const auto ret = objtypes_map[stype];
+        const auto ret = mtltypes_map[stype];
+        constexpr size_t max_strl = 64;
+        // print_ret(ret);
+        char str[max_strl] = {0};
+        file.getline(str, max_strl, '\x0a');
+        switch (ret) {
+            case mtltypes::comment:
+            case mtltypes::new_material:
+            case mtltypes::ambient:
+            case mtltypes::diffuse:
+            case mtltypes::specular:
+            case mtltypes::shininess:
+            case mtltypes::dissolve:
+            case mtltypes::transmission_filter:
+            case mtltypes::optical_density:
+            case mtltypes::illumination_mode:
+            case mtltypes::map_ambient:
+            case mtltypes::map_diffuse:
+            case mtltypes::map_specular:
+            case mtltypes::map_highlight:
+            case mtltypes::map_alpha:
+            case mtltypes::map_bump:
+            case mtltypes::map_displacement:
+            break;
+        }
+    }
+    file.close();
 }

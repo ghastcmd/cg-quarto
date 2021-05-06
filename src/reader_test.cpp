@@ -158,7 +158,8 @@ int main(int argc, char **argv)
         auto &vec = file.indices[i];
         if (vec.vertex != test[i]-1)
         {
-            puts("inconsistent value"), error_count += 1;
+            printf("inconssitent value %i\n", __LINE__);
+            error_count += 1;
             printf("%2i ", vec.vertex + 1);
         }
     }
@@ -177,7 +178,7 @@ int main(int argc, char **argv)
 
         if (vertexes[j] != vec.x || vertexes[j + 1] != vec.y || vertexes[j + 2] != vec.z)
         {
-            puts("inconsistent value");
+            printf("inconssitent value %i\n", __LINE__);
             error_count += 1;
             printf("%9f %9f %9f\n", vertexes[j], vertexes[j+1], vertexes[j+2]);
         }
@@ -189,7 +190,7 @@ int main(int argc, char **argv)
         auto &vec = file.vtexture[i];
         if (textures[j] != vec.x || textures[j+1] != vec.y)
         {
-            puts("inconsistent value");
+            printf("inconssitent value %i\n", __LINE__);
             error_count += 1;
             printf("%f %f | %f %f\n", textures[j], textures[j+1], vec.x, vec.y);
         }
@@ -201,7 +202,7 @@ int main(int argc, char **argv)
         auto &vec = file.vnormal[i];
         if (normals[j] != vec.x || normals[j+1] != vec.y || normals[j+2] != vec.z)
         {
-            puts("inconsistent value");
+            printf("inconssitent value %i\n", __LINE__);
             error_count += 1;
             printf("%9f %9f %9f | %9f %9f %9f\n", normals[j], normals[j+1], normals[j+2], vec.x, vec.y, vec.z);
         }

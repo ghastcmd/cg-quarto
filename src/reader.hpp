@@ -1,13 +1,13 @@
 #pragma once
 
-// #define READER_TEST
-// #define TEST
+#define READER_TEST
+#define TEST
 
 struct obj_file
 {
     struct index
     {
-        unsigned int vertex, texture, normal;
+        unsigned int normal, texture, vertex;
     };
 
     using iter = std::vector<index>::pointer;
@@ -45,5 +45,19 @@ struct material
     vec3 ambient, diffuse, specular, emissive;
     float highlights, optical_density, dissolve;
     unsigned int illum_model;
-    std::string diffuse_map;
+    std::string diffuse_maps;
+};
+
+struct mtl_file
+{
+    // TODO: need to decide which variables to put here
+    /**
+     * mtl file struct contains the functions to read a mtl file
+     * this should contain a vector of materials
+     */
+
+    mtl_file() = default;
+    mtl_file(const char *path);
+
+    std::vector<material> materials;
 };
