@@ -35,13 +35,14 @@ private:
 
 struct material
 {
-    material(vec3 ambient, vec3 diffuse, vec3 specular, float shininess)
-        : ambient(ambient), diffuse(diffuse), specular(specular), highlights(shininess)
+    material(vec3 ambient, vec3 diffuse, vec3 specular, vec3 emissive, float shininess)
+        : ambient(ambient), diffuse(diffuse), specular(specular), 
+        emissive(emissive), highlights(shininess)
     {}
-    
+
     void apply_material() const;
 
-    vec3 ambient, diffuse, specular, emmisive;
+    vec3 ambient, diffuse, specular, emissive;
     float highlights, optical_density, dissolve;
     unsigned int illum_model;
     std::string diffuse_map;

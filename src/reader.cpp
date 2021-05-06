@@ -161,8 +161,6 @@ void obj_file::open(const char *path)
                 break;
             case object_name:
                 optrs.push_back(indices.size());
-                // printf(">%s<\n", str);
-                // printf("%i\n", optrs[str]);
             break;
             case vertex_coord: {
                 vec3 vec;
@@ -230,11 +228,13 @@ void material::apply_material() const
 {
     const float fambient[] {ambient.x, ambient.y, ambient.z, 1.0f};
     const float fdiffuse[] {diffuse.x, diffuse.y, diffuse.z, 1.0f};
+    const float femission[] {emissive.x, emissive.y, emissive.z, 1.0f};
     const float fspecular[] {specular.x, specular.y, specular.z, 1.0f};
     const float fshininess[] {highlights};
 
-    glLightfv(GL_FRONT_AND_BACK, GL_AMBIENT, fambient);
-    glLightfv(GL_FRONT_AND_BACK, GL_DIFFUSE, fdiffuse);
-    glLightfv(GL_FRONT_AND_BACK, GL_SPECULAR, fspecular);
-    glLightfv(GL_FRONT_AND_BACK, GL_SHININESS, fshininess);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, fambient);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, fdiffuse);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, fspecular);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, femission);
+    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, highlights);
 }
