@@ -146,8 +146,9 @@ static void display()
         glColor3f(0, 0, 1);
         models["ventiladorc"].draw_mesh();
         glTranslatef(0.0f, 0.175f, -0.11f);
-        glRotatef(-rot_angle, 0.0f, 0.0f, 1.0f);
+        glRotatef(rot_angle, 0.0f, 0.0f, 1.0f);
         glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
+        glRotatef(180.0f, 0.0f, 1.0f, 0.0f);
         models["ventiladorh"].draw_mesh();
     glPopMatrix();
     
@@ -166,8 +167,6 @@ void motion(int x, int y)
 {
     cam.motion(x, y, 0.22f);
 }
-
-// GLenum draw_mode = GL_LINE;
 
 void keyboard(unsigned char key, int x, int y)
 {
