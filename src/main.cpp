@@ -9,29 +9,27 @@ static camera cam {
     {0.0f, 1.0f, 0.0f},
 };
 
-float last_frame, dt;
+float last_frame = 0, dt = 0;
 float speed = 9.6f;
 
-float rot_angle = 0.0f, rot_speed = 0.4f;
+float rot_angle = 0.0f;
 float dw_angle_n_pos[] = {0.0f, 0.0f, 0.0f};
 unsigned int control_index = 0;
 
-void timer(int count)
+static void idle()
 {
-    float current_frame = glutGet(GLUT_ELAPSED_TIME);
+    float current_frame = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
     dt = current_frame - last_frame;
     last_frame = current_frame;
 
-    rot_angle = (rot_angle + rot_speed * dt);
+    float rotation_speed = 360.0f;
+    rot_angle += rotation_speed * dt;
     rot_angle -= 360.0f * (rot_angle >= 360.0f);
 
     glutPostRedisplay();
-    glutTimerFunc(1000 / 60, timer, 0);
 }
 
-// std::vector<obj_file> models;
 static std::unordered_map<const char*, obj_file> models;
-obj_file simple;
 
 static void display()
 {
@@ -84,24 +82,21 @@ static void display()
 
     glPushMatrix(); // cama
         glScalef(2.0f, 2.0f, 2.0f);
-        glTranslatef(5.0f, 0.0f, 2.0f);
-        glTranslatef(-7.1f, -0.5f, 0.8f);
+        glTranslatef(-2.1f, -0.48f, 2.8f);
         glColor3f(0, 0, 1);
         models["cama"].draw_mesh();
     glPopMatrix();
 
     glPushMatrix(); // notebook
         glScalef(2.0f, 2.0f, 2.0f);
-        glTranslatef(5.0f, 0.0f, 2.0f);
-        glTranslatef(-6.8f, -0.22f, -0.2f);
+        glTranslatef(-1.8f, -0.22f, 1.8f);
         glColor3f(0, 0, 1);
         models["notebook"].draw_mesh();
     glPopMatrix();
 
     glPushMatrix(); //guarda-roupa
         glScalef(2.0f, 2.0f, 2.0f);
-        glTranslatef(5.0f, 0.0f, 2.0f);
-        glTranslatef(-3.5f, -0.1f, -0.2f);
+        glTranslatef(1.5f, -0.1f, 1.8f);
         glColor3f(0, 0, 1);
         models["guardaroupa"].draw_mesh();
     glPopMatrix();
@@ -117,24 +112,21 @@ static void display()
 
     glPushMatrix(); // caneca
         glScalef(2.0f, 2.0f, 2.0f);
-        glTranslatef(5.0f, 0.0f, 2.0f);
-        glTranslatef(-6.9f, -0.16f, -0.5f);
+        glTranslatef(-1.9f, -0.16f, 1.5f);
         glColor3f(0, 0, 1);
         models["caneca"].draw_mesh();
     glPopMatrix();
 
     glPushMatrix(); // cubo
         glScalef(2.0f, 2.0f, 2.0f);
-        glTranslatef(5.0f, 0.0f, 2.0f);
-        glTranslatef(-3.6f, -0.13f, 1.1f);
+        glTranslatef(1.4f, -0.15f, 3.1f);
         glColor3f(0, 0, 1);
         models["cubo"].draw_mesh();
     glPopMatrix();
 
     glPushMatrix(); // caderno
         glScalef(2.0f, 2.0f, 2.0f);
-        glTranslatef(5.0f, -0.19f, 1.2f);
-        glTranslatef(-6.9f, 0.0f, 0.0f);
+        glTranslatef(-1.9f, -0.19f, 1.2f);
         glColor3f(0, 0, 1);
         models["caderno"].draw_mesh();
     glPopMatrix();
@@ -175,9 +167,11 @@ void motion(int x, int y)
     cam.motion(x, y, 0.22f);
 }
 
+// GLenum draw_mode = GL_LINE;
+
 void keyboard(unsigned char key, int x, int y)
 {
-    float cam_speed = speed * dt / 1000.0f;
+    float cam_speed = speed * dt;
     float &ct_var = dw_angle_n_pos[control_index];
     switch (key)
     {
@@ -194,14 +188,14 @@ void keyboard(unsigned char key, int x, int y)
             cam.pos += cam.side_vector() * cam_speed;
         break;
         case ' ':
-            cam.pos += vec3{0, cam_speed, 0};
+            cam.pos += cam.up * cam_speed;
         break;
         case 'b':
-            cam.pos -= vec3{0, cam_speed, 0};
+            cam.pos -= cam.up * cam_speed;
         break;
         case 'o':
             ct_var -= 1.0f;
-            ct_var = ct_var < 0.0f ? 0.0f : ct_var;
+            ct_var = (ct_var >= 0.0f) * ct_var;
         break;
         case 'p':
             ct_var += 1.0f;
@@ -211,7 +205,9 @@ void keyboard(unsigned char key, int x, int y)
             control_index = (control_index + 1) % 3;
         break;
         case 'r':
-            printf("%f %f %f\n", cam.front.x, cam.front.y, cam.front.z);
+            static GLenum mode = GL_LINE;
+            glPolygonMode(GL_FRONT_AND_BACK, mode);
+            mode = mode == GL_LINE ? GL_FILL : GL_LINE;
         break;
     }
 }
@@ -234,6 +230,8 @@ int main(int argc, char **argv)
 {
     mwindow.init(argc, argv, "CG Work", 700, 700);
 
+    glEnable(GL_DEPTH_TEST);
+    /* lightning  */
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
 
@@ -244,16 +242,16 @@ int main(int argc, char **argv)
     glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
     glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);  
 
-    glEnable(GL_DEPTH_TEST);
-
+    /* materials */
+    glEnable(GL_COLOR_MATERIAL);
+    
     mwindow.set_display_func(display);
     cam.center_camera_angle(mwindow);
     glutReshapeFunc(reshape);
     glutKeyboardFunc(keyboard);
     glutMouseFunc(mouse);
-    
+    glutIdleFunc(idle);
     glutPassiveMotionFunc(motion);
-    glutTimerFunc(0, timer, 0);
 
     models["quarto"]      = obj_file("objs/quarto.obj");
     models["cama"]        = obj_file("objs/cama.obj");

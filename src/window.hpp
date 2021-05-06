@@ -54,7 +54,7 @@ struct camera
 
     void look_at();
 
-    void motion(int x, int y, float sensitivity);
+    void motion(int x, int y, float mouse_sensitivity);
 
 private:
     float prevx, prevy;

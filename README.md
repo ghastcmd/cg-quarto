@@ -29,7 +29,7 @@ Para abrir e fechar as portas e a janela, pressione a tecla `p` para abrir, `o` 
  - [ ] Modelar e apresentar um quadro de Vincent Van Gogh
  - [x] Ventilador de mesa com hélice girando no sentido horário em velocidade baixa
  - [ ] Luminária spot em cima da mesa
- - [ ] Iluminação especular e difusa na modelagem
+ - [x] Iluminação especular e difusa na modelagem
  - [ ] Aplicar mapeamento de textura em 5 objetos
 
 ## Referências:
