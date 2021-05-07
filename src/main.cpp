@@ -315,7 +315,7 @@ int main(int argc, char **argv)
     models.emplace_back(obj_file{"objs/cubo.obj"});
     models.emplace_back(obj_file{"objs/caderno.obj"});
     models.emplace_back(obj_file{"objs/cadeira2.obj"});
-    //models.emplace_back(obj_file{"objs/ventilador.obj"});
+    models.emplace_back(obj_file{"objs/untitled.obj"});
 
 
 
