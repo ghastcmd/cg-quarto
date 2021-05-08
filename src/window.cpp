@@ -72,8 +72,30 @@ void camera::motion(int x, int y, float sensitivity)
     yaw += xoffset;
     pitch += yoffset;
 
-    // cam.pitch = std::clamp(cam.pitch, -89.0f, 89.0f); // not working on linux ??
-    pitch = pitch < -89.0f ? -89.0f : pitch > 89.0f ? 89.0f : pitch;
+    pitch = std::clamp(pitch, -89.0f, 89.0f); // not working on linux ??
+    // pitch = pitch < -89.0f ? -89.0f : pitch > 89.0f ? 89.0f : pitch;
+
+    vec3 direction {
+        cos(radians(yaw)) * cos(radians(pitch)),
+        sin(radians(pitch)),
+        sin(radians(yaw)) * cos(radians(pitch))
+    };
+
+    front = vec3::normalize(direction);
+}
+
+void camera::motion_capped(int x, int y, float sensitivity, vec2 horizontal_cap, vec2 vertical_cap)
+{
+    float xoffset = x - prevx, yoffset = prevy - y;
+    xoffset *= sensitivity, yoffset *= sensitivity;
+    prevx = x, prevy = y;
+
+    yaw += xoffset;
+    pitch += yoffset;
+
+    yaw = std::clamp(yaw, horizontal_cap.x, horizontal_cap.y);
+    pitch = std::clamp(pitch, vertical_cap.x, vertical_cap.y); // not working on linux ??
+    // pitch = pitch < -89.0f ? -89.0f : pitch > 89.0f ? 89.0f : pitch;
 
     vec3 direction {
         cos(radians(yaw)) * cos(radians(pitch)),

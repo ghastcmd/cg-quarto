@@ -55,6 +55,7 @@ struct camera
     void look_at();
 
     void motion(int x, int y, float mouse_sensitivity);
+    void motion_capped(int x, int y, float mouse_sensitivity, vec2 horizontal_cap, vec2 vertical_cap);
 
 private:
     float prevx, prevy;

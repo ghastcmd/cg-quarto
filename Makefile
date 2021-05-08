@@ -55,7 +55,7 @@ compile: $(gch) $(target) | $(dep_dir)
 
 $(gch): $(pch)
 	$(call fmt,Compiling the precompiled header)
-	$(SS)$(CC) -c $< -o $@
+	$(SS)$(CC) -c $< -o $@ $(includes)
 
 $(target): $(object)
 	$(call fmt,Compiling $(target))

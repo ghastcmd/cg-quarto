@@ -3,6 +3,17 @@
 #include "reader.hpp"
 #include "window.hpp"
 
+size_t hash_func(const char *str)
+{
+    size_t hash = 5381;
+    int c;
+
+    while (c = *str++)
+        hash = ((hash << 5) + hash) + c;
+    
+    return hash;
+}
+
 enum class objtypes : unsigned int
 {
     invalid,
@@ -18,7 +29,8 @@ enum class objtypes : unsigned int
     line
 };
 
-static std::unordered_map<std::string_view, objtypes> objtypes_map {
+static std::pair<const char*, objtypes> const objtypes_array[]
+{
     {"#", objtypes::comment},
     {"mtllib", objtypes::mtllib},
     {"o", objtypes::object_name},
@@ -29,6 +41,10 @@ static std::unordered_map<std::string_view, objtypes> objtypes_map {
     {"f", objtypes::face},
     {"l", objtypes::line}
 };
+
+// static std::unordered_map<std::string, objtypes, std::function<size_t(const char* str)>> objtypes_map
+//     (std::begin(objtypes_array), std::end(objtypes_array), std::size(objtypes_array), hash_func);
+static std::unordered_map<std::string, objtypes> objtypes_map (std::begin(objtypes_array), std::end(objtypes_array));
 
 void print_ret(objtypes ret)
 {
@@ -70,6 +86,16 @@ void stovec2(vec2& vec, char * str)
     vec.x = atof(str);
     while(!isspace(*str)) str++;
     vec.y = atof(str);
+}
+
+void stof(float &val, char * str)
+{
+    val = atof(str);
+}
+
+void stoi(unsigned int &val, char * str)
+{
+    val = atoi(str);
 }
 
 obj_file::obj_file(const char *path)
@@ -143,15 +169,16 @@ void obj_file::open(const char *path)
 {
     if (m_initialized) return;
     std::ifstream file(path, std::ios::in | std::ios::binary);
+    constexpr size_t max_stype = 8;
+    char *stype = new char[max_stype];
     while (file.peek() != -1)
     {
-        char stype[16] = {0};
-        file.getline(stype, 16, ' ');
+        // char stype[8] = {0};
+        file.getline(stype, max_stype, ' ');
         const auto ret = objtypes_map[stype];
-        constexpr size_t max_strl = 1024;
         // print_ret(ret);
-        char str[max_strl] = {0};
-        file.getline(str, max_strl, '\x0a');
+        char str[1024] = {0};
+        file.getline(str, std::size(str), '\x0a');
         switch (ret) {
             case objtypes::comment:
             case objtypes::mtllib:
@@ -230,7 +257,6 @@ void material::apply_material() const
     const float fdiffuse[] {diffuse.x, diffuse.y, diffuse.z, 1.0f};
     const float femission[] {emissive.x, emissive.y, emissive.z, 1.0f};
     const float fspecular[] {specular.x, specular.y, specular.z, 1.0f};
-    const float fshininess[] {highlights};
 
     glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, fambient);
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, fdiffuse);
@@ -259,13 +285,14 @@ enum class mtltypes : unsigned int
     map_highlight,
     map_alpha,
     map_bump,
-    map_displacement
+    map_displacement,
+    new_line
 };
 
-static std::unordered_map<const char*, mtltypes> mtltypes_map
+static std::pair<const char*, mtltypes> const mtltypes_array[]
 {
     {"#", mtltypes::comment},
-    {"newmtl", mtltypes::new_material},
+    {"\r\nnewmtl", mtltypes::new_material},
     {"Ka", mtltypes::ambient},
     {"Kd", mtltypes::diffuse},
     {"Ks", mtltypes::specular},
@@ -283,40 +310,107 @@ static std::unordered_map<const char*, mtltypes> mtltypes_map
     {"map_bump", mtltypes::map_bump},
     {"bump", mtltypes::map_bump},
     {"disp", mtltypes::map_displacement},
+    {"\n", mtltypes::new_line}
 };
+
+void print_ret(mtltypes ret)
+{
+    const char *objtypes_str[] {
+        "invalid",
+        "comment",
+        "new_material",
+        "ambient",
+        "diffuse",
+        "specular",
+        "shininess",
+        "dissolve",
+        "inverse_dissolve",
+        "transmission_filter",
+        "optical_density",
+        "illumination_mode",
+        "map_ambient",
+        "map_diffuse",
+        "map_specular",
+        "map_highlight",
+        "map_alpha",
+        "map_bump",
+        "map_displacement",
+        "new_line"
+    };
+
+    puts(objtypes_str[(unsigned int)ret]);
+}
+
+
+// static std::unordered_map<const char*, mtltypes, std::function<size_t(const char *str)>> mtltypes_map
+//     (std::begin(mtltypes_array), std::end(mtltypes_array), std::size(mtltypes_array), hash_func);
+
+static std::unordered_map<std::string, mtltypes> mtltypes_map (std::begin(mtltypes_array), std::end(mtltypes_array));
 
 mtl_file::mtl_file(const char *path)
 {
     // if (m_initialized) return;
     std::ifstream file(path, std::ios::in | std::ios::binary);
+    material current_mat {{0},{0},{0},{0},0};
     while (file.peek() != -1)
     {
         char stype[16] = {0};
-        file.getline(stype, 16, ' ');
-        // const auto ret = objtypes_map[stype];
+        file.getline(stype, std::size(stype), ' ');
         const auto ret = mtltypes_map[stype];
-        constexpr size_t max_strl = 64;
         // print_ret(ret);
-        char str[max_strl] = {0};
-        file.getline(str, max_strl, '\x0a');
+        char str[64] = {0};
+        file.getline(str, std::size(str), '\x0a');
         switch (ret) {
             case mtltypes::comment:
+                if (char *tstr = str; !strncmp(str, "Material", std::size("Material") - 1))
+                {
+                    while (!isspace(*tstr)) tstr++;
+                    tstr++;
+                    while (!isspace(*tstr)) tstr++;
+                    m_material_len = atoi(tstr);
+                    materials.reserve(m_material_len);
+                }
+            break;
             case mtltypes::new_material:
+                mat_names.push_back(str);
+            break;
             case mtltypes::ambient:
+                stovec3(current_mat.ambient, str);
+            break;
             case mtltypes::diffuse:
+                stovec3(current_mat.diffuse, str);
+            break;
             case mtltypes::specular:
+                stovec3(current_mat.specular, str);
+            break;
             case mtltypes::shininess:
+                current_mat.highlights = atof(str);
+            break;
             case mtltypes::dissolve:
-            case mtltypes::transmission_filter:
+                stof(current_mat.dissolve, str);
+            break;
             case mtltypes::optical_density:
+                stof(current_mat.optical_density, str);
+            break;
             case mtltypes::illumination_mode:
+                stoi(current_mat.illum_model, str);
+                materials.emplace_back(current_mat);
+            break;
             case mtltypes::map_ambient:
+            break;
             case mtltypes::map_diffuse:
+            break;
             case mtltypes::map_specular:
+            break;
             case mtltypes::map_highlight:
+            break;
             case mtltypes::map_alpha:
+            break;
             case mtltypes::map_bump:
+            break;
             case mtltypes::map_displacement:
+            break;
+            case mtltypes::transmission_filter:
             break;
         }
     }

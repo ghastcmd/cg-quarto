@@ -90,7 +90,9 @@ static void reshape(int width, int height)
 
 static void motion(int x, int y)
 {
-    cam.motion(x, y, 0.22f);
+    vec2 camera_cap {-30.0f, 30.0f};
+    cam.motion_capped(x, y, 0.22f, vec2{-90.0f, -90.0f} + camera_cap, camera_cap);
+    // cam.motion(x, y, 0.22f);
 }
 
 static void keyboard(unsigned char key, int x, int y)
@@ -116,13 +118,15 @@ static void keyboard(unsigned char key, int x, int y)
         case 'b':
             cam.pos -= cam.up * cam_speed;
         break;
+        case 'r':
+            printf("%f %f %f\n", cam.yaw, cam.pitch, cam.roll);
+        break;
     }
 }
 
-static void timer(int count)
+static void idle()
 {
     glutPostRedisplay();
-    glutTimerFunc(0, timer, 0);
 }
 
 int main(int argc, char **argv)
@@ -134,7 +138,7 @@ int main(int argc, char **argv)
     glutReshapeFunc(reshape);
     glutPassiveMotionFunc(motion);
     glutKeyboardFunc(keyboard);
-    glutTimerFunc(0, timer, 0);
+    glutIdleFunc(idle);
     glEnable(GL_DEPTH_TEST);
 
     models.push_back(obj_file{"objs/cuboid.obj"});
@@ -142,17 +146,12 @@ int main(int argc, char **argv)
 
     unsigned int error_count = 0;
 
-    for (auto val: file.vcoords)
-    {
-        printf("%9f %9f %9f\n", val.x, val.y, val.z);
-    }
-
-    for (auto val: file.indices)
-    {
-        printf("%2i %2i %2i\n", val.vertex, val.texture, val.normal);
-    }
-
     unsigned int test[] = {13, 11, 7, 13, 7, 9, 4, 3, 9, 4, 9, 7, 3, 7, 8, 8, 7, 11, 8, 11, 5, 7, 5, 6, 6, 2, 4, 6, 4, 8, 2, 1, 10, 2, 10, 3, 1, 3, 4, 6, 5, 12, 6, 12, 1, 5, 1, 2, 10, 13, 9, 10, 9, 3, 1, 12, 13, 1, 13, 10, 12, 5, 11, 12, 11, 13};
+    if (std::size(test) != file.indices.size())
+    {
+        printf("size lenghts don't match %i\n", __LINE__);
+        error_count += 1;
+    }
     for (int i = 0, max = file.indices.size(); i < max; ++i)
     {
         auto &vec = file.indices[i];
@@ -160,18 +159,15 @@ int main(int argc, char **argv)
         {
             printf("inconssitent value %i\n", __LINE__);
             error_count += 1;
-            printf("%2i ", vec.vertex + 1);
         }
     }
-    puts("");
-
-    // for (auto &vec: file.vcoords)
-    // {
-    //     printf("%9f %9f %9f\n", vec.x, vec.y, vec.z);
-    // }
 
     float vertexes[] = {1, 1, -1, 1, -1, -1, 1, 1, 1, 1, -1, 1, -1, 1, -1, -1, -1, -1, -1, 1, 1, -1, -1, 1, 0, 1, 1, 1, 1, 0, -1, 1, 0, 0, 1, -1, 0, 2.575958, 0};
-
+    if (std::size(vertexes) != file.vcoords.size() * 3)
+    {
+        printf("size lenghts don't match %i\n", __LINE__);
+        error_count += 1;
+    }
     for (int i = 0, j = 0, max = file.vcoords.size(); i < max; i++, j+=3)
     {
         auto &vec = file.vcoords[i];
@@ -180,11 +176,16 @@ int main(int argc, char **argv)
         {
             printf("inconssitent value %i\n", __LINE__);
             error_count += 1;
-            printf("%9f %9f %9f\n", vertexes[j], vertexes[j+1], vertexes[j+2]);
+            printf("%9f %9f %9f | %9f %9f %9f\n", vertexes[j], vertexes[j+1], vertexes[j+2], vec.x, vec.y, vec.z);
         }
     }
 
     float textures[] = {0.75, 0.625, 0.875, 0.625, 0.875, 0.75, 0.75, 0.75, 0.375, 0.75, 0.625, 0.75, 0.625, 0.875, 0.625, 1.0, 0.375, 1.0, 0.375, 0.0, 0.625, 0.0, 0.625, 0.125, 0.625, 0.25, 0.375, 0.25, 0.125, 0.5, 0.375, 0.5, 0.125, 0.75, 0.625, 0.5, 0.625, 0.625, 0.625, 0.375, 0.75, 0.5, 0.875, 0.5};
+    if (std::size(textures) != file.vtexture.size() * 2)
+    {
+        printf("size lenghts don't match %i\n", __LINE__);
+        error_count += 1;
+    }
     for (int i = 0, j = 0, max = file.vtexture.size(); i < max; i++, j+=2)
     {
         auto &vec = file.vtexture[i];
@@ -197,6 +198,11 @@ int main(int argc, char **argv)
     }
 
     float normals[] = {-0.5263, 0.6679, 0.5263, 0.0, 0.0, 1.0, -1.0, 0.0, 0.0, 0.0, -1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.5263, 0.6679, 0.5263, 0.5263, 0.6679, -0.5263, -0.5263, 0.6679, -0.5263};
+    if (std::size(normals) != file.vnormal.size() * 3)
+    {
+        printf("size lenghts don't match %i\n", __LINE__);
+        error_count += 1;
+    }
     for (int i = 0, j = 0, max = file.vnormal.size(); i < max; ++i, j+=3)
     {
         auto &vec = file.vnormal[i];
@@ -205,6 +211,56 @@ int main(int argc, char **argv)
             printf("inconssitent value %i\n", __LINE__);
             error_count += 1;
             printf("%9f %9f %9f | %9f %9f %9f\n", normals[j], normals[j+1], normals[j+2], vec.x, vec.y, vec.z);
+        }
+    }
+
+    mtl_file mtl_file ("objs/cuboid.mtl");
+
+    for (auto &val: mtl_file.mat_names)
+    {
+        if (strncmp(val.c_str(), "Material", std::size("Material") - 1))
+        {
+            error_count += 1;
+            printf("%s\n", val.c_str());
+        }
+    }
+
+    for (auto &val: mtl_file.materials)
+    {
+        if (val.ambient.x != 1.0f || val.ambient.y != 1.0f || val.ambient.z != 1.0f)
+        {
+            error_count += 1;
+            printf("ambient: %f %f %f\n", val.ambient.x, val.ambient.y, val.ambient.z);
+        }
+        if (val.diffuse.x != 0.8f || val.diffuse.y != 0.8f || val.diffuse.z != 0.8f)
+        {
+            error_count += 1;
+            printf("diffuse: %f %f %f\n", val.diffuse.x, val.diffuse.y, val.diffuse.z);
+        }
+        if (val.specular.x != 0.5f || val.specular.y != 0.5f || val.specular.z != 0.5f)
+        {
+            error_count += 1;
+            printf("specular: %f %f %f\n", val.specular.x, val.specular.y, val.specular.z);
+        }
+        if (val.emissive.x != 0.0f || val.emissive.y != 0.0f || val.emissive.z != 0.0f)
+        {
+            error_count += 1;
+            printf("emission: %f %f %f\n", val.emissive.x, val.emissive.y, val.emissive.z);
+        }
+        if (val.highlights != 323.999994)
+        {
+            error_count += 1;
+            printf("highlights: %.20lf\n", val.highlights);
+        }
+        if (val.optical_density != 1.45f)
+        {
+            error_count += 1;
+            printf("optical density: %f\n", val.optical_density);
+        }
+        if (val.dissolve != 1.0f)
+        {
+            error_count += 1;
+            printf("shininess: %f\n", val.highlights);
         }
     }
 

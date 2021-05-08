@@ -43,7 +43,8 @@ struct material
     void apply_material() const;
 
     vec3 ambient, diffuse, specular, emissive;
-    float highlights, optical_density, dissolve;
+    double highlights;
+    float optical_density, dissolve;
     unsigned int illum_model;
     std::string diffuse_maps;
 };
@@ -60,4 +61,8 @@ struct mtl_file
     mtl_file(const char *path);
 
     std::vector<material> materials;
+    std::vector<std::string> mat_names;
+
+    size_t m_material_len = 0;
+    // size_t m_current_index = 0;
 };
