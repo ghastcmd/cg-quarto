@@ -3,17 +3,6 @@
 #include "reader.hpp"
 #include "window.hpp"
 
-size_t hash_func(const char *str)
-{
-    size_t hash = 5381;
-    int c;
-
-    while (c = *str++)
-        hash = ((hash << 5) + hash) + c;
-    
-    return hash;
-}
-
 enum class objtypes : unsigned int
 {
     invalid,
@@ -28,23 +17,6 @@ enum class objtypes : unsigned int
     face,
     line
 };
-
-static std::pair<const char*, objtypes> const objtypes_array[]
-{
-    {"#", objtypes::comment},
-    {"mtllib", objtypes::mtllib},
-    {"o", objtypes::object_name},
-    {"v", objtypes::vertex_coord},
-    {"vn", objtypes::vertex_normal},
-    {"vt", objtypes::vertex_texture},
-    {"usemtl", objtypes::usemtl},
-    {"f", objtypes::face},
-    {"l", objtypes::line}
-};
-
-// static std::unordered_map<std::string, objtypes, std::function<size_t(const char* str)>> objtypes_map
-//     (std::begin(objtypes_array), std::end(objtypes_array), std::size(objtypes_array), hash_func);
-static std::unordered_map<std::string, objtypes> objtypes_map (std::begin(objtypes_array), std::end(objtypes_array));
 
 void print_ret(objtypes ret)
 {
@@ -64,6 +36,21 @@ void print_ret(objtypes ret)
 
     puts(objtypes_str[(unsigned int)ret]);
 }
+
+static std::pair<const char*, objtypes> const objtypes_array[]
+{
+    {"#", objtypes::comment},
+    {"mtllib", objtypes::mtllib},
+    {"o", objtypes::object_name},
+    {"v", objtypes::vertex_coord},
+    {"vn", objtypes::vertex_normal},
+    {"vt", objtypes::vertex_texture},
+    {"usemtl", objtypes::usemtl},
+    {"f", objtypes::face},
+    {"l", objtypes::line}
+};
+
+static std::unordered_map<std::string, objtypes> objtypes_map (std::begin(objtypes_array), std::end(objtypes_array));
 
 void print_val(std::ifstream& fstream)
 {
@@ -289,30 +276,6 @@ enum class mtltypes : unsigned int
     new_line
 };
 
-static std::pair<const char*, mtltypes> const mtltypes_array[]
-{
-    {"#", mtltypes::comment},
-    {"\r\nnewmtl", mtltypes::new_material},
-    {"Ka", mtltypes::ambient},
-    {"Kd", mtltypes::diffuse},
-    {"Ks", mtltypes::specular},
-    {"Ns", mtltypes::shininess},
-    {"d", mtltypes::dissolve},
-    {"Tr", mtltypes::inverse_dissolve},
-    {"Tf", mtltypes::transmission_filter},
-    {"Ni", mtltypes::optical_density},
-    {"illum", mtltypes::illumination_mode},
-    {"map_Ka", mtltypes::map_ambient},
-    {"map_Kd", mtltypes::map_diffuse},
-    {"map_Ks", mtltypes::map_specular},
-    {"map_Ns", mtltypes::map_highlight},
-    {"map_d", mtltypes::map_alpha},
-    {"map_bump", mtltypes::map_bump},
-    {"bump", mtltypes::map_bump},
-    {"disp", mtltypes::map_displacement},
-    {"\n", mtltypes::new_line}
-};
-
 void print_ret(mtltypes ret)
 {
     const char *objtypes_str[] {
@@ -341,9 +304,29 @@ void print_ret(mtltypes ret)
     puts(objtypes_str[(unsigned int)ret]);
 }
 
-
-// static std::unordered_map<const char*, mtltypes, std::function<size_t(const char *str)>> mtltypes_map
-//     (std::begin(mtltypes_array), std::end(mtltypes_array), std::size(mtltypes_array), hash_func);
+static std::pair<const char*, mtltypes> const mtltypes_array[]
+{
+    {"#", mtltypes::comment},
+    {"\r\nnewmtl", mtltypes::new_material},
+    {"Ka", mtltypes::ambient},
+    {"Kd", mtltypes::diffuse},
+    {"Ks", mtltypes::specular},
+    {"Ns", mtltypes::shininess},
+    {"d", mtltypes::dissolve},
+    {"Tr", mtltypes::inverse_dissolve},
+    {"Tf", mtltypes::transmission_filter},
+    {"Ni", mtltypes::optical_density},
+    {"illum", mtltypes::illumination_mode},
+    {"map_Ka", mtltypes::map_ambient},
+    {"map_Kd", mtltypes::map_diffuse},
+    {"map_Ks", mtltypes::map_specular},
+    {"map_Ns", mtltypes::map_highlight},
+    {"map_d", mtltypes::map_alpha},
+    {"map_bump", mtltypes::map_bump},
+    {"bump", mtltypes::map_bump},
+    {"disp", mtltypes::map_displacement},
+    {"\n", mtltypes::new_line}
+};
 
 static std::unordered_map<std::string, mtltypes> mtltypes_map (std::begin(mtltypes_array), std::end(mtltypes_array));
 
