@@ -60,6 +60,22 @@ void print_val(std::ifstream& fstream)
     puts(str);
 }
 
+void merge_path_name(char *&out, const char *path, char *name)
+{
+    int path_len = strlen(path);
+    int name_len = strlen(name);
+
+    const char *end_path = path + path_len;
+    while(*end_path-- != '/' && end_path > path);
+
+    int dir_len = end_path - path + 2;
+
+    strcpy(out, path);
+    strcpy(out + dir_len, name);
+
+    *(out + name_len + dir_len) = '\0';
+}
+
 void stovec3(vec3& vec, char * str)
 {
     vec.x = atof(str);
@@ -169,11 +185,16 @@ void obj_file::open(const char *path)
         file.getline(str, std::size(str), '\x0a');
         switch (ret) {
             case objtypes::comment:
-            case objtypes::mtllib:
             case objtypes::smooth_shading:
-            case objtypes::usemtl:
             case objtypes::line:
-                break;
+            case objtypes::usemtl:
+            break;
+            case objtypes::mtllib: {
+                char cpath[50] = {0};
+                char *apath = cpath;
+                merge_path_name(apath, path, str);
+                mat_lib.open(apath);
+            } break;
             case objtypes::object_name:
                 optrs.push_back(indices.size());
             break;
@@ -198,6 +219,7 @@ void obj_file::open(const char *path)
         }
     }
     file.close();
+    delete stype;
     m_initialized = true;
 }
 
@@ -408,9 +430,9 @@ static std::pair<const char*, mtltypes> const mtltypes_array[]
 
 static std::unordered_map<std::string, mtltypes> mtltypes_map (std::begin(mtltypes_array), std::end(mtltypes_array));
 
-mtl_file::mtl_file(const char *path)
+void mtl_file::open(const char *path)
 {
-    // if (m_initialized) return;
+    // if (m_init) return;
     std::ifstream file(path, std::ios::in | std::ios::binary);
     // Here I use a dummy material, but is guaranteed that it is't used
     material dummy_mat {{0}, {0}, {0}, {0}, 0};
@@ -464,20 +486,12 @@ mtl_file::mtl_file(const char *path)
             case mtltypes::illumination_mode:
                 stoi(materials[m_ci].illum_model, str);
             break;
-            case mtltypes::map_diffuse:
-                {
-                    int size = strlen(path);
-                    const char *spath = path + size;
-                    while(*spath-- != '/' && spath > path);
-                    int len = spath - path + 2;
-                    char apath[50] = {0};
-                    strcpy(apath, path);
-                    int str_len = strlen(str);
-                    strcpy(apath + len, str);
-                    *(apath + len + str_len) = '\0';
-                    materials[m_ci].tex_diffuse.open(apath);
-                }
-            break;
+            case mtltypes::map_diffuse: {
+                char cpath[50] = {0};
+                char *apath = cpath;
+                merge_path_name(apath, path, str);
+                materials[m_ci].tex_diffuse.open(apath);
+            } break;
             case mtltypes::new_line:
             case mtltypes::map_ambient:
             case mtltypes::map_specular:

@@ -52,7 +52,8 @@ struct material
 struct mtl_file
 {
     mtl_file() = default;
-    mtl_file(const char *path);
+    mtl_file(const char *path) { open(path); }
+    void open(const char *path);
 
     std::vector<material> materials;
     std::vector<std::string> mat_names;

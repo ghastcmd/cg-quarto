@@ -221,7 +221,8 @@ int main(int argc, char **argv)
         }
     }
 
-    mtl_file mtl_file ("objs/cuboid.mtl");
+    // mtl_file mtl_file ("objs/cuboid.mtl");
+    auto mtl_file = file.mat_lib;
 
     if (mtl_file.materials[0].tex_diffuse.m_init == 0)
     {
