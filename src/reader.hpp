@@ -33,12 +33,29 @@ private:
     void get_faces_index(char *str);
 };
 
+struct texture
+{
+    texture() = default;
+
+    void open(const char *path);
+    ~texture();
+
+    void bind(unsigned int slot) const;
+    void unbind() const;
+
+private:
+    unsigned int m_texture_id;
+    unsigned char *m_local_buffer;
+    int m_width, m_height, m_nr_channels;
+};
+
 struct material
 {
     material(vec3 ambient, vec3 diffuse, vec3 specular, vec3 emissive, float shininess)
         : ambient(ambient), diffuse(diffuse), specular(specular), 
         emissive(emissive), highlights(shininess)
-    {}
+    {
+    }
 
     void apply_material() const;
 
@@ -46,7 +63,7 @@ struct material
     double highlights;
     float optical_density, dissolve;
     unsigned int illum_model;
-    std::string diffuse_maps;
+    texture diffuse_map;
 };
 
 struct mtl_file

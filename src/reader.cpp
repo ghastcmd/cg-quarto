@@ -2,6 +2,7 @@
 #include "vec.hpp"
 #include "reader.hpp"
 #include "window.hpp"
+#include "stb_image.h"
 
 enum class objtypes : unsigned int
 {
@@ -238,6 +239,46 @@ obj_file::iter obj_file::get_iter(unsigned int index)
     return indices.data() + optrs[index];
 }
 
+void texture::open(const char *path)
+{
+    stbi_set_flip_vertically_on_load(1);
+    m_local_buffer = stbi_load(path, &m_width, &m_height, &m_nr_channels, 0);
+
+    glGenTextures(1, &m_texture_id);
+    glBindTexture(GL_TEXTURE_2D, m_texture_id);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, m_width, m_height, 0, GL_RGB, GL_UNSIGNED_BYTE, m_local_buffer);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    if (m_local_buffer)
+    {
+        stbi_image_free(m_local_buffer);
+    }
+}
+
+texture::~texture()
+{
+    glDeleteTextures(1, &m_texture_id);
+}
+
+void texture::bind(unsigned int slot) const
+{
+    // glActiveTexture(GL_TEXTURE0 + slot);
+    (void)slot;
+    glBindTexture(GL_TEXTURE_2D, m_texture_id);
+}
+
+void texture::unbind() const
+{
+    glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+
 void material::apply_material() const
 {
     const float fambient[] {ambient.x, ambient.y, ambient.z, 1.0f};
@@ -337,9 +378,18 @@ mtl_file::mtl_file(const char *path)
     material current_mat {{0},{0},{0},{0},0};
     while (file.peek() != -1)
     {
+        mtltypes ret;
         char stype[16] = {0};
-        file.getline(stype, std::size(stype), ' ');
-        const auto ret = mtltypes_map[stype];
+        if (file.peek() == '\r')
+        {
+            file.getline(stype, 2);
+            ret = mtltypes::new_line;
+        }
+        else
+        {
+            file.getline(stype, std::size(stype), ' ');
+            ret = mtltypes_map[stype];
+        }
         // print_ret(ret);
         char str[64] = {0};
         file.getline(str, std::size(str), '\x0a');
@@ -352,6 +402,8 @@ mtl_file::mtl_file(const char *path)
                     while (!isspace(*tstr)) tstr++;
                     m_material_len = atoi(tstr);
                     materials.reserve(m_material_len);
+                    char st[2] = {0};
+                    file.getline(st, 2);
                 }
             break;
             case mtltypes::new_material:
@@ -377,22 +429,19 @@ mtl_file::mtl_file(const char *path)
             break;
             case mtltypes::illumination_mode:
                 stoi(current_mat.illum_model, str);
+            break;
+            case mtltypes::map_diffuse:
+                puts(str);
+            break;
+            case mtltypes::new_line:
                 materials.emplace_back(current_mat);
             break;
             case mtltypes::map_ambient:
-            break;
-            case mtltypes::map_diffuse:
-            break;
             case mtltypes::map_specular:
-            break;
             case mtltypes::map_highlight:
-            break;
             case mtltypes::map_alpha:
-            break;
             case mtltypes::map_bump:
-            break;
             case mtltypes::map_displacement:
-            break;
             case mtltypes::transmission_filter:
             break;
         }
