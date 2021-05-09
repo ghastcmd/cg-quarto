@@ -6,6 +6,16 @@
 struct texture
 {
     texture() = default;
+    texture(const char *path) { open(path); }
+    void operator=(texture &other)
+    {
+        m_init = other.m_init;
+        m_texture_id = other.m_texture_id;
+        m_local_buffer = other.m_local_buffer;
+        m_width = other.m_width;
+        m_height = other.m_height;
+        m_nr_channels = other.m_nr_channels;
+    }
 
     void open(const char *path);
     ~texture();
@@ -15,9 +25,9 @@ struct texture
 
     bool m_init = false;
 private:
-    unsigned int m_texture_id;
-    unsigned char *m_local_buffer;
-    int m_width, m_height, m_nr_channels;
+    unsigned int m_texture_id = 0;
+    unsigned char *m_local_buffer = nullptr;
+    int m_width = 0, m_height = 0, m_nr_channels = 0;
 };
 
 struct material
@@ -36,7 +46,7 @@ struct material
     double highlights;
     float optical_density, dissolve;
     unsigned int illum_model;
-    texture diffuse_map;
+    texture tex_diffuse;
 };
 
 struct mtl_file
@@ -48,7 +58,7 @@ struct mtl_file
     std::vector<std::string> mat_names;
 
     size_t m_material_len = 0;
-    // size_t m_current_index = 0;
+    size_t m_ci = -1;
 };
 
 struct obj_file

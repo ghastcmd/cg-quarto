@@ -263,10 +263,8 @@ void texture::open(const char *path)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_width, m_height, 0, GL_RGB, GL_UNSIGNED_BYTE, m_local_buffer);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, m_width, m_height, 0, GL_RGB, GL_UNSIGNED_BYTE, m_local_buffer);
     glBindTexture(GL_TEXTURE_2D, 0);
-
-    puts("this into folder");
 
     if (m_local_buffer)
     {
@@ -303,6 +301,8 @@ void material::apply_material() const
     glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, fspecular);
     glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, femission);
     glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, highlights);
+
+    tex_diffuse.bind();
 }
 
 void material::dump_material() const
@@ -326,6 +326,8 @@ void material::zero_material()
     highlights = {0};
     optical_density = {0};
     dissolve = {0};
+    illum_model = 0;
+    tex_diffuse.m_init = false;    
 }
 
 enum class mtltypes : unsigned int
@@ -410,14 +412,16 @@ mtl_file::mtl_file(const char *path)
 {
     // if (m_initialized) return;
     std::ifstream file(path, std::ios::in | std::ios::binary);
-    material current_mat {{0},{0},{0},{0},0};
+    // Here I use a dummy material, but is guaranteed that it is't used
+    material dummy_mat {{0}, {0}, {0}, {0}, 0};
+    material &current_mat = dummy_mat;
     bool mat_now = false;
     while (file.peek() != -1)
     {
-        mtltypes ret;
         char stype[16] = {0};
+        while (!isalpha(file.peek())) file.get();
         file.getline(stype, std::size(stype), ' ');
-        ret = mtltypes_map[stype];
+        const auto ret = mtltypes_map[stype];
         // puts("print-ret: ");
         // print_ret(ret);
         // puts("");
@@ -435,38 +439,44 @@ mtl_file::mtl_file(const char *path)
                 }
             break;
             case mtltypes::new_material:
-                if (mat_now)
-                {
-                    materials.emplace_back(current_mat);
-                    current_mat.zero_material();
-                }
                 mat_names.push_back(str);
-                mat_now = true;
+                m_ci++;
+                materials.emplace_back(material{{0}, {0}, {0}, {0}, 0});
             break;
             case mtltypes::ambient:
-                stovec3(current_mat.ambient, str);
+                stovec3(materials[m_ci].ambient, str);
             break;
             case mtltypes::diffuse:
-                stovec3(current_mat.diffuse, str);
+                stovec3(materials[m_ci].diffuse, str);
             break;
             case mtltypes::specular:
-                stovec3(current_mat.specular, str);
+                stovec3(materials[m_ci].specular, str);
             break;
             case mtltypes::shininess:
-                current_mat.highlights = atof(str);
+                materials[m_ci].highlights = atof(str);
             break;
             case mtltypes::dissolve:
-                stof(current_mat.dissolve, str);
+                stof(materials[m_ci].dissolve, str);
             break;
             case mtltypes::optical_density:
-                stof(current_mat.optical_density, str);
+                stof(materials[m_ci].optical_density, str);
             break;
             case mtltypes::illumination_mode:
-                stoi(current_mat.illum_model, str);
+                stoi(materials[m_ci].illum_model, str);
             break;
             case mtltypes::map_diffuse:
-                current_mat.diffuse_map.open(str);
-                puts(str);
+                {
+                    int size = strlen(path);
+                    const char *spath = path + size;
+                    while(*spath-- != '/' && spath > path);
+                    int len = spath - path + 2;
+                    char apath[50] = {0};
+                    strcpy(apath, path);
+                    int str_len = strlen(str);
+                    strcpy(apath + len, str);
+                    *(apath + len + str_len) = '\0';
+                    materials[m_ci].tex_diffuse.open(apath);
+                }
             break;
             case mtltypes::new_line:
             case mtltypes::map_ambient:
@@ -479,6 +489,7 @@ mtl_file::mtl_file(const char *path)
             break;
         }
     }
-    materials.emplace_back(current_mat);
+
+    // materials.push_back(current_mat);
     file.close();
 }

@@ -68,12 +68,10 @@ static void display(void)
     // glutSolidCube(1.0f);
 
     glPushMatrix();
-        // glTranslatef(0.0f, 1.0f, 0.0f);
-        glColor3f(1.0f, 0.0f, 0.0f);
-        // glScalef(4.0f, 4.0f, 4.0f);
+        glTranslatef(0.0f, 1.0f, 0.0f);
+        glScalef(4.0f, 4.0f, 4.0f);
         models[0].draw_mesh();
     glPopMatrix();
-    
 
     glutSwapBuffers();
 }
@@ -129,63 +127,7 @@ static void keyboard(unsigned char key, int x, int y)
     }
 }
 
-void another_display()
-{
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-
-    cam.look_at();
-
-    models[0].mat_lib.materials[0].apply_material();
-    models[0].draw_mesh();
-
-    glutSwapBuffers();
-}
-
 int main(int argc, char **argv)
-{
-    windows.init(argc, argv, "Simple texture renderer", 900, 700);
-    windows.set_display_func(another_display);
-    cam.center_camera_angle(windows);
-
-    glutReshapeFunc(reshape);
-    glutPassiveMotionFunc(motion);
-    glutKeyboardFunc(keyboard);
-    glutIdleFunc(idle);
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_LIGHTING);
-    glEnable(GL_LIGHT0);
-    glEnable(GL_NORMALIZE);
-
-    float ambient_n_diffuse[] {0.2f, 0.2f, 0.2f};
-    float specular[] {1.0f, 1.0f, 1.0f};
-    glLightfv(GL_LIGHT0, GL_AMBIENT_AND_DIFFUSE, ambient_n_diffuse);
-    glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
-
-    glEnable(GL_TEXTURE_2D);
-
-    mtl_file simple_file("../../../cube.mtl");
-    obj_file file("../../../cube.obj");
-    simple_file.materials[0].diffuse_map.open("../../../wood-texture.jpg");
-    simple_file.materials[0].diffuse_map.bind();
-    printf("%i\n", simple_file.materials[0].diffuse_map.m_init);
-    file.mat_lib = simple_file;
-
-    for (auto &val: file.vtexture)
-    {
-        printf("%f %f\n", val.x, val.y);
-    }
-
-    simple_file.materials[0].dump_material();
-
-    models.push_back(file);
-
-    windows.run();
-    return 0;
-}
-
-int _main(int argc, char **argv)
 {
     windows.init(argc, argv, "Test Window", 900, 700);
     windows.set_display_func(display);
@@ -196,13 +138,22 @@ int _main(int argc, char **argv)
     glutKeyboardFunc(keyboard);
     glutIdleFunc(idle);
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
+    glEnable(GL_NORMALIZE);
+    glEnable(GL_TEXTURE_2D);
+
+    float ambient_n_diffuse[] {0.2f, 0.2f, 0.2f};
+    float specular[] {1.0f, 1.0f, 1.0f};
+    glLightfv(GL_LIGHT0, GL_AMBIENT_AND_DIFFUSE, ambient_n_diffuse);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
 
     models.push_back(obj_file{"objs/cuboid.obj"});
     obj_file &file = models[0];
 
     unsigned int error_count = 0;
 
-    unsigned int test[] = {13, 11, 7, 13, 7, 9, 4, 3, 9, 4, 9, 7, 3, 7, 8, 8, 7, 11, 8, 11, 5, 7, 5, 6, 6, 2, 4, 6, 4, 8, 2, 1, 10, 2, 10, 3, 1, 3, 4, 6, 5, 12, 6, 12, 1, 5, 1, 2, 10, 13, 9, 10, 9, 3, 1, 12, 13, 1, 13, 10, 12, 5, 11, 12, 11, 13};
+    unsigned int test[] = {1, 2, 3, 1, 3, 4, 5, 6, 4, 5, 4, 3, 6, 3, 7, 7, 3, 2, 7, 2, 8, 3, 8, 9, 9, 10, 5, 9, 5, 7, 10, 11, 12, 10, 12, 6, 11, 6, 5, 9, 8, 13, 9, 13, 11, 8, 11, 10, 12, 1, 4, 12, 4, 6, 11, 13, 1, 11, 1, 12, 13, 8, 2, 13, 2, 1};
     if (std::size(test) != file.indices.size())
     {
         printf("size lenghts don't match %i\n", __LINE__);
@@ -218,7 +169,7 @@ int _main(int argc, char **argv)
         }
     }
 
-    float vertexes[] = {1, 1, -1, 1, -1, -1, 1, 1, 1, 1, -1, 1, -1, 1, -1, -1, -1, -1, -1, 1, 1, -1, -1, 1, 0, 1, 1, 1, 1, 0, -1, 1, 0, 0, 1, -1, 0, 2.575958, 0};
+    float vertexes[] = {0, 2.575958, 0, -1, 1, 0, -1, 1, 1, 0, 1, 1, 1, -1, 1, 1, 1, 1, -1, -1, 1, -1, 1, -1, -1, -1, -1, 1, -1, -1, 1, 1, -1, 1, 1, 0, 0, 1, -1};
     if (std::size(vertexes) != file.vcoords.size() * 3)
     {
         printf("size lenghts don't match %i\n", __LINE__);
@@ -230,7 +181,7 @@ int _main(int argc, char **argv)
 
         if (vertexes[j] != vec.x || vertexes[j + 1] != vec.y || vertexes[j + 2] != vec.z)
         {
-            printf("inconssitent value %i\n", __LINE__);
+            printf("inconssitent value index<%i> line: %i\n", j, __LINE__);
             error_count += 1;
             printf("%9f %9f %9f | %9f %9f %9f\n", vertexes[j], vertexes[j+1], vertexes[j+2], vec.x, vec.y, vec.z);
         }
@@ -272,10 +223,16 @@ int _main(int argc, char **argv)
 
     mtl_file mtl_file ("objs/cuboid.mtl");
 
+    if (mtl_file.materials[0].tex_diffuse.m_init == 0)
+    {
+        error_count += 1;
+        puts("Have not initialized texture object");
+    }
+
     if (int len = mtl_file.mat_names.size(); len != 1)
     {
         error_count += 1;
-        printf("The number of materials names doesn't match\n\tExpected 1, got %i, line: %i\n", len, __LINE__);
+        printf("The number of named materials doesn't match\n\tExpected 1, got %i, line: %i\n", len, __LINE__);
     }
     for (auto &val: mtl_file.mat_names)
     {
@@ -286,6 +243,9 @@ int _main(int argc, char **argv)
         }
     }
     
+    mtl_file.materials[0].apply_material();
+    mtl_file.materials[0].tex_diffuse.bind();
+
     if (int len = mtl_file.materials.size(); len != 1)
     {
         error_count += 1;
@@ -313,7 +273,7 @@ int _main(int argc, char **argv)
             error_count += 1;
             printf("emission: %f %f %f\n", val.emissive.x, val.emissive.y, val.emissive.z);
         }
-        if (val.highlights != 323.999994)
+        if (val.highlights != 225.0f)
         {
             error_count += 1;
             printf("highlights: %.20lf\n", val.highlights);
@@ -342,7 +302,7 @@ int _main(int argc, char **argv)
     };
     printf(fmt_alloc_count[alloc_count == 0], alloc_count);
 
-    // windows.run();
+    windows.run();
     return 0;
 }
 
