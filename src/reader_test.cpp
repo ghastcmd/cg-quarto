@@ -58,10 +58,6 @@ static float dt, last_frame;
 
 static void display(void)
 {
-    float current_frame = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
-    dt = current_frame - last_frame;
-    last_frame = current_frame;
-
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -90,9 +86,18 @@ static void reshape(int width, int height)
 
 static void motion(int x, int y)
 {
-    vec2 camera_cap {-30.0f, 30.0f};
+    const vec2 camera_cap {-30.0f, 30.0f};
     cam.motion_capped(x, y, 0.22f, vec2{-90.0f, -90.0f} + camera_cap, camera_cap);
     // cam.motion(x, y, 0.22f);
+}
+
+static void idle()
+{
+    float current_frame = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
+    dt = current_frame - last_frame;
+    last_frame = current_frame;
+    
+    glutPostRedisplay();
 }
 
 static void keyboard(unsigned char key, int x, int y)
@@ -124,12 +129,63 @@ static void keyboard(unsigned char key, int x, int y)
     }
 }
 
-static void idle()
+void another_display()
 {
-    glutPostRedisplay();
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+    cam.look_at();
+
+    models[0].mat_lib.materials[0].apply_material();
+    models[0].draw_mesh();
+
+    glutSwapBuffers();
 }
 
 int main(int argc, char **argv)
+{
+    windows.init(argc, argv, "Simple texture renderer", 900, 700);
+    windows.set_display_func(another_display);
+    cam.center_camera_angle(windows);
+
+    glutReshapeFunc(reshape);
+    glutPassiveMotionFunc(motion);
+    glutKeyboardFunc(keyboard);
+    glutIdleFunc(idle);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
+    glEnable(GL_NORMALIZE);
+
+    float ambient_n_diffuse[] {0.2f, 0.2f, 0.2f};
+    float specular[] {1.0f, 1.0f, 1.0f};
+    glLightfv(GL_LIGHT0, GL_AMBIENT_AND_DIFFUSE, ambient_n_diffuse);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
+
+    glEnable(GL_TEXTURE_2D);
+
+    mtl_file simple_file("../../../cube.mtl");
+    obj_file file("../../../cube.obj");
+    simple_file.materials[0].diffuse_map.open("../../../wood-texture.jpg");
+    simple_file.materials[0].diffuse_map.bind();
+    printf("%i\n", simple_file.materials[0].diffuse_map.m_init);
+    file.mat_lib = simple_file;
+
+    for (auto &val: file.vtexture)
+    {
+        printf("%f %f\n", val.x, val.y);
+    }
+
+    simple_file.materials[0].dump_material();
+
+    models.push_back(file);
+
+    windows.run();
+    return 0;
+}
+
+int _main(int argc, char **argv)
 {
     windows.init(argc, argv, "Test Window", 900, 700);
     windows.set_display_func(display);
@@ -216,6 +272,11 @@ int main(int argc, char **argv)
 
     mtl_file mtl_file ("objs/cuboid.mtl");
 
+    if (int len = mtl_file.mat_names.size(); len != 1)
+    {
+        error_count += 1;
+        printf("The number of materials names doesn't match\n\tExpected 1, got %i, line: %i\n", len, __LINE__);
+    }
     for (auto &val: mtl_file.mat_names)
     {
         if (strncmp(val.c_str(), "Material", std::size("Material") - 1))
@@ -224,7 +285,12 @@ int main(int argc, char **argv)
             printf("%s\n", val.c_str());
         }
     }
-
+    
+    if (int len = mtl_file.materials.size(); len != 1)
+    {
+        error_count += 1;
+        printf("The number of materials doesn't match\n\tExpected 1, got %i, line: %i\n", len, __LINE__);
+    }
     for (auto &val: mtl_file.materials)
     {
         if (val.ambient.x != 1.0f || val.ambient.y != 1.0f || val.ambient.z != 1.0f)
@@ -276,7 +342,7 @@ int main(int argc, char **argv)
     };
     printf(fmt_alloc_count[alloc_count == 0], alloc_count);
 
-    windows.run();
+    // windows.run();
     return 0;
 }
 

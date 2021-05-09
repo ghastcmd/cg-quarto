@@ -241,8 +241,19 @@ obj_file::iter obj_file::get_iter(unsigned int index)
 
 void texture::open(const char *path)
 {
+    if (m_init)
+    {
+        puts("Already initialized texture object");
+        return;
+    }
+    m_init = true;
     stbi_set_flip_vertically_on_load(1);
     m_local_buffer = stbi_load(path, &m_width, &m_height, &m_nr_channels, 0);
+    if (!m_local_buffer)
+    {
+        m_init = false;
+        return;
+    }
 
     glGenTextures(1, &m_texture_id);
     glBindTexture(GL_TEXTURE_2D, m_texture_id);
@@ -252,8 +263,10 @@ void texture::open(const char *path)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, m_width, m_height, 0, GL_RGB, GL_UNSIGNED_BYTE, m_local_buffer);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_width, m_height, 0, GL_RGB, GL_UNSIGNED_BYTE, m_local_buffer);
     glBindTexture(GL_TEXTURE_2D, 0);
+
+    puts("this into folder");
 
     if (m_local_buffer)
     {
@@ -266,10 +279,9 @@ texture::~texture()
     glDeleteTextures(1, &m_texture_id);
 }
 
-void texture::bind(unsigned int slot) const
+void texture::bind() const
 {
     // glActiveTexture(GL_TEXTURE0 + slot);
-    (void)slot;
     glBindTexture(GL_TEXTURE_2D, m_texture_id);
 }
 
@@ -291,6 +303,29 @@ void material::apply_material() const
     glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, fspecular);
     glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, femission);
     glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, highlights);
+}
+
+void material::dump_material() const
+{
+    printf("ambient: %f %f %f\n", ambient.x, ambient.y, ambient.z);
+    printf("diffuse: %f %f %f\n", diffuse.x, diffuse.y, diffuse.z);
+    printf("specular: %f %f %f\n", specular.x, specular.y, specular.z);
+    printf("emission: %f %f %f\n", emissive.x, emissive.y, emissive.z);
+    printf("highlithgts: %f\n", highlights);
+    printf("optical_density: %f\n", optical_density);
+    printf("dissolve: %f\n", dissolve);
+    printf("illumination_mode: %i\n", illum_model);
+}
+
+void material::zero_material()
+{
+    ambient = {0};
+    diffuse = {0};
+    specular = {0};
+    emissive = {0};
+    highlights = {0};
+    optical_density = {0};
+    dissolve = {0};
 }
 
 enum class mtltypes : unsigned int
@@ -348,7 +383,7 @@ void print_ret(mtltypes ret)
 static std::pair<const char*, mtltypes> const mtltypes_array[]
 {
     {"#", mtltypes::comment},
-    {"\r\nnewmtl", mtltypes::new_material},
+    {"newmtl", mtltypes::new_material},
     {"Ka", mtltypes::ambient},
     {"Kd", mtltypes::diffuse},
     {"Ks", mtltypes::specular},
@@ -376,21 +411,16 @@ mtl_file::mtl_file(const char *path)
     // if (m_initialized) return;
     std::ifstream file(path, std::ios::in | std::ios::binary);
     material current_mat {{0},{0},{0},{0},0};
+    bool mat_now = false;
     while (file.peek() != -1)
     {
         mtltypes ret;
         char stype[16] = {0};
-        if (file.peek() == '\r')
-        {
-            file.getline(stype, 2);
-            ret = mtltypes::new_line;
-        }
-        else
-        {
-            file.getline(stype, std::size(stype), ' ');
-            ret = mtltypes_map[stype];
-        }
+        file.getline(stype, std::size(stype), ' ');
+        ret = mtltypes_map[stype];
+        // puts("print-ret: ");
         // print_ret(ret);
+        // puts("");
         char str[64] = {0};
         file.getline(str, std::size(str), '\x0a');
         switch (ret) {
@@ -402,12 +432,16 @@ mtl_file::mtl_file(const char *path)
                     while (!isspace(*tstr)) tstr++;
                     m_material_len = atoi(tstr);
                     materials.reserve(m_material_len);
-                    char st[2] = {0};
-                    file.getline(st, 2);
                 }
             break;
             case mtltypes::new_material:
+                if (mat_now)
+                {
+                    materials.emplace_back(current_mat);
+                    current_mat.zero_material();
+                }
                 mat_names.push_back(str);
+                mat_now = true;
             break;
             case mtltypes::ambient:
                 stovec3(current_mat.ambient, str);
@@ -431,11 +465,10 @@ mtl_file::mtl_file(const char *path)
                 stoi(current_mat.illum_model, str);
             break;
             case mtltypes::map_diffuse:
+                current_mat.diffuse_map.open(str);
                 puts(str);
             break;
             case mtltypes::new_line:
-                materials.emplace_back(current_mat);
-            break;
             case mtltypes::map_ambient:
             case mtltypes::map_specular:
             case mtltypes::map_highlight:
@@ -446,5 +479,6 @@ mtl_file::mtl_file(const char *path)
             break;
         }
     }
+    materials.emplace_back(current_mat);
     file.close();
 }
