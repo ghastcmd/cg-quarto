@@ -194,7 +194,7 @@ void obj_file::get_faces_index(char *str)
 void obj_file::open(const char *path)
 {
     if (m_initialized) return;
-    std::ifstream file(path, std::ios::in | std::ios::binary);
+    std::ifstream file(path, std::ios::in);
     while (file.peek() != -1)
     {
         char stype[8] = {0};
@@ -203,8 +203,6 @@ void obj_file::open(const char *path)
         // print_ret(ret);
         char str[1024] = {0};
         file.getline(str, std::size(str));
-        size_t len_str = strlen(str);
-        *(str + --len_str) = '\0';
         switch (ret) {
             case objtypes::comment:
             case objtypes::smooth_shading:
@@ -464,7 +462,6 @@ void mtl_file::open(const char *path)
         const auto ret = mtltypes_map[stype];
         char str[64] = {0};
         file.getline(str, std::size(str));
-        size_t len_str = strlen(str);
         switch (ret) {
             case mtltypes::new_line:
             case mtltypes::transmission_filter:
