@@ -1,4 +1,4 @@
-# Blender MTL File: 'cubomágico.blend'
+# Blender MTL File: 'None'
 # Material Count: 6
 
 newmtl Cor_Básica
@@ -11,7 +11,7 @@ Ni 1.450000
 d 1.000000
 illum 2
 
-newmtl Materiais.002
+newmtl Materiais.005
 Ns 225.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.000000 0.005662
@@ -21,7 +21,7 @@ Ni 1.450000
 d 1.000000
 illum 2
 
-newmtl Materiais.003
+newmtl Materiais.007
 Ns 225.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.630060 0.000000
@@ -31,7 +31,7 @@ Ni 1.450000
 d 1.000000
 illum 2
 
-newmtl Materiais.004
+newmtl Materiais.008
 Ns 225.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.000000 0.006727 0.800000
@@ -41,7 +41,7 @@ Ni 1.450000
 d 1.000000
 illum 2
 
-newmtl Materiais.005
+newmtl Materiais.009
 Ns 225.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.000000 0.800000 0.009955
@@ -51,7 +51,7 @@ Ni 1.450000
 d 1.000000
 illum 2
 
-newmtl Materiais.006
+newmtl Materiais.010
 Ns 225.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.156545 0.000000

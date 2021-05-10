@@ -66,3 +66,13 @@ void clight::dist_position() const
         glLightf(light, GL_SPOT_EXPONENT, exponent);
     }
 }
+
+void clight::enable() const
+{
+    glEnable(light);
+}
+
+void clight::disable() const
+{
+    glDisable(light);
+}

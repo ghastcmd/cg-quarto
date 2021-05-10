@@ -31,4 +31,7 @@ struct clight
     void apply_color() const;
 
     void dist_position() const;
+
+    void enable() const;
+    void disable() const;
 };

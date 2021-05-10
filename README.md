@@ -16,6 +16,8 @@ Para movimentação vertical, utilize `barra de espaço` para ir para cima e `b`
 Para abrir e fechar as portas e a janela, pressione a tecla `p` para abrir, `o` para fechar, para trocar entre os objetos que podem abrir ou fechar, utilize a tecla `l`.
     No total são 3 objetos que podem ser abertos/fechados, sendo eles duas portas e uma janela.
 
+Para ligar ou desligar a luminária, utilize a tecla `k`.
+
 ## Requisitos da AB1
 
  - [x] Poder navegar pelo quarto utilizando o mouse e teclado
@@ -28,7 +30,7 @@ Para abrir e fechar as portas e a janela, pressione a tecla `p` para abrir, `o` 
 
  - [ ] Modelar e apresentar um quadro de Vincent Van Gogh
  - [x] Ventilador de mesa com hélice girando no sentido horário em velocidade baixa
- - [ ] Luminária spot em cima da mesa
+ - [x] Luminária spot em cima da mesa
  - [x] Iluminação especular e difusa na modelagem
  - [ ] Aplicar mapeamento de textura em 5 objetos
 

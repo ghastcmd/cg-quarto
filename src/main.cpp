@@ -23,7 +23,7 @@ static void idle()
     dt = current_frame - last_frame;
     last_frame = current_frame;
 
-    float rotation_speed = 360.0f;
+    float rotation_speed = 360.0f * 2.0f;
     rot_angle += rotation_speed * dt;
     rot_angle -= 360.0f * (rot_angle >= 360.0f);
 
@@ -104,8 +104,9 @@ static void display()
     glPopMatrix();
 
     glPushMatrix(); //guarda-roupa
+        glTranslatef(0.8f, -1.9f, 3.5f);
+        glRotatef(180.0f, 0.0f, 1.0f, 0.0f);
         glScalef(2.0f, 2.0f, 2.0f);
-        glTranslatef(1.5f, -0.1f, 1.8f);
         models["guardaroupa"].draw_mat_mesh();
     glPopMatrix();
 
@@ -119,20 +120,21 @@ static void display()
 
     glPushMatrix(); // caneca
         glScalef(2.0f, 2.0f, 2.0f);
-        glTranslatef(-1.9f, -0.16f, 1.5f);
-        glColor3f(0, 0, 1);
+        glTranslatef(-1.9f, -0.15f, 1.5f);
+        glScalef(0.05f, 0.05f, 0.05f);
         models["caneca"].draw_mat_mesh();
     glPopMatrix();
 
     glPushMatrix(); // cubo
+        glTranslatef(2.8f, -0.51f, 6.7f);
         glScalef(2.0f, 2.0f, 2.0f);
-        glTranslatef(1.4f, -0.145f, 3.1f);
         models["cubo"].draw_mat_mesh();
     glPopMatrix();
 
     glPushMatrix(); // caderno
+        glTranslatef(2.9f, -0.56f, 6.2f);
+        glRotatef(80.0f, 0.0f, 1.0f, 0.0f);
         glScalef(2.0f, 2.0f, 2.0f);
-        glTranslatef(-1.9f, -0.19f, 1.2f);
         models["caderno"].draw_mat_mesh();
     glPopMatrix();
 
@@ -156,10 +158,20 @@ static void display()
     glPopMatrix();
     
     glPushMatrix();
-        glTranslatef(-4.0f, -0.394f, 1.8f);
-        glRotatef(-180.0f, 0.0f, 1.0f, 0.0f);
-        glScalef(2.0f, 2.0f, 2.0f);
+        glTranslatef(3.5f, -3.08f, 5.8f);
+        glRotatef(-220.0f, 0.0f, 1.0f, 0.0f);
+        glScalef(2.2f, 2.2f, 2.2f);
         models["luminaria"].draw_mat_mesh();
+    glPopMatrix();
+
+    glPushMatrix();
+        models["quadro van"].draw_mat_mesh();
+    glPopMatrix();
+
+    glPushMatrix();
+        glTranslatef(0.0f, 0.0f, 0.0f);
+        glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
+        models["janela"].draw_mat_mesh();
     glPopMatrix();
 
     glutSwapBuffers();
@@ -177,6 +189,8 @@ void motion(int x, int y)
 {
     cam.motion(x, y, 0.22f);
 }
+
+bool light_on = true;
 
 void keyboard(unsigned char key, int x, int y)
 {
@@ -218,6 +232,18 @@ void keyboard(unsigned char key, int x, int y)
             glPolygonMode(GL_FRONT_AND_BACK, mode);
             mode = mode == GL_LINE ? GL_FILL : GL_LINE;
         break;
+        case 'k':
+            if (light_on)
+            {
+                light[1].disable();
+                light_on = false;
+            }
+            else
+            {
+                light[1].enable();
+                light_on = true;
+            }
+        break;
         case 'u':
             printf("%f %f %f\n", cam.pos.x, cam.pos.y, cam.pos.z);
             printf("%f %f %f\n", cam.front.x, cam.front.y, cam.front.z);
@@ -244,45 +270,34 @@ int main(int argc, char **argv)
     glEnable(GL_DEPTH_TEST);
     /* lightning  */
     glEnable(GL_LIGHTING);
-    glEnable(GL_LIGHT0);
-    glEnable(GL_LIGHT1);
+    glEnable(GL_NORMALIZE);
+    glEnable(GL_TEXTURE_2D);
     
-    float light_ambient[] = {0.0f, 0.0f, 0.0f};
-    float light_diffuse[] = {0.4f, 0.4f, 0.4f};
-    float light_specular[] = {1.0f, 0.0f, 0.0f};
-    glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
-    glLightfv(GL_LIGHT0, GL_SPECULAR, light_diffuse);
-
     light[0] = clight(
         0,
-        {0.0f, 0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f, 1.0f},
-        {0.4f, 0.4f, 0.4f, 1.0f},
-        {1.0f, 0.0f, 0.0f, 1.0f},
+        {0.488164f, 3.054233f, 6.129874f, 0.0f}, // position
+        {0.0f, 0.0f, 0.0f, 0.0f}, // direction
+        {0.0f, 0.0f, 0.0f, 0.0f}, // ambient
+        {1.0f, 1.0f, 1.0f, 1.0f}, // diffuse
+        {1.0f, 1.0f, 1.0f, 1.0f}, // specular
         0.0f, 0.0f, clight::type::point_light
     );
 
     light[1] = clight(
         1,
-        {-4.0f, 0.13f, 1.92f, 0.0f}, // position
-        {0.0f, 1.0f, 0.0f, 0.0f},   // direction
-        {1.0f, 0.0f, 0.0f, 1.0f},   // ambient
-        {1.0f, 0.0f, 0.0f, 1.0f},   // diffuse
+        {3.376924f, -0.035178f, 5.941844f, 1.0f}, // position
+        {2.642475f, -0.578486f, 6.341764f, 1.0f},   // direction
+        {0.2f, 0.2f, 0.2f, 1.0f},   // ambient
+        {2.0f, 2.2f, 2.0f, 2.0f},   // diffuse
         {1.0f, 1.0f, 1.0f, 1.0f},   // specular
-        10.0f, 2.0f, clight::type::spot_light
+        5.0f, 100.0f, clight::type::spot_light
     );
 
     for (auto &li: light)
     {
+        li.enable();
         li.apply_color();
     }
-
-    /* materials */
-    glEnable(GL_NORMALIZE);
-    glEnable(GL_TEXTURE_2D);
-    glShadeModel(GL_SMOOTH);
 
     mwindow.set_display_func(display);
     glutReshapeFunc(reshape);
@@ -299,12 +314,14 @@ int main(int argc, char **argv)
     models["guardaroupa"] = obj_file("objs/guardaroupa.obj");
     models["mesa"]        = obj_file("objs/mesa.obj");
     models["caneca"]      = obj_file("objs/caneca.obj");
-    models["cubo"]        = obj_file("objs/cubo.obj");
+    models["cubo"]        = obj_file("objs/cubomagico.obj");
     models["caderno"]     = obj_file("objs/caderno.obj");
     models["cadeira"]     = obj_file("objs/cadeira.obj");
     models["ventiladorc"] = obj_file("objs/ventilador_corpo.obj");
     models["ventiladorh"] = obj_file("objs/ventilador_helice.obj");
     models["luminaria"]   = obj_file("objs/luminaria.obj");
+    models["quadro van"]  = obj_file("objs/quadroVangog.obj");
+    models["janela"]      = obj_file("objs/janela.obj");
 
     mwindow.run();
     return 0;
