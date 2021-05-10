@@ -127,6 +127,8 @@ static void keyboard(unsigned char key, int x, int y)
     }
 }
 
+extern void merge_path_name(char *&, const char*, char*);
+
 int main(int argc, char **argv)
 {
     windows.init(argc, argv, "Test Window", 900, 700);

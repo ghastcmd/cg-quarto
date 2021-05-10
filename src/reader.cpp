@@ -60,20 +60,28 @@ void print_val(std::ifstream& fstream)
     puts(str);
 }
 
-void merge_path_name(char *&out, const char *path, char *name)
+void strmvcnt(char *str, int str_len, int move_count)
 {
-    int path_len = strlen(path);
-    int name_len = strlen(name);
+    char *endp = str + str_len;
+    while (endp-- != str)
+        *(endp) = *(str + move_count);
+}
 
-    const char *end_path = path + path_len;
-    while(*end_path-- != '/' && end_path > path);
+void revstrmove(char *str, int len, int count)
+{
+    char *endp = str + len;
+    while (endp-- != str)
+        *(endp + count) = *endp;
+}
 
+void merge_path_name(const char *path, char *name)
+{
+    const char *end_path = path + strlen(path);
+    while(end_path >= path - 1 && *end_path-- != '/');
     int dir_len = end_path - path + 2;
 
-    strcpy(out, path);
-    strcpy(out + dir_len, name);
-
-    *(out + name_len + dir_len) = '\0';
+    revstrmove(name, strlen(name), dir_len);
+    strncpy(name, path, dir_len);
 }
 
 void stovec3(vec3& vec, char * str)
@@ -182,18 +190,18 @@ void obj_file::open(const char *path)
         const auto ret = objtypes_map[stype];
         // print_ret(ret);
         char str[1024] = {0};
-        file.getline(str, std::size(str), '\x0a');
+        file.getline(str, std::size(str));
         switch (ret) {
             case objtypes::comment:
             case objtypes::smooth_shading:
             case objtypes::line:
+            break;
             case objtypes::usemtl:
+
             break;
             case objtypes::mtllib: {
-                char cpath[50] = {0};
-                char *apath = cpath;
-                merge_path_name(apath, path, str);
-                mat_lib.open(apath);
+                merge_path_name(path, str);
+                mat_lib.open(str);
             } break;
             case objtypes::object_name:
                 optrs.push_back(indices.size());
@@ -450,6 +458,9 @@ void mtl_file::open(const char *path)
         char str[64] = {0};
         file.getline(str, std::size(str), '\x0a');
         switch (ret) {
+            case mtltypes::new_line:
+            case mtltypes::transmission_filter:
+            break;
             case mtltypes::comment:
                 if (char *tstr = str; !strncmp(str, "Material", std::size("Material") - 1))
                 {
@@ -487,23 +498,17 @@ void mtl_file::open(const char *path)
                 stoi(materials[m_ci].illum_model, str);
             break;
             case mtltypes::map_diffuse: {
-                char cpath[50] = {0};
-                char *apath = cpath;
-                merge_path_name(apath, path, str);
-                materials[m_ci].tex_diffuse.open(apath);
+                merge_path_name(path, str);
+                materials[m_ci].tex_diffuse.open(str);
             } break;
-            case mtltypes::new_line:
             case mtltypes::map_ambient:
             case mtltypes::map_specular:
             case mtltypes::map_highlight:
             case mtltypes::map_alpha:
             case mtltypes::map_bump:
             case mtltypes::map_displacement:
-            case mtltypes::transmission_filter:
             break;
         }
     }
-
-    // materials.push_back(current_mat);
     file.close();
 }
