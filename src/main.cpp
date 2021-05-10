@@ -59,8 +59,8 @@ static void display()
             glTranslatef(-3.63f, 0.040f, 2.5f);
             glRotatef(dw_angle_n_pos[0], 0, 1, 0);
             glTranslatef(0.4f, 0.0f, 0.0f);
-            glScalef(0.7624f, 2.058f, 0.03f);
-            glutSolidCube(1.0f);
+            glScalef(0.9f, 1.0f, 0.9f);
+            models["porta"].draw_mat_mesh();
         glPopMatrix();
 
         glPushMatrix(); // second door
@@ -68,8 +68,8 @@ static void display()
             glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
             glRotatef(-dw_angle_n_pos[1], 0.0f, 1.0f, 0.0f);
             glTranslatef(0.4f, 0.0f, 0.0f);
-            glScalef(0.7624f, 2.058f, 0.03f);
-            glutSolidCube(1.0f);
+            glScalef(0.9f, 1.0f, 0.9f);
+            models["porta"].draw_mat_mesh();
         glPopMatrix();
 
         glPushMatrix(); // drawing the bedroom
@@ -91,7 +91,6 @@ static void display()
         glScalef(1.0f, 2.9f, 2.7f);
         models["janela"].draw_mat_mesh();
     glPopMatrix();
-
 
     glPushMatrix(); // cama
         glScalef(2.0f, 2.0f, 2.0f);
@@ -318,6 +317,7 @@ int main(int argc, char **argv)
     models["luminaria"]   = obj_file("objs/luminaria.obj");
     models["quadro van"]  = obj_file("objs/quadroVangog.obj");
     models["janela"]      = obj_file("objs/janela.obj");
+    models["porta"]       = obj_file("objs/porta.obj");
 
     mwindow.run();
     return 0;

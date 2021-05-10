@@ -32,7 +32,7 @@ Para ligar ou desligar a luminária, utilize a tecla `k`.
  - [x] Ventilador de mesa com hélice girando no sentido horário em velocidade baixa
  - [x] Luminária spot em cima da mesa
  - [x] Iluminação especular e difusa na modelagem
- - [ ] Aplicar mapeamento de textura em 5 objetos
+ - [x] Aplicar mapeamento de textura em 5 objetos
 
 ## Referências:
 
