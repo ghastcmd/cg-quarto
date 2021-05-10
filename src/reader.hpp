@@ -77,7 +77,9 @@ struct obj_file
     void open(const char *path);
 
     void draw_mesh();
-    void draw_mesh(iter &begin, iter &end);
+    void draw_mesh(const iter &begin, const iter &end);
+    void draw_mat_mesh();
+
     iter get_iter(unsigned int index);
 
     bool m_initialized = false;
@@ -92,8 +94,8 @@ struct obj_file
 
     struct faces_group
     {
-        iter begin;
-        size_t index;
+        size_t begin, end;
+        size_t mat_index;
     };
 
     std::vector<faces_group> grouping;

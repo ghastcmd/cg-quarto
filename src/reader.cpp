@@ -207,10 +207,16 @@ void obj_file::open(const char *path)
             case objtypes::comment:
             case objtypes::smooth_shading:
             case objtypes::line:
+            break;
             case objtypes::usemtl:
             {
-                iter nuevo = &indices[indices.size()];
-                grouping.push_back(faces_group{nuevo , mat_lib.map_material[str]});
+                auto nuevo = indices.size();
+                size_t index = mat_lib.map_material[str];
+                grouping.push_back(faces_group{nuevo, 0, index});
+                if (auto pend = &grouping[grouping.size()-1]; pend != nullptr)
+                {
+                    pend->end = nuevo;
+                }
             }
             break;
             case objtypes::mtllib:
@@ -240,6 +246,7 @@ void obj_file::open(const char *path)
             } break;
         }
     }
+    grouping[grouping.size()-1].end = indices.size();
     file.close();
     m_initialized = true;
 }
@@ -260,7 +267,7 @@ void obj_file::draw_mesh()
     glEnd();
 }
 
-void obj_file::draw_mesh(obj_file::iter &begin, obj_file::iter &end)
+void obj_file::draw_mesh(const obj_file::iter &begin, const obj_file::iter &end)
 {
     glBegin(GL_TRIANGLES);
     // auto iptr = indices.data();
@@ -277,6 +284,19 @@ void obj_file::draw_mesh(obj_file::iter &begin, obj_file::iter &end)
     glEnd();
 }
 
+void obj_file::draw_mat_mesh()
+{
+    for (auto &group: grouping)
+    {
+        mat_lib.materials[group.mat_index].apply_material();
+
+        iter left = indices.data() + group.begin;
+        iter right = indices.data() + group.end;
+        // draw_mesh(group.begin, group.end);
+        draw_mesh(left, right);
+    }
+}
+
 obj_file::iter obj_file::get_iter(unsigned int index)
 {
     return indices.data() + optrs[index];
@@ -289,14 +309,14 @@ void texture::open(const char *path)
         puts("Already initialized texture object");
         return;
     }
-    m_init = true;
     stbi_set_flip_vertically_on_load(1);
     m_local_buffer = stbi_load(path, &m_width, &m_height, &m_nr_channels, 0);
     if (!m_local_buffer)
     {
-        m_init = false;
+        printf("Could not open requested file %s\n", path);
         return;
     }
+    m_init = true;
 
     glGenTextures(1, &m_texture_id);
     glBindTexture(GL_TEXTURE_2D, m_texture_id);
@@ -330,7 +350,6 @@ void texture::unbind() const
 {
     glBindTexture(GL_TEXTURE_2D, 0);
 }
-
 
 void material::apply_material() const
 {

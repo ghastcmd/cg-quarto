@@ -64,13 +64,13 @@ static void display(void)
 
     cam.look_at();
 
-    // glColor3f(0.2f, 0.2f, 0.2f);
-    // glutSolidCube(1.0f);
+    glColor3f(0.2f, 0.2f, 0.2f);
+    glutSolidCube(1.0f);
 
     glPushMatrix();
         glTranslatef(0.0f, 1.0f, 0.0f);
         glScalef(4.0f, 4.0f, 4.0f);
-        models[0].draw_mesh();
+        models[0].draw_mat_mesh();
     glPopMatrix();
 
     glutSwapBuffers();
