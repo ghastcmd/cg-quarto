@@ -72,22 +72,24 @@ static void display()
             glutSolidCube(1.0f);
         glPopMatrix();
 
-        glPushMatrix(); // left window (imovable)
-            glTranslatef(-5.745f, 0.585f, -1.66f);
-            glScalef(1.55f, 1.125f, 0.03f);
-            glutSolidCube(1.0f);
-        glPopMatrix();
-
-        glPushMatrix(); // right window (movable)
-            glTranslatef(-4.255f - dw_angle_n_pos[2] / 65.0f, 0.585f, -1.62f);
-            glScalef(1.55f, 1.125f, 0.03f);
-            glutSolidCube(1.0f);
-        glPopMatrix();
-
         glPushMatrix(); // drawing the bedroom
             glTranslatef(-5.0f, -1.0f, 0.0f);
             models["quarto"].draw_mat_mesh();
         glPopMatrix();
+    glPopMatrix();
+
+    glPushMatrix(); // left window (imovable)
+        glTranslatef(-1.5f, 1.17f, 0.7f);
+        glRotatef(-90.0f, 0.0f, 1.0f, 0.0f);
+        glScalef(1.0f, 2.9f, 2.7f);
+        models["janela"].draw_mat_mesh();
+    glPopMatrix();
+
+    glPushMatrix(); // right window (movable)
+        glTranslatef(1.5f - dw_angle_n_pos[2] / 35.0f, 1.17f, 0.78f);
+        glRotatef(-90.0f, 0.0f, 1.0f, 0.0f);
+        glScalef(1.0f, 2.9f, 2.7f);
+        models["janela"].draw_mat_mesh();
     glPopMatrix();
 
 
@@ -166,12 +168,6 @@ static void display()
 
     glPushMatrix();
         models["quadro van"].draw_mat_mesh();
-    glPopMatrix();
-
-    glPushMatrix();
-        glTranslatef(0.0f, 0.0f, 0.0f);
-        glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
-        models["janela"].draw_mat_mesh();
     glPopMatrix();
 
     glutSwapBuffers();
