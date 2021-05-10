@@ -2,6 +2,7 @@
 #include "window.hpp"
 #include "vec.hpp"
 #include "reader.hpp"
+#include "light.hpp"
 
 static camera cam {
     {0.0f, 0.0f, 5.0f},
@@ -33,16 +34,20 @@ static std::unordered_map<const char*, obj_file> models;
 
 material mat1 {{1.0f, 1.0f, 1.0f}, {0.8f, 0.8f, 0.8f}, {0.5f, 0.5f, 0.5f}, {0.0f, 0.0f, 0.0f}, 255.0f};
 
+clight light[2];
+
 static void display()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    float light_position[] {1.45f, 1.0f, 1.0f};
-    glLightfv(GL_LIGHT0, GL_POSITION, light_position);
-
     cam.look_at();
+
+    for (auto &li: light)
+    {
+        li.dist_position();
+    }
 
     mat1.apply_material();
 
@@ -121,7 +126,7 @@ static void display()
 
     glPushMatrix(); // cubo
         glScalef(2.0f, 2.0f, 2.0f);
-        glTranslatef(1.4f, -0.15f, 3.1f);
+        glTranslatef(1.4f, -0.145f, 3.1f);
         models["cubo"].draw_mat_mesh();
     glPopMatrix();
 
@@ -150,6 +155,13 @@ static void display()
         models["ventiladorh"].draw_mat_mesh();
     glPopMatrix();
     
+    glPushMatrix();
+        glTranslatef(-4.0f, -0.394f, 1.8f);
+        glRotatef(-180.0f, 0.0f, 1.0f, 0.0f);
+        glScalef(2.0f, 2.0f, 2.0f);
+        models["luminaria"].draw_mat_mesh();
+    glPopMatrix();
+
     glutSwapBuffers();
 }
 
@@ -206,6 +218,10 @@ void keyboard(unsigned char key, int x, int y)
             glPolygonMode(GL_FRONT_AND_BACK, mode);
             mode = mode == GL_LINE ? GL_FILL : GL_LINE;
         break;
+        case 'u':
+            printf("%f %f %f\n", cam.pos.x, cam.pos.y, cam.pos.z);
+            printf("%f %f %f\n", cam.front.x, cam.front.y, cam.front.z);
+        break;
     }
 }
 
@@ -229,6 +245,7 @@ int main(int argc, char **argv)
     /* lightning  */
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
+    glEnable(GL_LIGHT1);
     
     float light_ambient[] = {0.0f, 0.0f, 0.0f};
     float light_diffuse[] = {0.4f, 0.4f, 0.4f};
@@ -237,15 +254,36 @@ int main(int argc, char **argv)
     glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
     glLightfv(GL_LIGHT0, GL_SPECULAR, light_diffuse);
 
+    light[0] = clight(
+        0,
+        {0.0f, 0.0f, 0.0f, 0.0f},
+        {0.0f, 0.0f, 0.0f, 0.0f},
+        {0.0f, 0.0f, 0.0f, 1.0f},
+        {0.4f, 0.4f, 0.4f, 1.0f},
+        {1.0f, 0.0f, 0.0f, 1.0f},
+        0.0f, 0.0f, clight::type::point_light
+    );
+
+    light[1] = clight(
+        1,
+        {-4.0f, 0.13f, 1.92f, 0.0f}, // position
+        {0.0f, 1.0f, 0.0f, 0.0f},   // direction
+        {1.0f, 0.0f, 0.0f, 1.0f},   // ambient
+        {1.0f, 0.0f, 0.0f, 1.0f},   // diffuse
+        {1.0f, 1.0f, 1.0f, 1.0f},   // specular
+        10.0f, 2.0f, clight::type::spot_light
+    );
+
+    for (auto &li: light)
+    {
+        li.apply_color();
+    }
+
     /* materials */
-    // glEnable(GL_COLOR_MATERIAL);
     glEnable(GL_NORMALIZE);
     glEnable(GL_TEXTURE_2D);
     glShadeModel(GL_SMOOTH);
 
-    // float light_position[] {0.0f, 0.0f, -2.0f, 1.0f};
-    // glLightfv(GL_LIGHT0, GL_POSITION, light_position);
-    
     mwindow.set_display_func(display);
     glutReshapeFunc(reshape);
     glutKeyboardFunc(keyboard);
@@ -264,23 +302,10 @@ int main(int argc, char **argv)
     models["cubo"]        = obj_file("objs/cubo.obj");
     models["caderno"]     = obj_file("objs/caderno.obj");
     models["cadeira"]     = obj_file("objs/cadeira.obj");
-    models["ventiladorc"]  = obj_file("objs/ventilador_corpo.obj");
-    models["ventiladorh"]  = obj_file("objs/ventilador_helice.obj");
-    // models["ventilador2"] = obj_file("objs/ventilador2.obj");
+    models["ventiladorc"] = obj_file("objs/ventilador_corpo.obj");
+    models["ventiladorh"] = obj_file("objs/ventilador_helice.obj");
+    models["luminaria"]   = obj_file("objs/luminaria.obj");
 
-    // models.emplace_back(obj_file{"objs/quarto.obj"});
-    // models.emplace_back(obj_file{"objs/cama.obj"});
-    // models.emplace_back(obj_file{"objs/notebook.obj"});
-    // models.emplace_back(obj_file{"objs/guardaroupa.obj"});
-    // models.emplace_back(obj_file{"objs/mesa.obj"});
-    // models.emplace_back(obj_file{"objs/caneca.obj"});
-    // models.emplace_back(obj_file{"objs/cubo.obj"});
-    // models.emplace_back(obj_file{"objs/caderno.obj"});
-    // models.emplace_back(obj_file{"objs/cadeira.obj"});
-    // models.emplace_back(obj_file{"objs/ventilador.obj"});
-    // models.emplace_back(obj_file{"objs/ventilador2.obj"});
-
-    // main_window.create_window();
     mwindow.run();
     return 0;
 }
