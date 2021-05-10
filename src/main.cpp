@@ -31,7 +31,7 @@ static void idle()
 
 static std::unordered_map<const char*, obj_file> models;
 
-material mat1 {{0.2f, 0.2f, 0.2f}, {0.0f, 1.0f, 0.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, 80.0f};
+material mat1 {{1.0f, 1.0f, 1.0f}, {0.8f, 0.8f, 0.8f}, {0.5f, 0.5f, 0.5f}, {0.0f, 0.0f, 0.0f}, 255.0f};
 
 static void display()
 {
@@ -78,7 +78,7 @@ static void display()
 
         glPushMatrix(); // drawing the bedroom
             glTranslatef(-5.0f, -1.0f, 0.0f);
-            models["quarto"].draw_mesh();
+            models["quarto"].draw_mat_mesh();
         glPopMatrix();
     glPopMatrix();
 
@@ -86,26 +86,26 @@ static void display()
     glPushMatrix(); // cama
         glScalef(2.0f, 2.0f, 2.0f);
         glTranslatef(-2.1f, -0.48f, 2.8f);
-        models["cama"].draw_mesh();
+        models["cama"].draw_mat_mesh();
     glPopMatrix();
 
     glPushMatrix(); // notebook
         glScalef(2.0f, 2.0f, 2.0f);
         glTranslatef(-1.8f, -0.22f, 1.8f);
-        models["notebook"].draw_mesh();
+        models["notebook"].draw_mat_mesh();
     glPopMatrix();
 
     glPushMatrix(); //guarda-roupa
         glScalef(2.0f, 2.0f, 2.0f);
         glTranslatef(1.5f, -0.1f, 1.8f);
-        models["guardaroupa"].draw_mesh();
+        models["guardaroupa"].draw_mat_mesh();
     glPopMatrix();
 
     glPushMatrix(); //mesa
         glScalef(2.0f, 2.0f, 2.0f);
         glTranslatef(5.0f, 0.0f, 2.0f);
         glTranslatef(-3.4f, -1.0f, 1.1f);
-        models["mesa"].draw_mesh();
+        models["mesa"].draw_mat_mesh();
     glPopMatrix();
 
 
@@ -113,38 +113,38 @@ static void display()
         glScalef(2.0f, 2.0f, 2.0f);
         glTranslatef(-1.9f, -0.16f, 1.5f);
         glColor3f(0, 0, 1);
-        models["caneca"].draw_mesh();
+        models["caneca"].draw_mat_mesh();
     glPopMatrix();
 
     glPushMatrix(); // cubo
         glScalef(2.0f, 2.0f, 2.0f);
         glTranslatef(1.4f, -0.15f, 3.1f);
-        models["cubo"].draw_mesh();
+        models["cubo"].draw_mat_mesh();
     glPopMatrix();
 
     glPushMatrix(); // caderno
         glScalef(2.0f, 2.0f, 2.0f);
         glTranslatef(-1.9f, -0.19f, 1.2f);
-        models["caderno"].draw_mesh();
+        models["caderno"].draw_mat_mesh();
     glPopMatrix();
 
     glPushMatrix(); // cadeira
         glScalef(2.0f, 2.0f, 2.0f);
         glTranslatef(-1.3f, -0.71f, 1.5f);
         glRotatef(-90.0f, 0.0f, 1.0f, 0.0f);
-        models["cadeira"].draw_mesh();
+        models["cadeira"].draw_mat_mesh();
     glPopMatrix();
 
     glPushMatrix(); // ventilador
         glTranslatef(-3.6f, -0.39f, 1.5f);
         glRotatef(200.0f, 0.0f, 1.0f, 0.0f);
         glScalef(3.3f, 3.3f, 3.3f);
-        models["ventiladorc"].draw_mesh();
+        models["ventiladorc"].draw_mat_mesh();
         glTranslatef(0.0f, 0.175f, -0.11f);
         glRotatef(rot_angle, 0.0f, 0.0f, 1.0f);
         glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
         glRotatef(180.0f, 0.0f, 1.0f, 0.0f);
-        models["ventiladorh"].draw_mesh();
+        models["ventiladorh"].draw_mat_mesh();
     glPopMatrix();
     
     glutSwapBuffers();
@@ -237,6 +237,7 @@ int main(int argc, char **argv)
     /* materials */
     // glEnable(GL_COLOR_MATERIAL);
     glEnable(GL_NORMALIZE);
+    glEnable(GL_TEXTURE_2D);
     glShadeModel(GL_SMOOTH);
 
     // float light_position[] {0.0f, 0.0f, -2.0f, 1.0f};

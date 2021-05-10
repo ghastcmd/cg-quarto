@@ -213,7 +213,7 @@ void obj_file::open(const char *path)
                 auto nuevo = indices.size();
                 size_t index = mat_lib.map_material[str];
                 grouping.push_back(faces_group{nuevo, 0, index});
-                if (auto pend = &grouping[grouping.size()-1]; pend != nullptr)
+                if (auto pend = &grouping[grouping.size()-2]; pend != nullptr)
                 {
                     pend->end = nuevo;
                 }
@@ -288,6 +288,7 @@ void obj_file::draw_mat_mesh()
 {
     for (auto &group: grouping)
     {
+        if (mat_lib.init())
         mat_lib.materials[group.mat_index].apply_material();
 
         iter left = indices.data() + group.begin;
@@ -474,6 +475,12 @@ void mtl_file::open(const char *path)
 {
     // if (m_init) return;
     std::ifstream file(path, std::ios::in);
+    if (!file.is_open())
+    {
+        printf("Could not open the mtl file %s\n", path);
+        file.close();
+        return;
+    }
     // Here I use a dummy material, but is guaranteed that it is't used
     material dummy_mat {{0}, {0}, {0}, {0}, 0};
     material &current_mat = dummy_mat;
@@ -540,5 +547,6 @@ void mtl_file::open(const char *path)
             break;
         }
     }
+    m_init = true;
     file.close();
 }

@@ -1,7 +1,7 @@
 #pragma once
 
-#define READER_TEST
-#define TEST
+// #define READER_TEST
+// #define TEST
 
 struct texture
 {
@@ -59,8 +59,12 @@ struct mtl_file
     std::vector<std::string> mat_names;
     std::unordered_map<std::string, size_t> map_material;
 
+    bool init() const { return m_init; }
+
+private:
     size_t m_material_len = 0;
     size_t m_ci = -1;
+    bool m_init = false;
 };
 
 struct obj_file
@@ -80,6 +84,7 @@ struct obj_file
     void draw_mesh(const iter &begin, const iter &end);
     void draw_mat_mesh();
 
+    // ! Unused
     iter get_iter(unsigned int index);
 
     bool m_initialized = false;
@@ -90,7 +95,7 @@ struct obj_file
 
     std::vector<index> indices;
     // std::unordered_map<std::string_view, unsigned int> optrs;
-    std::vector<unsigned int> optrs;
+    std::vector<unsigned int> optrs; // ! Unused
 
     struct faces_group
     {
