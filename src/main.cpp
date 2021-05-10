@@ -1,59 +1,47 @@
 #include "pch.h"
+#include "window.hpp"
 #include "vec.hpp"
 #include "reader.hpp"
 
-template <typename _ty>
-constexpr _ty PI = (_ty)3.14159265358979323846;
-
-float radians(float val)
-{
-    return val * (PI<float> / 180.0f);
-}
-
-struct camera
-{
-    vec3 pos;
-    vec3 front;
-    vec3 up;
-    struct {
-        float yaw, pitch, roll;
-    };
+static camera cam {
+    {0.0f, 0.0f, 5.0f},
+    {0.0f, 0.0f, -3.0f},
+    {0.0f, 1.0f, 0.0f},
 };
 
-camera cam{ {0.0f, 0.0f, 5.0f}, {0.0f, 0.0f, -3.0f}, {0.0f, 1.0f, 0.0f}, {-90.0f, 0.0f, 0.0f} };
+float last_frame = 0, dt = 0;
+float speed = 9.6f;
 
-#define dist(vec) vec.x, vec.y, vec.z
-
-float last_frame, dt;
-float fov = 75.0f;
-float speed = 4.8f * 2.0f;
-float mouse_sensitivity = 0.22f;
-
-void timer(int count)
-{
-    float current_frame = glutGet(GLUT_ELAPSED_TIME);
-    dt = current_frame - last_frame;
-    last_frame = current_frame;
-
-    glutPostRedisplay();
-    glutTimerFunc(1000 / 60, timer, 0);
-}
-
-std::vector<obj_file> models;
-obj_file simple;
-
-float test_angle = 0;
+float rot_angle = 0.0f;
 float dw_angle_n_pos[] = {0.0f, 0.0f, 0.0f};
 unsigned int control_index = 0;
 
-void display()
+static void idle()
+{
+    float current_frame = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
+    dt = current_frame - last_frame;
+    last_frame = current_frame;
+
+    float rotation_speed = 360.0f;
+    rot_angle += rotation_speed * dt;
+    rot_angle -= 360.0f * (rot_angle >= 360.0f);
+
+    glutPostRedisplay();
+}
+
+static std::unordered_map<const char*, obj_file> models;
+
+material mat1 {{0.2f, 0.2f, 0.2f}, {0.0f, 1.0f, 0.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, 80.0f};
+
+static void display()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    vec3 look = cam.pos + cam.front;
-    gluLookAt(dist(cam.pos), dist(look), dist(cam.up));
+    cam.look_at();
+
+    mat1.apply_material();
 
     glPushMatrix();
         glScalef(2.0f, 2.0f, 2.0f);
@@ -89,128 +77,95 @@ void display()
         glPopMatrix();
 
         glPushMatrix(); // drawing the bedroom
-            glColor3f(1, 0, 0);
             glTranslatef(-5.0f, -1.0f, 0.0f);
-            models[0].draw_mesh();
+            models["quarto"].draw_mesh();
         glPopMatrix();
     glPopMatrix();
 
 
     glPushMatrix(); // cama
-        glPushMatrix(); 
-            glScalef(2.0f, 2.0f, 2.0f);
-            glTranslatef(5.0f, 0.0f, 2.0f);
-            glTranslatef(-7.1f, -0.5f, 0.8f);
-            glColor3f(0, 0, 1);
-            models[1].draw_mesh();
-        glPopMatrix();
-
-        glPushMatrix(); // notebook
-            glScalef(2.0f, 2.0f, 2.0f);
-            glTranslatef(5.0f, 0.0f, 2.0f);
-            glTranslatef(-6.8f, -0.22f, -0.2f);
-            glColor3f(0, 0, 1);
-            models[2].draw_mesh();
-        glPopMatrix();
-
-        glPushMatrix(); //guarda-roupa
-            glScalef(2.0f, 2.0f, 2.0f);
-            glTranslatef(5.0f, 0.0f, 2.0f);
-            glTranslatef(-3.5f, -0.1f, -0.2f);
-            glColor3f(0, 0, 1);
-            models[3].draw_mesh();
-        glPopMatrix();
-
-        glPushMatrix(); //mesa
-            glScalef(2.0f, 2.0f, 2.0f);
-            glTranslatef(5.0f, 0.0f, 2.0f);
-            glTranslatef(-3.4f, -1.0f, 1.1f);
-            glColor3f(0, 0, 1);
-            models[4].draw_mesh();
-        glPopMatrix();
-
-
-        glPushMatrix(); // caneca
-            glScalef(2.0f, 2.0f, 2.0f);
-            glTranslatef(5.0f, 0.0f, 2.0f);
-            glTranslatef(-6.9f, -0.16f, -0.5f);
-            glColor3f(0, 0, 1);
-            models[5].draw_mesh();
-        glPopMatrix();
-
-        glPushMatrix(); // cubo
-            glScalef(2.0f, 2.0f, 2.0f);
-            glTranslatef(5.0f, 0.0f, 2.0f);
-            glTranslatef(-3.6f, -0.13f, 1.1f);
-            glColor3f(0, 0, 1);
-            models[6].draw_mesh();
-        glPopMatrix();
-
-        glPushMatrix(); // caderno
-            glScalef(2.0f, 2.0f, 2.0f);
-            glTranslatef(5.0f, 0.0f, 2.0f);
-            glTranslatef(-6.9f, -0.19f, -0.8f);
-            glColor3f(0, 0, 1);
-            models[7].draw_mesh();
-        glPopMatrix();
-
-        glPushMatrix(); 
-            glScalef(2.0f, 2.0f, 2.0f);
-            glTranslatef(5.0f, 0.0f, 2.0f);
-            glTranslatef(-6.3f, -0.5f, -0.5f);
-            glColor3f(0, 0, 1);
-            models[8].draw_mesh();
-        glPopMatrix();
-
-
-        /*
-        glPushMatrix(); //ventilador
-            glScalef(2.0f, 2.0f, 2.0f);
-            glTranslatef(5.0f, 0.0f, 2.0f);
-            glTranslatef(-3.4f, -1.0f, 1.1f);
-            glColor3f(0, 0, 1);
-            models[9].draw_mesh();
-        glPopMatrix();
-        */
-
+        glScalef(2.0f, 2.0f, 2.0f);
+        glTranslatef(-2.1f, -0.48f, 2.8f);
+        models["cama"].draw_mesh();
     glPopMatrix();
 
+    glPushMatrix(); // notebook
+        glScalef(2.0f, 2.0f, 2.0f);
+        glTranslatef(-1.8f, -0.22f, 1.8f);
+        models["notebook"].draw_mesh();
+    glPopMatrix();
+
+    glPushMatrix(); //guarda-roupa
+        glScalef(2.0f, 2.0f, 2.0f);
+        glTranslatef(1.5f, -0.1f, 1.8f);
+        models["guardaroupa"].draw_mesh();
+    glPopMatrix();
+
+    glPushMatrix(); //mesa
+        glScalef(2.0f, 2.0f, 2.0f);
+        glTranslatef(5.0f, 0.0f, 2.0f);
+        glTranslatef(-3.4f, -1.0f, 1.1f);
+        models["mesa"].draw_mesh();
+    glPopMatrix();
+
+
+    glPushMatrix(); // caneca
+        glScalef(2.0f, 2.0f, 2.0f);
+        glTranslatef(-1.9f, -0.16f, 1.5f);
+        glColor3f(0, 0, 1);
+        models["caneca"].draw_mesh();
+    glPopMatrix();
+
+    glPushMatrix(); // cubo
+        glScalef(2.0f, 2.0f, 2.0f);
+        glTranslatef(1.4f, -0.15f, 3.1f);
+        models["cubo"].draw_mesh();
+    glPopMatrix();
+
+    glPushMatrix(); // caderno
+        glScalef(2.0f, 2.0f, 2.0f);
+        glTranslatef(-1.9f, -0.19f, 1.2f);
+        models["caderno"].draw_mesh();
+    glPopMatrix();
+
+    glPushMatrix(); // cadeira
+        glScalef(2.0f, 2.0f, 2.0f);
+        glTranslatef(-1.3f, -0.71f, 1.5f);
+        glRotatef(-90.0f, 0.0f, 1.0f, 0.0f);
+        models["cadeira"].draw_mesh();
+    glPopMatrix();
+
+    glPushMatrix(); // ventilador
+        glTranslatef(-3.6f, -0.39f, 1.5f);
+        glRotatef(200.0f, 0.0f, 1.0f, 0.0f);
+        glScalef(3.3f, 3.3f, 3.3f);
+        models["ventiladorc"].draw_mesh();
+        glTranslatef(0.0f, 0.175f, -0.11f);
+        glRotatef(rot_angle, 0.0f, 0.0f, 1.0f);
+        glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
+        glRotatef(180.0f, 0.0f, 1.0f, 0.0f);
+        models["ventiladorh"].draw_mesh();
+    glPopMatrix();
+    
     glutSwapBuffers();
 }
 
+window mwindow;
+
 void reshape(int width, int height)
 {
-    glViewport(0, 0, (GLsizei)width, (GLsizei)height);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluPerspective(fov, (GLfloat)width / (GLfloat)height, 0.001f, 1000.0f);
+    mwindow.set_dimensions_values(width, height);
+    mwindow.run_perspective();
 }
 
 void motion(int x, int y)
 {
-    static float prevx = glutGet(GLUT_WINDOW_WIDTH) / 2, prevy = glutGet(GLUT_WINDOW_HEIGHT) / 2;
-    float xoffset = x - prevx, yoffset = prevy - y;
-    xoffset *= mouse_sensitivity, yoffset *= mouse_sensitivity;
-    prevx = x, prevy = y;
-
-    cam.yaw += xoffset;
-    cam.pitch += yoffset;
-
-    // cam.pitch = std::clamp(cam.pitch, -89.0f, 89.0f); // not working on linux ??
-    cam.pitch = cam.pitch < -89.0f ? -89.0f : cam.pitch > 89.0f ? 89.0f : cam.pitch;
-
-    vec3 direction {
-        cos(radians(cam.yaw)) * cos(radians(cam.pitch)),
-        sin(radians(cam.pitch)),
-        sin(radians(cam.yaw)) * cos(radians(cam.pitch))
-    };
-
-    cam.front = vec3::normalize(direction);
+    cam.motion(x, y, 0.22f);
 }
 
 void keyboard(unsigned char key, int x, int y)
 {
-    float cam_speed = speed * dt / 1000;
+    float cam_speed = speed * dt;
     float &ct_var = dw_angle_n_pos[control_index];
     switch (key)
     {
@@ -221,20 +176,20 @@ void keyboard(unsigned char key, int x, int y)
             cam.pos -= cam.front * cam_speed / 2.0f;
         break;
         case 'a':
-            cam.pos -= vec3::normalize(vec3::cross(cam.front, cam.up)) * cam_speed;
+            cam.pos -= cam.side_vector() * cam_speed;
         break;
         case 'd':
-            cam.pos += vec3::normalize(vec3::cross(cam.front, cam.up)) * cam_speed;
+            cam.pos += cam.side_vector() * cam_speed;
         break;
         case ' ':
-            cam.pos += vec3{0, cam_speed, 0};
+            cam.pos += cam.up * cam_speed;
         break;
         case 'b':
-            cam.pos -= vec3{0, cam_speed, 0};
+            cam.pos -= cam.up * cam_speed;
         break;
         case 'o':
             ct_var -= 1.0f;
-            ct_var = ct_var < 0.0f ? 0.0f : ct_var;
+            ct_var = (ct_var >= 0.0f) * ct_var;
         break;
         case 'p':
             ct_var += 1.0f;
@@ -243,6 +198,11 @@ void keyboard(unsigned char key, int x, int y)
         case 'l':
             control_index = (control_index + 1) % 3;
         break;
+        case 'r':
+            static GLenum mode = GL_LINE;
+            glPolygonMode(GL_FRONT_AND_BACK, mode);
+            mode = mode == GL_LINE ? GL_FILL : GL_LINE;
+        break;
     }
 }
 
@@ -250,53 +210,45 @@ void mouse(int button, int state, int x, int y)
 {
     if (button == 3) // wheel up
     {
-        
     }
     else if (button == 4) // wheel down
     {
-        
     }
-}
-
-void light_enable()
-
-{
-	/*
-    glEnable(GL_LIGHTING);
-    glEnable(GL_LIGHT0);
-
-    float light_ambient[] = {0.2f, 0.2f, 0.2f};
-    float light_specular[] = {1.0f, 0.0f, 0.0f};
-    glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
-    glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
-    */
 }
 
 #ifndef TEST
 
 int main(int argc, char **argv)
 {
-    glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-    int width = 700, height = 700;
-    glutInitWindowSize(width, width);
-    glutCreateWindow("CG Work");
-
-    glViewport(0, 0, (GLsizei)width, (GLsizei)height);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluPerspective(fov, (GLfloat)width / (GLfloat)height, 0.001f, 1000.0f);
-
-    light_enable();
+    mwindow.init(argc, argv, "CG Work", 700, 700);
 
     glEnable(GL_DEPTH_TEST);
+    /* lightning  */
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
+    
+    float light_ambient[] = {0.4f, 0.4f, 0.4f};
+    float light_diffuse[] = {0.2f, 0.2f, 0.2f};
+    float light_specular[] = {1.0f, 0.0f, 0.0f};
+    glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, light_diffuse);
 
-    glutDisplayFunc(display);
+    /* materials */
+    // glEnable(GL_COLOR_MATERIAL);
+    glEnable(GL_NORMALIZE);
+    glShadeModel(GL_SMOOTH);
+
+    // float light_position[] {0.0f, 0.0f, -2.0f, 1.0f};
+    // glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+    
+    mwindow.set_display_func(display);
     glutReshapeFunc(reshape);
     glutKeyboardFunc(keyboard);
     glutMouseFunc(mouse);
-    
+    glutIdleFunc(idle);
     glutPassiveMotionFunc(motion);
+<<<<<<< HEAD
     glutTimerFunc(0, timer, 0);
 
     // obj_file square("objs/object export.obj");
@@ -319,8 +271,38 @@ int main(int argc, char **argv)
 
 
 
+=======
+>>>>>>> 16bca43e806841121547fcf5bbbf7238c61ee93b
 
-    glutMainLoop();
+    cam.center_camera_angle(mwindow);
+
+    models["quarto"]      = obj_file("objs/quarto.obj");
+    models["cama"]        = obj_file("objs/cama.obj");
+    models["notebook"]    = obj_file("objs/notebook.obj");
+    models["guardaroupa"] = obj_file("objs/guardaroupa.obj");
+    models["mesa"]        = obj_file("objs/mesa.obj");
+    models["caneca"]      = obj_file("objs/caneca.obj");
+    models["cubo"]        = obj_file("objs/cubo.obj");
+    models["caderno"]     = obj_file("objs/caderno.obj");
+    models["cadeira"]     = obj_file("objs/cadeira.obj");
+    models["ventiladorc"]  = obj_file("objs/ventilador_corpo.obj");
+    models["ventiladorh"]  = obj_file("objs/ventilador_helice.obj");
+    // models["ventilador2"] = obj_file("objs/ventilador2.obj");
+
+    // models.emplace_back(obj_file{"objs/quarto.obj"});
+    // models.emplace_back(obj_file{"objs/cama.obj"});
+    // models.emplace_back(obj_file{"objs/notebook.obj"});
+    // models.emplace_back(obj_file{"objs/guardaroupa.obj"});
+    // models.emplace_back(obj_file{"objs/mesa.obj"});
+    // models.emplace_back(obj_file{"objs/caneca.obj"});
+    // models.emplace_back(obj_file{"objs/cubo.obj"});
+    // models.emplace_back(obj_file{"objs/caderno.obj"});
+    // models.emplace_back(obj_file{"objs/cadeira.obj"});
+    // models.emplace_back(obj_file{"objs/ventilador.obj"});
+    // models.emplace_back(obj_file{"objs/ventilador2.obj"});
+
+    // main_window.create_window();
+    mwindow.run();
     return 0;
 }
 

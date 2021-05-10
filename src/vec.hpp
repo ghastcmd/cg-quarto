@@ -1,5 +1,51 @@
 #pragma once
 
+struct vec4
+{
+    float x, y, z, w;
+
+    static const float modulus(const vec4& vec);
+
+    static vec4 normalize(const vec4& vec);
+ 
+    static vec4 cross(const vec4& v1, const vec4& v2);
+
+    vec4 operator+(const vec4& other)
+    {
+        return {x + other.x, y + other.y, z + other.z, w + other.w};
+    }
+
+    void operator+=(const vec4& other)
+    {
+        *this = *this + other;
+    }
+
+    vec4 operator-(const vec4& other)
+    {
+        return {x - other.x, y - other.y, z - other.z, w - other.w};
+    }
+
+    void operator-=(const vec4& other)
+    {
+        *this = *this - other;
+    }
+
+    vec4 operator*(const vec4& other)
+    {
+        return {x * other.x, y * other.y, z * other.z, w * other.w};
+    }
+
+    vec4 operator*(const float val)
+    {
+        return {x * val, y * val, z * val, w * val};
+    }
+
+    vec4 operator/(float val)
+    {
+        return {x / val, y / val, z / val, w / val};
+    }
+};
+
 struct vec3
 {
     float x, y, z;
