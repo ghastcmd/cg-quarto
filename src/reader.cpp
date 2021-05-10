@@ -78,26 +78,22 @@ void revstrmove(char *str, int len, int count)
         *(endp + count) = *endp;
 }
 
-void merge_path_name(const char *path, char *name, const size_t len_name)
+void merge_path_name(const char *path, char *name)
 {
     const char *end_path = path + strlen(path);
     while(end_path >= path - 1 && *end_path-- != '/');
     int dir_len = end_path - path + 2;
 
-    revstrmove(name, len_name, dir_len);
+    revstrmove(name, strlen(name), dir_len);
     strncpy(name, path, dir_len);
-}
-
-void merge_path_name(const char *path, char *name)
-{
-    merge_path_name(path, name, strlen(name));
 }
 
 void dump_str(char *str)
 {
-    while (*str++)
+    char c;
+    while (c = *str++)
     {
-        printf("%02x ", *str);
+        printf("%02x ", c);
     }
     puts("");
 }
@@ -216,7 +212,7 @@ void obj_file::open(const char *path)
             case objtypes::usemtl:
             break;
             case objtypes::mtllib:
-                merge_path_name(path, str, len_str);
+                merge_path_name(path, str);
                 mat_lib.open(str);
             break;
             case objtypes::object_name:
@@ -456,21 +452,19 @@ static std::unordered_map<std::string, mtltypes> mtltypes_map (std::begin(mtltyp
 void mtl_file::open(const char *path)
 {
     // if (m_init) return;
-    std::ifstream file(path, std::ios::in | std::ios::binary);
+    std::ifstream file(path, std::ios::in);
     // Here I use a dummy material, but is guaranteed that it is't used
     material dummy_mat {{0}, {0}, {0}, {0}, 0};
     material &current_mat = dummy_mat;
     while (file.peek() != -1)
     {
         char stype[16] = {0};
-        while (file.peek() < 20) file.get();
+        while (file.peek() == '\n') file.get();
         file.getline(stype, std::size(stype), ' ');
         const auto ret = mtltypes_map[stype];
-        // print_ret(ret);
         char str[64] = {0};
-        file.getline(str, std::size(str), '\x0a');
+        file.getline(str, std::size(str));
         size_t len_str = strlen(str);
-        *(str + --len_str) = '\0';
         switch (ret) {
             case mtltypes::new_line:
             case mtltypes::transmission_filter:
@@ -512,7 +506,7 @@ void mtl_file::open(const char *path)
                 stoi(materials[m_ci].illum_model, str);
             break;
             case mtltypes::map_diffuse: {
-                merge_path_name(path, str, (int)len_str);
+                merge_path_name(path, str);
                 materials[m_ci].tex_diffuse.open(str);
             } break;
             case mtltypes::map_ambient:
