@@ -57,6 +57,7 @@ struct mtl_file
 
     std::vector<material> materials;
     std::vector<std::string> mat_names;
+    std::unordered_map<std::string, size_t> map_material;
 
     size_t m_material_len = 0;
     size_t m_ci = -1;
@@ -88,6 +89,14 @@ struct obj_file
     std::vector<index> indices;
     // std::unordered_map<std::string_view, unsigned int> optrs;
     std::vector<unsigned int> optrs;
+
+    struct faces_group
+    {
+        iter begin;
+        size_t index;
+    };
+
+    std::vector<faces_group> grouping;
 
     mtl_file mat_lib;
 private:

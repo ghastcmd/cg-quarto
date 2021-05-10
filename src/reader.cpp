@@ -208,6 +208,10 @@ void obj_file::open(const char *path)
             case objtypes::smooth_shading:
             case objtypes::line:
             case objtypes::usemtl:
+            {
+                iter nuevo = &indices[indices.size()];
+                grouping.push_back(faces_group{nuevo , mat_lib.map_material[str]});
+            }
             break;
             case objtypes::mtllib:
                 merge_path_name(path, str);
@@ -474,11 +478,13 @@ void mtl_file::open(const char *path)
                     while (!isspace(*tstr)) tstr++;
                     m_material_len = atoi(tstr);
                     materials.reserve(m_material_len);
+                    map_material.reserve(m_material_len);
                 }
             break;
             case mtltypes::new_material:
                 mat_names.push_back(str);
                 m_ci++;
+                map_material[str] = m_ci;
                 materials.emplace_back(material{{0}, {0}, {0}, {0}, 0});
             break;
             case mtltypes::ambient:
