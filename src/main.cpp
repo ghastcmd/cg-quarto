@@ -166,7 +166,16 @@ static void display()
     glPopMatrix();
 
     glPushMatrix();
+        glTranslatef(-4.38f, 2.0f, 5.5f);
+        glRotatef(180.0f, 0.0f, 1.0f, 0.0f);
+        glScalef(2.0f, 2.0f, 2.0f);
         models["quadro van"].draw_mat_mesh();
+    glPopMatrix();
+
+    glPushMatrix();
+        glTranslatef(-4.38f, 0.0f, 3.3f);
+        glScalef(5.0f, 5.0f, 5.0f);
+        models["quadro gato"].draw_mat_mesh();
     glPopMatrix();
 
     glutSwapBuffers();
@@ -318,6 +327,7 @@ int main(int argc, char **argv)
     models["quadro van"]  = obj_file("objs/quadroVangog.obj");
     models["janela"]      = obj_file("objs/janela.obj");
     models["porta"]       = obj_file("objs/porta.obj");
+    models["quadro gato"] = obj_file("objs/quadro.obj");
 
     mwindow.run();
     return 0;
