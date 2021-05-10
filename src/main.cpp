@@ -39,6 +39,9 @@ static void display()
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
+    float light_position[] {1.45f, 1.0f, 1.0f};
+    glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+
     cam.look_at();
 
     mat1.apply_material();
@@ -227,8 +230,8 @@ int main(int argc, char **argv)
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
     
-    float light_ambient[] = {0.4f, 0.4f, 0.4f};
-    float light_diffuse[] = {0.2f, 0.2f, 0.2f};
+    float light_ambient[] = {0.0f, 0.0f, 0.0f};
+    float light_diffuse[] = {0.4f, 0.4f, 0.4f};
     float light_specular[] = {1.0f, 0.0f, 0.0f};
     glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
     glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
