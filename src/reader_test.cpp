@@ -127,7 +127,8 @@ static void keyboard(unsigned char key, int x, int y)
     }
 }
 
-extern void merge_path_name(char *&, const char*, char*);
+extern void merge_path_name(const char*, char*, const size_t);
+extern void merge_path_name(const char*, char*);
 
 int main(int argc, char **argv)
 {
@@ -154,6 +155,36 @@ int main(int argc, char **argv)
     obj_file &file = models[0];
 
     unsigned int error_count = 0;
+
+    const char *path[] = 
+    {
+        "",
+        "simple/file",
+        "simple/fiile/alelo.jpd"
+    };
+    char name[][50]
+    {
+        "name.mtl",
+        "another_name.mtl",
+        "cupid.mtl"
+    };
+
+    const char *correct[]
+    {
+        "name.mtl",
+        "simple/another_name.mtl",
+        "simple/fiile/cupid.mtl"
+    };
+
+    for (int i = 0; i < 3; i++)
+    {
+        merge_path_name(path[i], name[i]);
+        if (strcmp(name[i], correct[i]))
+        {
+            error_count += 1;
+            printf("%s | %s   >> line %i\n", name[i], correct[i], __LINE__);
+        }
+    }
 
     unsigned int test[] = {1, 2, 3, 1, 3, 4, 5, 6, 4, 5, 4, 3, 6, 3, 7, 7, 3, 2, 7, 2, 8, 3, 8, 9, 9, 10, 5, 9, 5, 7, 10, 11, 12, 10, 12, 6, 11, 6, 5, 9, 8, 13, 9, 13, 11, 8, 11, 10, 12, 1, 4, 12, 4, 6, 11, 13, 1, 11, 1, 12, 13, 8, 2, 13, 2, 1};
     if (std::size(test) != file.indices.size())
@@ -226,12 +257,6 @@ int main(int argc, char **argv)
     // mtl_file mtl_file ("objs/cuboid.mtl");
     auto mtl_file = file.mat_lib;
 
-    if (mtl_file.materials[0].tex_diffuse.m_init == 0)
-    {
-        error_count += 1;
-        puts("Have not initialized texture object");
-    }
-
     if (int len = mtl_file.mat_names.size(); len != 1)
     {
         error_count += 1;
@@ -247,7 +272,7 @@ int main(int argc, char **argv)
     }
     
     mtl_file.materials[0].apply_material();
-    mtl_file.materials[0].tex_diffuse.bind();
+    // mtl_file.materials[0].tex_diffuse.bind();
 
     if (int len = mtl_file.materials.size(); len != 1)
     {
@@ -291,6 +316,12 @@ int main(int argc, char **argv)
             error_count += 1;
             printf("shininess: %f\n", val.highlights);
         }
+    }
+
+    if (mtl_file.materials[0].tex_diffuse.m_init == false)
+    {
+        error_count += 1;
+        puts("Have not initialized texture object");
     }
 
     const char *fmt_status_error[] {

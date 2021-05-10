@@ -16,7 +16,8 @@ enum class objtypes : unsigned int
     usemtl,
     smooth_shading,
     face,
-    line
+    line,
+    new_line
 };
 
 void print_ret(objtypes ret)
@@ -32,7 +33,8 @@ void print_ret(objtypes ret)
         "usemtl",
         "smooth_shading",
         "face",
-        "line"
+        "line",
+        "new_line"
     };
 
     puts(objtypes_str[(unsigned int)ret]);
@@ -48,7 +50,9 @@ static std::pair<const char*, objtypes> const objtypes_array[]
     {"vt", objtypes::vertex_texture},
     {"usemtl", objtypes::usemtl},
     {"f", objtypes::face},
-    {"l", objtypes::line}
+    {"l", objtypes::line},
+    {"s", objtypes::smooth_shading},
+    {"\n", objtypes::new_line}
 };
 
 static std::unordered_map<std::string, objtypes> objtypes_map (std::begin(objtypes_array), std::end(objtypes_array));
@@ -74,14 +78,28 @@ void revstrmove(char *str, int len, int count)
         *(endp + count) = *endp;
 }
 
-void merge_path_name(const char *path, char *name)
+void merge_path_name(const char *path, char *name, const size_t len_name)
 {
     const char *end_path = path + strlen(path);
     while(end_path >= path - 1 && *end_path-- != '/');
     int dir_len = end_path - path + 2;
 
-    revstrmove(name, strlen(name), dir_len);
+    revstrmove(name, len_name, dir_len);
     strncpy(name, path, dir_len);
+}
+
+void merge_path_name(const char *path, char *name)
+{
+    merge_path_name(path, name, strlen(name));
+}
+
+void dump_str(char *str)
+{
+    while (*str++)
+    {
+        printf("%02x ", *str);
+    }
+    puts("");
 }
 
 void stovec3(vec3& vec, char * str)
@@ -181,28 +199,26 @@ void obj_file::open(const char *path)
 {
     if (m_initialized) return;
     std::ifstream file(path, std::ios::in | std::ios::binary);
-    constexpr size_t max_stype = 8;
-    char *stype = new char[max_stype];
     while (file.peek() != -1)
     {
-        // char stype[8] = {0};
-        file.getline(stype, max_stype, ' ');
+        char stype[8] = {0};
+        file.getline(stype, std::size(stype), ' ');
         const auto ret = objtypes_map[stype];
         // print_ret(ret);
         char str[1024] = {0};
         file.getline(str, std::size(str));
+        size_t len_str = strlen(str);
+        *(str + --len_str) = '\0';
         switch (ret) {
             case objtypes::comment:
             case objtypes::smooth_shading:
             case objtypes::line:
-            break;
             case objtypes::usemtl:
-
             break;
-            case objtypes::mtllib: {
-                merge_path_name(path, str);
+            case objtypes::mtllib:
+                merge_path_name(path, str, len_str);
                 mat_lib.open(str);
-            } break;
+            break;
             case objtypes::object_name:
                 optrs.push_back(indices.size());
             break;
@@ -227,7 +243,6 @@ void obj_file::open(const char *path)
         }
     }
     file.close();
-    delete stype;
     m_initialized = true;
 }
 
@@ -445,18 +460,17 @@ void mtl_file::open(const char *path)
     // Here I use a dummy material, but is guaranteed that it is't used
     material dummy_mat {{0}, {0}, {0}, {0}, 0};
     material &current_mat = dummy_mat;
-    bool mat_now = false;
     while (file.peek() != -1)
     {
         char stype[16] = {0};
-        while (!isalpha(file.peek())) file.get();
+        while (file.peek() < 20) file.get();
         file.getline(stype, std::size(stype), ' ');
         const auto ret = mtltypes_map[stype];
-        // puts("print-ret: ");
         // print_ret(ret);
-        // puts("");
         char str[64] = {0};
         file.getline(str, std::size(str), '\x0a');
+        size_t len_str = strlen(str);
+        *(str + --len_str) = '\0';
         switch (ret) {
             case mtltypes::new_line:
             case mtltypes::transmission_filter:
@@ -498,7 +512,7 @@ void mtl_file::open(const char *path)
                 stoi(materials[m_ci].illum_model, str);
             break;
             case mtltypes::map_diffuse: {
-                merge_path_name(path, str);
+                merge_path_name(path, str, (int)len_str);
                 materials[m_ci].tex_diffuse.open(str);
             } break;
             case mtltypes::map_ambient:
