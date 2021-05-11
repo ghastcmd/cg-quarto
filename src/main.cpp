@@ -294,7 +294,7 @@ int main(int argc, char **argv)
         {0.2f, 0.2f, 0.2f, 1.0f},   // ambient
         {2.0f, 2.2f, 2.0f, 2.0f},   // diffuse
         {1.0f, 1.0f, 1.0f, 1.0f},   // specular
-        5.0f, 100.0f, clight::type::spot_light
+        5.0f, 10.0f, clight::type::spot_light
     );
 
     for (auto &li: light)
