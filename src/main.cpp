@@ -172,7 +172,7 @@ static void display()
     glPopMatrix();
 
     glPushMatrix();
-        glTranslatef(-4.38f, 0.0f, 3.3f);
+        glTranslatef(-4.37f, 0.0f, 3.3f);
         glScalef(5.0f, 5.0f, 5.0f);
         models["quadro gato"].draw_mat_mesh();
     glPopMatrix();
