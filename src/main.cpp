@@ -25,6 +25,7 @@ static void idle()
 
     float rotation_speed = 360.0f * 2.0f;
     rot_angle += rotation_speed * dt;
+    // basically it caps the angle to 360.0f
     rot_angle -= 360.0f * (rot_angle >= 360.0f);
 
     glutPostRedisplay();

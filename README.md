@@ -28,7 +28,7 @@ Para ligar ou desligar a luminária, utilize a tecla `k`.
 
 ## Requisitos da AB2
 
- - [ ] Modelar e apresentar um quadro de Vincent Van Gogh
+ - [x] Modelar e apresentar um quadro de Vincent Van Gogh
  - [x] Ventilador de mesa com hélice girando no sentido horário em velocidade baixa
  - [x] Luminária spot em cima da mesa
  - [x] Iluminação especular e difusa na modelagem
