@@ -167,7 +167,6 @@ static void display()
 
     glPushMatrix();
         glTranslatef(-4.38f, 2.0f, 5.5f);
-        glRotatef(180.0f, 0.0f, 1.0f, 0.0f);
         glScalef(2.0f, 2.0f, 2.0f);
         models["quadro van"].draw_mat_mesh();
     glPopMatrix();
@@ -281,7 +280,7 @@ int main(int argc, char **argv)
         0,
         {0.488164f, 3.054233f, 6.129874f, 0.0f}, // position
         {0.0f, 0.0f, 0.0f, 0.0f}, // direction
-        {0.0f, 0.0f, 0.0f, 0.0f}, // ambient
+        {0.0f, 0.0f, 0.0f, 1.0f}, // ambient
         {1.0f, 1.0f, 1.0f, 1.0f}, // diffuse
         {1.0f, 1.0f, 1.0f, 1.0f}, // specular
         0.0f, 0.0f, clight::type::point_light
@@ -324,7 +323,7 @@ int main(int argc, char **argv)
     models["ventiladorc"] = obj_file("objs/ventilador_corpo.obj");
     models["ventiladorh"] = obj_file("objs/ventilador_helice.obj");
     models["luminaria"]   = obj_file("objs/luminaria.obj");
-    models["quadro van"]  = obj_file("objs/quadroVangog.obj");
+    models["quadro van"]  = obj_file("objs/quadrovangogh.obj");
     models["janela"]      = obj_file("objs/janela.obj");
     models["porta"]       = obj_file("objs/porta.obj");
     models["quadro gato"] = obj_file("objs/quadro.obj");
