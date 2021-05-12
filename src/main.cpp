@@ -169,6 +169,7 @@ static void display()
     glPushMatrix();
         glTranslatef(-4.38f, 2.0f, 5.5f);
         glScalef(2.0f, 2.0f, 2.0f);
+        glRotatef(180.0f, 1.0f, 0.0f, 0.0f);
         models["quadro van"].draw_mat_mesh();
     glPopMatrix();
 
