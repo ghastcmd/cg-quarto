@@ -140,7 +140,7 @@ char * take_tuple(unsigned int &v, unsigned int &t, unsigned int &n, char *str)
     n = atoi(++str);
     while (*str != ' ' && *str) str++;
 
-    return str;
+    return ++str;
 }
 
 void obj_file::get_faces_index(char *str)

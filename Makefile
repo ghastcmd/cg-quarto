@@ -51,7 +51,7 @@ build: ; $(SS)$(MAKE) -s --no-print-directory -j 4 compile
 
 run: build ; $(SS)$(target)
 
-compile: $(gch) $(target) | $(dep_dir)
+compile: $(dep_dir) $(gch) $(target)
 
 $(gch): $(pch)
 	$(call fmt,Compiling the precompiled header)
@@ -69,11 +69,13 @@ $(obj)/%.o: %.cpp $(dep_dir)/%.d
 $(depend):
 include $(depend)
 
-$(obj): ; $(SS)mkdir $@
+$(obj): $(obj)
 	$(call fmt,Creating $@ directory)
+	$(SS)mkdir $@
 
-$(dep_dir): | $(obj) ; $(SS)mkdir $@
+$(dep_dir):
 	$(call fmt,Creating $@ directory)
+	$(SS)mkdir $@
 
 clean: ; $(SS)rm -f $(object) $(target)
 	$(call fmt,Cleaning the entire $(obj) folder)
