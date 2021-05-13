@@ -278,8 +278,6 @@ int main(int argc, char **argv)
     glEnable(GL_NORMALIZE);
     glEnable(GL_TEXTURE_2D);
 
-    puts("main func");
-
     light[0] = clight(
         0,
         {0.488164f, 3.054233f, 6.129874f, 0.0f}, // position
@@ -322,9 +320,7 @@ int main(int argc, char **argv)
     models["caneca"]      = obj_file("objs/caneca.obj");
     models["cubo"]        = obj_file("objs/cubomagico.obj");
     models["caderno"]     = obj_file("objs/caderno.obj");
-    puts("before importing caneca");
     models["cadeira"]     = obj_file("objs/cadeira.obj");
-    puts("after importing caneca");
     models["ventiladorc"] = obj_file("objs/ventilador_corpo.obj");
     models["ventiladorh"] = obj_file("objs/ventilador_helice.obj");
     models["luminaria"]   = obj_file("objs/luminaria.obj");

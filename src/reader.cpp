@@ -57,13 +57,6 @@ static std::pair<const char*, objtypes> const objtypes_array[]
 
 static std::unordered_map<std::string, objtypes> objtypes_map (std::begin(objtypes_array), std::end(objtypes_array));
 
-void print_val(std::ifstream& fstream)
-{
-    char str[16];
-    fstream.getline(str, 16, '\x0a');
-    puts(str);
-}
-
 void strmvcnt(char *str, int str_len, int move_count)
 {
     char *endp = str + str_len;
@@ -128,7 +121,6 @@ obj_file::obj_file(const char *path)
 {
     if (m_initialized) return;
     open(path);
-    puts("inside the constructor");
 }
 
 char * take_tuple(unsigned int &v, unsigned int &t, unsigned int &n, char *str)
@@ -152,21 +144,14 @@ void obj_file::get_faces_index(char *str)
     unsigned int tindexes[buffer_size] = {0};
     unsigned int nindexes[buffer_size] = {0};
     int i = 0, j = 0;
-    puts("before for loop");
-    printf(">%s<\n", str);
-    puts("after printing");
-    dump_str(str);
     for (i = 0; *str != '\0'; ++i)
     {
-        printf("'%s'\n", str);
         str = take_tuple(vindexes[i], tindexes[i], nindexes[i], str)-1;
-        printf("%i %i %i\n", vindexes[i], tindexes[i], nindexes[i]);
         if (vindexes[i] < 0 || tindexes[i] < 0 || nindexes[i] < 0)
         {
             assert("invalid index value");
         }
     }
-    puts("before reordering the faces");
     int len = i;
     unsigned int fvertex [buffer_size * 3] = {0};
     unsigned int ftexture[buffer_size * 3] = {0};
@@ -182,7 +167,6 @@ void obj_file::get_faces_index(char *str)
     fnormals[0] = nindexes[0];
     fnormals[1] = nindexes[1];
     fnormals[2] = nindexes[2];
-    puts("before second for loop");
     for (i = 0, j = 3; i + 3 <= len; ++i, j+=3)
     { // Converting n edge faces to triangles
         fvertex[j]   = vindexes[i];
@@ -203,7 +187,6 @@ void obj_file::get_faces_index(char *str)
     {
         indices.emplace_back(fnormals[i]-1, ftexture[i]-1, fvertex[i]-1);
     }
-    puts("at the end of function");
 }
 
 void obj_file::open(const char *path)
@@ -216,7 +199,6 @@ void obj_file::open(const char *path)
     {
         std::getline(file, stri, ' ');
         const auto ret = objtypes_map[stri];
-        print_ret(ret);
         std::getline(file, stri, '\n');
         
         char *str = &stri[0];
@@ -242,33 +224,27 @@ void obj_file::open(const char *path)
                 mat_lib.open(str);
             break;
             case objtypes::vertex_coord: {
-                printf("'%s'\n", str);
-                dump_str(str);
                 vec3 vec;
                 stovec3(vec, str);
-                vcoords.push_back(vec);
+                vcoords.emplace_back(vec);
             } break;
             case objtypes::vertex_texture: {
                 vec2 vec;
                 stovec2(vec, str);
-                vtexture.push_back(vec);
+                vtexture.emplace_back(vec);
             } break;
             case objtypes::vertex_normal: {
                 vec3 vec;
                 stovec3(vec, str);
-                vnormal.push_back(vec);
+                vnormal.emplace_back(vec);
             } break;
             case objtypes::face: {
-                puts("before getting face index");
                 get_faces_index(str);
-                puts("after getting face index");
             } break;
         }
     }
-    puts("before sizing");
     grouping[grouping.size()-1].end = indices.size();
     m_initialized = true;
-    puts("after sizing");
 }
 
 void obj_file::draw_mesh()
@@ -504,7 +480,6 @@ void mtl_file::open(const char *path)
     // Here I use a dummy material, but is guaranteed that it is't used
     material dummy_mat {{0}, {0}, {0}, {0}, 0};
     material &current_mat = dummy_mat;
-    puts("before peek thingy");
     std::string stype;
     std::string &stri = stype;
     while (file.peek() != -1)
@@ -575,6 +550,5 @@ void mtl_file::open(const char *path)
             break;
         }
     }
-    puts("after peeky thing");
     m_init = true;
 }
