@@ -73,7 +73,7 @@ void strmvcnt(char *str, int str_len, int move_count)
 
 void revstrmove(char *str, int len, int count)
 {
-    char *endp = str + len;
+    char *endp = str + len + 1;
     while (endp-- != str)
         *(endp + count) = *endp;
 }
@@ -128,7 +128,7 @@ obj_file::obj_file(const char *path)
 {
     if (m_initialized) return;
     open(path);
-    m_initialized = true;
+    puts("inside the constructor");
 }
 
 char * take_tuple(unsigned int &v, unsigned int &t, unsigned int &n, char *str)
@@ -143,6 +143,8 @@ char * take_tuple(unsigned int &v, unsigned int &t, unsigned int &n, char *str)
     return ++str;
 }
 
+#include <assert.h>
+
 void obj_file::get_faces_index(char *str)
 {
     constexpr unsigned int buffer_size = 40;
@@ -150,10 +152,21 @@ void obj_file::get_faces_index(char *str)
     unsigned int tindexes[buffer_size] = {0};
     unsigned int nindexes[buffer_size] = {0};
     int i = 0, j = 0;
+    puts("before for loop");
+    printf(">%s<\n", str);
+    puts("after printing");
+    dump_str(str);
     for (i = 0; *str != '\0'; ++i)
     {
-        str = take_tuple(vindexes[i], tindexes[i], nindexes[i], str);
+        printf("'%s'\n", str);
+        str = take_tuple(vindexes[i], tindexes[i], nindexes[i], str)-1;
+        printf("%i %i %i\n", vindexes[i], tindexes[i], nindexes[i]);
+        if (vindexes[i] < 0 || tindexes[i] < 0 || nindexes[i] < 0)
+        {
+            assert("invalid index value");
+        }
     }
+    puts("before reordering the faces");
     int len = i;
     unsigned int fvertex [buffer_size * 3] = {0};
     unsigned int ftexture[buffer_size * 3] = {0};
@@ -169,6 +182,7 @@ void obj_file::get_faces_index(char *str)
     fnormals[0] = nindexes[0];
     fnormals[1] = nindexes[1];
     fnormals[2] = nindexes[2];
+    puts("before second for loop");
     for (i = 0, j = 3; i + 3 <= len; ++i, j+=3)
     { // Converting n edge faces to triangles
         fvertex[j]   = vindexes[i];
@@ -187,32 +201,36 @@ void obj_file::get_faces_index(char *str)
     indices.reserve(len);
     for (i = 0; i < len; ++i)
     {
-        indices.push_back({fnormals[i]-1, ftexture[i]-1, fvertex[i]-1});
+        indices.emplace_back(fnormals[i]-1, ftexture[i]-1, fvertex[i]-1);
     }
+    puts("at the end of function");
 }
 
 void obj_file::open(const char *path)
 {
     if (m_initialized) return;
     std::ifstream file(path, std::ios::in);
+    std::string stri;
+    stri.reserve(256);
     while (file.peek() != -1)
     {
-        char stype[8] = {0};
-        file.getline(stype, std::size(stype), ' ');
-        const auto ret = objtypes_map[stype];
-        // print_ret(ret);
-        char str[1024] = {0};
-        file.getline(str, std::size(str));
+        std::getline(file, stri, ' ');
+        const auto ret = objtypes_map[stri];
+        print_ret(ret);
+        std::getline(file, stri, '\n');
+        
+        char *str = &stri[0];
         switch (ret) {
             case objtypes::comment:
             case objtypes::smooth_shading:
+            case objtypes::object_name:
             case objtypes::line:
             break;
             case objtypes::usemtl:
             {
                 auto nuevo = indices.size();
-                size_t index = mat_lib.map_material[str];
-                grouping.push_back(faces_group{nuevo, 0, index});
+                size_t index = mat_lib.map_material[stri];
+                grouping.emplace_back(nuevo, 0, index);
                 if (auto pend = &grouping[grouping.size()-2]; pend != nullptr)
                 {
                     pend->end = nuevo;
@@ -223,10 +241,9 @@ void obj_file::open(const char *path)
                 merge_path_name(path, str);
                 mat_lib.open(str);
             break;
-            case objtypes::object_name:
-                optrs.push_back(indices.size());
-            break;
             case objtypes::vertex_coord: {
+                printf("'%s'\n", str);
+                dump_str(str);
                 vec3 vec;
                 stovec3(vec, str);
                 vcoords.push_back(vec);
@@ -242,13 +259,16 @@ void obj_file::open(const char *path)
                 vnormal.push_back(vec);
             } break;
             case objtypes::face: {
+                puts("before getting face index");
                 get_faces_index(str);
+                puts("after getting face index");
             } break;
         }
     }
+    puts("before sizing");
     grouping[grouping.size()-1].end = indices.size();
-    file.close();
     m_initialized = true;
+    puts("after sizing");
 }
 
 void obj_file::draw_mesh()
@@ -288,8 +308,8 @@ void obj_file::draw_mat_mesh()
 {
     for (auto &group: grouping)
     {
-        if (mat_lib.init())
-        mat_lib.materials[group.mat_index].apply_material();
+        //if (mat_lib.init())
+        //mat_lib.materials[group.mat_index].apply_material();
 
         iter left = indices.data() + group.begin;
         iter right = indices.data() + group.end;
@@ -484,14 +504,22 @@ void mtl_file::open(const char *path)
     // Here I use a dummy material, but is guaranteed that it is't used
     material dummy_mat {{0}, {0}, {0}, {0}, 0};
     material &current_mat = dummy_mat;
+    puts("before peek thingy");
+    std::string stype;
+    std::string &stri = stype;
     while (file.peek() != -1)
     {
-        char stype[16] = {0};
+        // char stype[16] = {0};
         while (file.peek() == '\n') file.get();
-        file.getline(stype, std::size(stype), ' ');
+        file >> stype;
+        std::getline(file, stype, ' ');
+        // file.getline(stype, std::size(stype), ' ');
         const auto ret = mtltypes_map[stype];
-        char str[64] = {0};
-        file.getline(str, std::size(str));
+        // char str[64] = {0};
+        // file.getline(str, std::size(str));
+        // file.getline(stri);
+        std::getline(file, stri, '\n');
+        char *str = &stri[0];
         switch (ret) {
             case mtltypes::new_line:
             case mtltypes::transmission_filter:
@@ -547,6 +575,6 @@ void mtl_file::open(const char *path)
             break;
         }
     }
+    puts("after peeky thing");
     m_init = true;
-    file.close();
 }
