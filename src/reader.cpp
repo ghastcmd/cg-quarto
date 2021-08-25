@@ -337,8 +337,8 @@ void obj_file::draw_mat_mesh()
 {
     for (auto &group: grouping)
     {
-        //if (mat_lib.init())
-        //mat_lib.materials[group.mat_index].apply_material();
+        if (mat_lib.init())
+        mat_lib.materials[group.mat_index].apply_material();
 
         iter left = indices.data() + group.begin;
         iter right = indices.data() + group.end;
