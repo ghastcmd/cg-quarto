@@ -53,29 +53,25 @@ static void display()
     mat1.apply_material();
 
     glPushMatrix();
-        glutSolidCone(1.0, 1.0, 20, 2);
-    glPopMatrix();
-
-    glPushMatrix();
         glScalef(2.0f, 2.0f, 2.0f);
         glTranslatef(5.0f, 0.0f, 2.0f);
 
-        // glPushMatrix(); // first door
-        //     glTranslatef(-3.63f, 0.040f, 2.5f);
-        //     glRotatef(dw_angle_n_pos[0], 0, 1, 0);
-        //     glTranslatef(0.4f, 0.0f, 0.0f);
-        //     glScalef(0.9f, 1.0f, 0.9f);
-        //     models["porta"].draw_mat_mesh();
-        // glPopMatrix();
+        glPushMatrix(); // first door
+            glTranslatef(-3.63f, 0.040f, 2.5f);
+            glRotatef(dw_angle_n_pos[0], 0, 1, 0);
+            glTranslatef(0.4f, 0.0f, 0.0f);
+            glScalef(0.9f, 1.0f, 0.9f);
+            models["porta"].draw_mat_mesh();
+        glPopMatrix();
 
-        // glPushMatrix(); // second door
-        //     glTranslatef(-10.0f, 0.03f, 2.427f);
-        //     glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
-        //     glRotatef(-dw_angle_n_pos[1], 0.0f, 1.0f, 0.0f);
-        //     glTranslatef(0.4f, 0.0f, 0.0f);
-        //     glScalef(0.9f, 1.0f, 0.9f);
-        //     models["porta"].draw_mat_mesh();
-        // glPopMatrix();
+        glPushMatrix(); // second door
+            glTranslatef(-10.0f, 0.03f, 2.427f);
+            glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
+            glRotatef(-dw_angle_n_pos[1], 0.0f, 1.0f, 0.0f);
+            glTranslatef(0.4f, 0.0f, 0.0f);
+            glScalef(0.9f, 1.0f, 0.9f);
+            models["porta"].draw_mat_mesh();
+        glPopMatrix();
 
         glPushMatrix(); // drawing the bedroom
             glTranslatef(-5.0f, -1.0f, 0.0f);
@@ -83,105 +79,105 @@ static void display()
         glPopMatrix();
     glPopMatrix();
 
-    // glPushMatrix(); // left window (imovable)
-    //     glTranslatef(-1.5f, 1.17f, 0.7f);
-    //     glRotatef(-90.0f, 0.0f, 1.0f, 0.0f);
-    //     glScalef(1.0f, 2.9f, 2.7f);
-    //     models["janela"].draw_mat_mesh();
-    // glPopMatrix();
+    glPushMatrix(); // left window (imovable)
+        glTranslatef(-1.5f, 1.17f, 0.7f);
+        glRotatef(-90.0f, 0.0f, 1.0f, 0.0f);
+        glScalef(1.0f, 2.9f, 2.7f);
+        models["janela"].draw_mat_mesh();
+    glPopMatrix();
 
-    // glPushMatrix(); // right window (movable)
-    //     glTranslatef(1.5f - dw_angle_n_pos[2] / 35.0f, 1.17f, 0.78f);
-    //     glRotatef(-90.0f, 0.0f, 1.0f, 0.0f);
-    //     glScalef(1.0f, 2.9f, 2.7f);
-    //     models["janela"].draw_mat_mesh();
-    // glPopMatrix();
+    glPushMatrix(); // right window (movable)
+        glTranslatef(1.5f - dw_angle_n_pos[2] / 35.0f, 1.17f, 0.78f);
+        glRotatef(-90.0f, 0.0f, 1.0f, 0.0f);
+        glScalef(1.0f, 2.9f, 2.7f);
+        models["janela"].draw_mat_mesh();
+    glPopMatrix();
 
-    // glPushMatrix(); // cama
-    //     glScalef(2.0f, 2.0f, 2.0f);
-    //     glTranslatef(-2.1f, -0.48f, 2.8f);
-    //     models["cama"].draw_mat_mesh();
-    // glPopMatrix();
+    glPushMatrix(); // cama
+        glScalef(2.0f, 2.0f, 2.0f);
+        glTranslatef(-2.1f, -0.48f, 2.8f);
+        models["cama"].draw_mat_mesh();
+    glPopMatrix();
 
-    // glPushMatrix(); // notebook
-    //     glScalef(2.0f, 2.0f, 2.0f);
-    //     glTranslatef(-1.8f, -0.22f, 1.8f);
-    //     models["notebook"].draw_mat_mesh();
-    // glPopMatrix();
+    glPushMatrix(); // notebook
+        glScalef(2.0f, 2.0f, 2.0f);
+        glTranslatef(-1.8f, -0.22f, 1.8f);
+        models["notebook"].draw_mat_mesh();
+    glPopMatrix();
 
-    // glPushMatrix(); //guarda-roupa
-    //     glTranslatef(0.8f, -1.9f, 3.5f);
-    //     glRotatef(180.0f, 0.0f, 1.0f, 0.0f);
-    //     glScalef(2.0f, 2.0f, 2.0f);
-    //     models["guardaroupa"].draw_mat_mesh();
-    // glPopMatrix();
+    glPushMatrix(); //guarda-roupa
+        glTranslatef(0.8f, -1.9f, 3.5f);
+        glRotatef(180.0f, 0.0f, 1.0f, 0.0f);
+        glScalef(2.0f, 2.0f, 2.0f);
+        models["guardaroupa"].draw_mat_mesh();
+    glPopMatrix();
 
-    // glPushMatrix(); //mesa
-    //     glScalef(2.0f, 2.0f, 2.0f);
-    //     glTranslatef(5.0f, 0.0f, 2.0f);
-    //     glTranslatef(-3.4f, -1.0f, 1.1f);
-    //     models["mesa"].draw_mat_mesh();
-    // glPopMatrix();
+    glPushMatrix(); //mesa
+        glScalef(2.0f, 2.0f, 2.0f);
+        glTranslatef(5.0f, 0.0f, 2.0f);
+        glTranslatef(-3.4f, -1.0f, 1.1f);
+        models["mesa"].draw_mat_mesh();
+    glPopMatrix();
 
 
-    // glPushMatrix(); // caneca
-    //     glScalef(2.0f, 2.0f, 2.0f);
-    //     glTranslatef(-1.9f, -0.15f, 1.5f);
-    //     glScalef(0.05f, 0.05f, 0.05f);
-    //     models["caneca"].draw_mat_mesh();
-    // glPopMatrix();
+    glPushMatrix(); // caneca
+        glScalef(2.0f, 2.0f, 2.0f);
+        glTranslatef(-1.9f, -0.15f, 1.5f);
+        glScalef(0.05f, 0.05f, 0.05f);
+        models["caneca"].draw_mat_mesh();
+    glPopMatrix();
 
-    // glPushMatrix(); // cubo
-    //     glTranslatef(2.8f, -0.51f, 6.7f);
-    //     glScalef(2.0f, 2.0f, 2.0f);
-    //     models["cubo"].draw_mat_mesh();
-    // glPopMatrix();
+    glPushMatrix(); // cubo
+        glTranslatef(2.8f, -0.51f, 6.7f);
+        glScalef(2.0f, 2.0f, 2.0f);
+        models["cubo"].draw_mat_mesh();
+    glPopMatrix();
 
-    // glPushMatrix(); // caderno
-    //     glTranslatef(2.9f, -0.56f, 6.2f);
-    //     glRotatef(80.0f, 0.0f, 1.0f, 0.0f);
-    //     glScalef(2.0f, 2.0f, 2.0f);
-    //     models["caderno"].draw_mat_mesh();
-    // glPopMatrix();
+    glPushMatrix(); // caderno
+        glTranslatef(2.9f, -0.56f, 6.2f);
+        glRotatef(80.0f, 0.0f, 1.0f, 0.0f);
+        glScalef(2.0f, 2.0f, 2.0f);
+        models["caderno"].draw_mat_mesh();
+    glPopMatrix();
 
-    // glPushMatrix(); // cadeira
-    //     glScalef(2.0f, 2.0f, 2.0f);
-    //     glTranslatef(-1.3f, -0.71f, 1.5f);
-    //     glRotatef(-90.0f, 0.0f, 1.0f, 0.0f);
-    //     models["cadeira"].draw_mat_mesh();
-    // glPopMatrix();
+    glPushMatrix(); // cadeira
+        glScalef(2.0f, 2.0f, 2.0f);
+        glTranslatef(-1.3f, -0.71f, 1.5f);
+        glRotatef(-90.0f, 0.0f, 1.0f, 0.0f);
+        models["cadeira"].draw_mat_mesh();
+    glPopMatrix();
 
-    // glPushMatrix(); // ventilador
-    //     glTranslatef(-3.6f, -0.39f, 1.5f);
-    //     glRotatef(200.0f, 0.0f, 1.0f, 0.0f);
-    //     glScalef(3.3f, 3.3f, 3.3f);
-    //     models["ventiladorc"].draw_mat_mesh();
-    //     glTranslatef(0.0f, 0.175f, -0.11f);
-    //     glRotatef(rot_angle, 0.0f, 0.0f, 1.0f);
-    //     glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
-    //     glRotatef(180.0f, 0.0f, 1.0f, 0.0f);
-    //     models["ventiladorh"].draw_mat_mesh();
-    // glPopMatrix();
+    glPushMatrix(); // ventilador
+        glTranslatef(-3.6f, -0.39f, 1.5f);
+        glRotatef(200.0f, 0.0f, 1.0f, 0.0f);
+        glScalef(3.3f, 3.3f, 3.3f);
+        models["ventiladorc"].draw_mat_mesh();
+        glTranslatef(0.0f, 0.175f, -0.11f);
+        glRotatef(rot_angle, 0.0f, 0.0f, 1.0f);
+        glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
+        glRotatef(180.0f, 0.0f, 1.0f, 0.0f);
+        models["ventiladorh"].draw_mat_mesh();
+    glPopMatrix();
     
-    // glPushMatrix(); // luminaria
-    //     glTranslatef(3.5f, -3.08f, 5.8f);
-    //     glRotatef(-220.0f, 0.0f, 1.0f, 0.0f);
-    //     glScalef(2.2f, 2.2f, 2.2f);
-    //     models["luminaria"].draw_mat_mesh();
-    // glPopMatrix();
+    glPushMatrix(); // luminaria
+        glTranslatef(3.5f, -3.08f, 5.8f);
+        glRotatef(-220.0f, 0.0f, 1.0f, 0.0f);
+        glScalef(2.2f, 2.2f, 2.2f);
+        models["luminaria"].draw_mat_mesh();
+    glPopMatrix();
 
-    // glPushMatrix(); // quadro van gogh
-    //     glTranslatef(-4.38f, 2.0f, 5.5f);
-    //     glScalef(2.0f, 2.0f, 2.0f);
-    //     glRotatef(180.0f, 1.0f, 0.0f, 0.0f);
-    //     models["quadro van"].draw_mat_mesh();
-    // glPopMatrix();
+    glPushMatrix(); // quadro van gogh
+        glTranslatef(-4.38f, 2.0f, 5.5f);
+        glScalef(2.0f, 2.0f, 2.0f);
+        glRotatef(180.0f, 1.0f, 0.0f, 0.0f);
+        models["quadro van"].draw_mat_mesh();
+    glPopMatrix();
 
-    // glPushMatrix();
-    //     glTranslatef(-4.37f, 0.0f, 3.3f);
-    //     glScalef(5.0f, 5.0f, 5.0f);
-    //     models["quadro gato"].draw_mat_mesh();
-    // glPopMatrix();
+    glPushMatrix();
+        glTranslatef(-4.37f, 0.0f, 3.3f);
+        glScalef(5.0f, 5.0f, 5.0f);
+        models["quadro gato"].draw_mat_mesh();
+    glPopMatrix();
 
     glutSwapBuffers();
 }
@@ -317,21 +313,21 @@ int main(int argc, char **argv)
 
     cam.center_camera_angle(mwindow);
     models["quarto"]      = obj_file("objs/quarto.obj");
-    // models["cama"]        = obj_file("objs/cama.obj");
-    // models["notebook"]    = obj_file("objs/notebook.obj");
-    // models["guardaroupa"] = obj_file("objs/guardaroupa.obj");
-    // models["mesa"]        = obj_file("objs/mesa.obj");
-    // models["caneca"]      = obj_file("objs/caneca.obj");
-    // models["cubo"]        = obj_file("objs/cubomagico.obj");
-    // models["caderno"]     = obj_file("objs/caderno.obj");
-    // models["cadeira"]     = obj_file("objs/cadeira.obj");
-    // models["ventiladorc"] = obj_file("objs/ventilador_corpo.obj");
-    // models["ventiladorh"] = obj_file("objs/ventilador_helice.obj");
-    // models["luminaria"]   = obj_file("objs/luminaria.obj");
-    // models["quadro van"]  = obj_file("objs/quadrovangogh.obj");
-    // models["janela"]      = obj_file("objs/janela.obj");
-    // models["porta"]       = obj_file("objs/porta.obj");
-    // models["quadro gato"] = obj_file("objs/quadro.obj");
+    models["cama"]        = obj_file("objs/cama.obj");
+    models["notebook"]    = obj_file("objs/notebook.obj");
+    models["guardaroupa"] = obj_file("objs/guardaroupa.obj");
+    models["mesa"]        = obj_file("objs/mesa.obj");
+    models["caneca"]      = obj_file("objs/caneca.obj");
+    models["cubo"]        = obj_file("objs/cubomagico.obj");
+    models["caderno"]     = obj_file("objs/caderno.obj");
+    models["cadeira"]     = obj_file("objs/cadeira.obj");
+    models["ventiladorc"] = obj_file("objs/ventilador_corpo.obj");
+    models["ventiladorh"] = obj_file("objs/ventilador_helice.obj");
+    models["luminaria"]   = obj_file("objs/luminaria.obj");
+    models["quadro van"]  = obj_file("objs/quadrovangogh.obj");
+    models["janela"]      = obj_file("objs/janela.obj");
+    models["porta"]       = obj_file("objs/porta.obj");
+    models["quadro gato"] = obj_file("objs/quadro.obj");
 
     mwindow.run();
     return 0;

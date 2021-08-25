@@ -88,7 +88,7 @@ void merge_path_name(const char *path, std::string &str)
     {
         if (path[i] == '/' || path[i] == '\\')
         {
-            path_size = i;
+            path_size = i + 1;
             break;
         }
     }
@@ -187,15 +187,21 @@ char * take_tuple(unsigned int &v, unsigned int &t, unsigned int &n, char *str)
 void obj_file::get_faces_index(std::string &str)
 {
     std::stringstream str_to_parse (str);
+    //! DEBUG
     constexpr unsigned int buffer_size = 40;
     unsigned int vindexes[buffer_size] = {0};
     unsigned int tindexes[buffer_size] = {0};
     unsigned int nindexes[buffer_size] = {0};
     int i = 0, j = 0;
-    for (i = 0; str_to_parse.peek() != 0; ++i)
+    for (i = 0; str_to_parse.peek() != -1; ++i)
     {
         // str = take_tuple(vindexes[i], tindexes[i], nindexes[i], str)-1;
-        str_to_parse >> vindexes[i] >> tindexes[i] >> nindexes[i];
+        str_to_parse >> vindexes[i];
+        str_to_parse.get();
+        str_to_parse >> tindexes[i];
+        str_to_parse.get();
+        str_to_parse >> nindexes[i];
+        str_to_parse.get();
     }
     int len = i;
     unsigned int fvertex [buffer_size * 3] = {0};
@@ -240,9 +246,6 @@ void obj_file::open(const char *path)
     if (m_initialized) return;
     std::cout << path << '\n';
     std::ifstream file(path, std::ios::in);
-    //! DEBUG
-    puts("This is after opening the file");
-    std::cout << file.is_open() << '\n';
     std::string str;
     while (file.peek() != -1)
     {
