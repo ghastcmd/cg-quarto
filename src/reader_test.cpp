@@ -160,7 +160,7 @@ int main(int argc, char **argv)
     {
         "",
         "simple/file",
-        "simple/fiile/alelo.jpd"
+        "simple/fiile/alelo.jpg"
     };
     char name[][50]
     {
@@ -186,10 +186,10 @@ int main(int argc, char **argv)
         }
     }
 
-    unsigned int test[] = {1, 2, 3, 1, 3, 4, 5, 6, 4, 5, 4, 3, 6, 3, 7, 7, 3, 2, 7, 2, 8, 3, 8, 9, 9, 10, 5, 9, 5, 7, 10, 11, 12, 10, 12, 6, 11, 6, 5, 9, 8, 13, 9, 13, 11, 8, 11, 10, 12, 1, 4, 12, 4, 6, 11, 13, 1, 11, 1, 12, 13, 8, 2, 13, 2, 1};
+    unsigned int test[] = {13, 11, 7, 13, 7, 9, 4, 3, 9, 4, 9, 7, 3, 7, 8, 8, 7, 11, 8, 11, 5, 7, 5, 6, 6, 2, 4, 6, 4, 8, 2, 1, 10, 2, 10, 3, 1, 3, 4, 6, 5, 12, 6, 12, 1, 5, 1, 2, 10, 13, 9, 10, 9, 3, 1, 12, 13, 1, 13, 10, 12, 5, 11, 12, 11, 13};
     if (std::size(test) != file.indices.size())
     {
-        printf("size lenghts don't match %i\n", __LINE__);
+        printf("size lenghts don't match %i | %i | line %i\n", std::size(test), file.indices.size(), __LINE__);
         error_count += 1;
     }
     for (int i = 0, max = file.indices.size(); i < max; ++i)
@@ -197,12 +197,13 @@ int main(int argc, char **argv)
         auto &vec = file.indices[i];
         if (vec.vertex != test[i]-1)
         {
-            printf("inconssitent value %i\n", __LINE__);
+            printf("insconsistent value <%i> %i\n", i, __LINE__);
+            printf("%u | %u\n", vec.vertex, test[i] - 1);
             error_count += 1;
         }
     }
 
-    float vertexes[] = {0, 2.575958, 0, -1, 1, 0, -1, 1, 1, 0, 1, 1, 1, -1, 1, 1, 1, 1, -1, -1, 1, -1, 1, -1, -1, -1, -1, 1, -1, -1, 1, 1, -1, 1, 1, 0, 0, 1, -1};
+    float vertexes[] = {1, 1, -1, 1, -1, -1, 1, 1, 1, 1, -1, 1, -1, 1, -1, -1, -1, -1, -1, 1, 1, -1, -1, 1, 0, 1, 1, 1, 1, 0, -1, 1, 0, 0, 1, -1, 0, 2.575958, 0};
     if (std::size(vertexes) != file.vcoords.size() * 3)
     {
         printf("size lenghts don't match %i\n", __LINE__);
@@ -301,7 +302,7 @@ int main(int argc, char **argv)
             error_count += 1;
             printf("emission: %f %f %f\n", val.emissive.x, val.emissive.y, val.emissive.z);
         }
-        if (val.highlights != 225.0f)
+        if (ceil(val.highlights) != 323.999994f)
         {
             error_count += 1;
             printf("highlights: %.20lf\n", val.highlights);

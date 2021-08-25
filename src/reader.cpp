@@ -187,7 +187,6 @@ char * take_tuple(unsigned int &v, unsigned int &t, unsigned int &n, char *str)
 void obj_file::get_faces_index(std::string &str)
 {
     std::stringstream str_to_parse (str);
-    //! DEBUG
     constexpr unsigned int buffer_size = 40;
     unsigned int vindexes[buffer_size] = {0};
     unsigned int tindexes[buffer_size] = {0};
