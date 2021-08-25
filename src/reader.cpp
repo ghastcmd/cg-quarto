@@ -57,13 +57,6 @@ static std::pair<const char*, objtypes> const objtypes_array[]
 
 static std::unordered_map<std::string, objtypes> objtypes_map (std::begin(objtypes_array), std::end(objtypes_array));
 
-void print_val(std::ifstream& fstream)
-{
-    char str[16];
-    fstream.getline(str, 16, '\x0a');
-    puts(str);
-}
-
 void strmvcnt(char *str, int str_len, int move_count)
 {
     char *endp = str + str_len;
@@ -73,7 +66,7 @@ void strmvcnt(char *str, int str_len, int move_count)
 
 void revstrmove(char *str, int len, int count)
 {
-    char *endp = str + len;
+    char *endp = str + len + 1;
     while (endp-- != str)
         *(endp + count) = *endp;
 }
@@ -88,23 +81,51 @@ void merge_path_name(const char *path, char *name)
     strncpy(name, path, dir_len);
 }
 
+void merge_path_name(const char *path, std::string &str)
+{
+    int path_size = -1;
+    for (int i = strlen(path); i > 0; i--)
+    {
+        if (path[i] == '/' || path[i] == '\\')
+        {
+            path_size = i + 1;
+            break;
+        }
+    }
+    if (path_size == -1) perror("Could not find a '\\' or '/' in path");
+
+    str.insert(0, path, path_size);
+}
+
 void dump_str(char *str)
 {
-    char c;
-    while (c = *str++)
+    char c = 0;
+    while ((c = *str++))
     {
         printf("%02x ", c);
     }
     puts("");
 }
 
-void stovec3(vec3& vec, char * str)
+vec3 stovec3(char * str)
 {
-    vec.x = atof(str);
+    float x = atof(str);
     while (!isspace(*str)) str++;
-    vec.y = atof(str++);
+    float y = atof(str++);
     while (!isspace(*str)) str++;
-    vec.z = atof(str);
+    float z = atof(str);
+    return {x, y, z};
+}
+
+vec3 stovec3(std::string &str)
+{
+    size_t size1 = str.find_first_of(" ");
+    size_t size2 = str.find_first_of(" ", size1 + 1);
+    float x = atof(str.c_str());
+    float y = atof(str.c_str() + size1);
+    float z = atof(str.c_str() + size2);
+
+    return {x, y, z};
 }
 
 void stovec2(vec2& vec, char * str)
@@ -114,9 +135,23 @@ void stovec2(vec2& vec, char * str)
     vec.y = atof(str);
 }
 
+vec2 stovec2(std::string &str)
+{
+    size_t size = str.find_first_of(" ");
+    float x = atof(str.c_str());
+    float y = atof(str.c_str() + size);
+
+    return {x, y};
+}
+
 void stof(float &val, char * str)
 {
     val = atof(str);
+}
+
+float stof(std::string &str)
+{
+    return atof(str.c_str());
 }
 
 void stoi(unsigned int &val, char * str)
@@ -124,11 +159,17 @@ void stoi(unsigned int &val, char * str)
     val = atoi(str);
 }
 
+size_t stoi(std::string &str)
+{
+    size_t size;
+    sscanf(str.c_str(), "%zu", &size);
+    return size;
+}
+
 obj_file::obj_file(const char *path)
 {
     if (m_initialized) return;
     open(path);
-    m_initialized = true;
 }
 
 char * take_tuple(unsigned int &v, unsigned int &t, unsigned int &n, char *str)
@@ -143,16 +184,23 @@ char * take_tuple(unsigned int &v, unsigned int &t, unsigned int &n, char *str)
     return ++str;
 }
 
-void obj_file::get_faces_index(char *str)
+void obj_file::get_faces_index(std::string &str)
 {
+    std::stringstream str_to_parse (str);
     constexpr unsigned int buffer_size = 40;
     unsigned int vindexes[buffer_size] = {0};
     unsigned int tindexes[buffer_size] = {0};
     unsigned int nindexes[buffer_size] = {0};
     int i = 0, j = 0;
-    for (i = 0; *str != '\0'; ++i)
+    for (i = 0; str_to_parse.peek() != -1; ++i)
     {
-        str = take_tuple(vindexes[i], tindexes[i], nindexes[i], str);
+        // str = take_tuple(vindexes[i], tindexes[i], nindexes[i], str)-1;
+        str_to_parse >> vindexes[i];
+        str_to_parse.get();
+        str_to_parse >> tindexes[i];
+        str_to_parse.get();
+        str_to_parse >> nindexes[i];
+        str_to_parse.get();
     }
     int len = i;
     unsigned int fvertex [buffer_size * 3] = {0};
@@ -187,32 +235,37 @@ void obj_file::get_faces_index(char *str)
     indices.reserve(len);
     for (i = 0; i < len; ++i)
     {
-        indices.push_back({fnormals[i]-1, ftexture[i]-1, fvertex[i]-1});
+        const auto new_index = index({fnormals[i] - 1, ftexture[i] - 1, fvertex[i] - 1});
+        indices.emplace_back(new_index);
     }
 }
 
 void obj_file::open(const char *path)
 {
     if (m_initialized) return;
+    std::cout << path << '\n';
     std::ifstream file(path, std::ios::in);
+    std::string str;
     while (file.peek() != -1)
     {
-        char stype[8] = {0};
-        file.getline(stype, std::size(stype), ' ');
-        const auto ret = objtypes_map[stype];
-        // print_ret(ret);
-        char str[1024] = {0};
-        file.getline(str, std::size(str));
+        std::getline(file, str, ' ');
+        const auto ret = objtypes_map[str];
+        std::getline(file, str, '\n');
+        // char *str = &stri[0];
         switch (ret) {
+            case objtypes::invalid:
+            case objtypes::new_line:
             case objtypes::comment:
             case objtypes::smooth_shading:
+            case objtypes::object_name:
             case objtypes::line:
             break;
             case objtypes::usemtl:
             {
                 auto nuevo = indices.size();
                 size_t index = mat_lib.map_material[str];
-                grouping.push_back(faces_group{nuevo, 0, index});
+                const auto new_group = faces_group({nuevo, 0, index});
+                grouping.emplace_back(new_group);
                 if (auto pend = &grouping[grouping.size()-2]; pend != nullptr)
                 {
                     pend->end = nuevo;
@@ -223,23 +276,20 @@ void obj_file::open(const char *path)
                 merge_path_name(path, str);
                 mat_lib.open(str);
             break;
-            case objtypes::object_name:
-                optrs.push_back(indices.size());
-            break;
             case objtypes::vertex_coord: {
-                vec3 vec;
-                stovec3(vec, str);
-                vcoords.push_back(vec);
+                // vec3 vec;
+                // stovec3(vec, str);
+                vcoords.emplace_back(stovec3(str));
             } break;
             case objtypes::vertex_texture: {
-                vec2 vec;
-                stovec2(vec, str);
-                vtexture.push_back(vec);
+                // vec2 vec;
+                // stovec2(vec, str);
+                vtexture.emplace_back(stovec2(str));
             } break;
             case objtypes::vertex_normal: {
-                vec3 vec;
-                stovec3(vec, str);
-                vnormal.push_back(vec);
+                // vec3 vec;
+                // stovec3(vec, str);
+                vnormal.emplace_back(stovec3(str));
             } break;
             case objtypes::face: {
                 get_faces_index(str);
@@ -247,7 +297,6 @@ void obj_file::open(const char *path)
         }
     }
     grouping[grouping.size()-1].end = indices.size();
-    file.close();
     m_initialized = true;
 }
 
@@ -296,11 +345,6 @@ void obj_file::draw_mat_mesh()
         // draw_mesh(group.begin, group.end);
         draw_mesh(left, right);
     }
-}
-
-obj_file::iter obj_file::get_iter(unsigned int index)
-{
-    return indices.data() + optrs[index];
 }
 
 void texture::open(const char *path)
@@ -484,25 +528,30 @@ void mtl_file::open(const char *path)
     // Here I use a dummy material, but is guaranteed that it is't used
     material dummy_mat {{0}, {0}, {0}, {0}, 0};
     material &current_mat = dummy_mat;
+    std::string str;
     while (file.peek() != -1)
     {
-        char stype[16] = {0};
+        // char stype[16] = {0};
         while (file.peek() == '\n') file.get();
-        file.getline(stype, std::size(stype), ' ');
-        const auto ret = mtltypes_map[stype];
-        char str[64] = {0};
-        file.getline(str, std::size(str));
+        // file >> str;
+        std::getline(file, str, ' ');
+        // file.getline(stype, std::size(stype), ' ');
+        const auto ret = mtltypes_map[str];
+        // char str[64] = {0};
+        // file.getline(str, std::size(str));
+        // file.getline(stri);
+        std::getline(file, str, '\n');
         switch (ret) {
+            case mtltypes::invalid:
+            case mtltypes::inverse_dissolve:
             case mtltypes::new_line:
             case mtltypes::transmission_filter:
             break;
             case mtltypes::comment:
-                if (char *tstr = str; !strncmp(str, "Material", std::size("Material") - 1))
+                if (char *tstr = &str[0]; !strncmp(str.c_str(), "Material", std::size("Material") - 1))
                 {
-                    while (!isspace(*tstr)) tstr++;
-                    tstr++;
-                    while (!isspace(*tstr)) tstr++;
-                    m_material_len = atoi(tstr);
+                    size_t last_space = str.find_last_of(" ");
+                    m_material_len = atoi(tstr + last_space);
                     materials.reserve(m_material_len);
                     map_material.reserve(m_material_len);
                 }
@@ -514,25 +563,25 @@ void mtl_file::open(const char *path)
                 materials.emplace_back(material{{0}, {0}, {0}, {0}, 0});
             break;
             case mtltypes::ambient:
-                stovec3(materials[m_ci].ambient, str);
+                materials[m_ci].ambient = stovec3(str);
             break;
             case mtltypes::diffuse:
-                stovec3(materials[m_ci].diffuse, str);
+                materials[m_ci].diffuse = stovec3(str);
             break;
             case mtltypes::specular:
-                stovec3(materials[m_ci].specular, str);
+                materials[m_ci].specular = stovec3(str);
             break;
             case mtltypes::shininess:
-                materials[m_ci].highlights = atof(str);
+                materials[m_ci].highlights = atof(str.c_str());
             break;
             case mtltypes::dissolve:
-                stof(materials[m_ci].dissolve, str);
+                materials[m_ci].dissolve = stof(str);
             break;
             case mtltypes::optical_density:
-                stof(materials[m_ci].optical_density, str);
+                materials[m_ci].optical_density = stof(str);
             break;
             case mtltypes::illumination_mode:
-                stoi(materials[m_ci].illum_model, str);
+                materials[m_ci].illum_model = stof(str);
             break;
             case mtltypes::map_diffuse: {
                 merge_path_name(path, str);
@@ -548,5 +597,4 @@ void mtl_file::open(const char *path)
         }
     }
     m_init = true;
-    file.close();
 }

@@ -159,14 +159,14 @@ static void display()
         models["ventiladorh"].draw_mat_mesh();
     glPopMatrix();
     
-    glPushMatrix();
+    glPushMatrix(); // luminaria
         glTranslatef(3.5f, -3.08f, 5.8f);
         glRotatef(-220.0f, 0.0f, 1.0f, 0.0f);
         glScalef(2.2f, 2.2f, 2.2f);
         models["luminaria"].draw_mat_mesh();
     glPopMatrix();
 
-    glPushMatrix();
+    glPushMatrix(); // quadro van gogh
         glTranslatef(-4.38f, 2.0f, 5.5f);
         glScalef(2.0f, 2.0f, 2.0f);
         glRotatef(180.0f, 1.0f, 0.0f, 0.0f);
@@ -277,7 +277,7 @@ int main(int argc, char **argv)
     glEnable(GL_LIGHTING);
     glEnable(GL_NORMALIZE);
     glEnable(GL_TEXTURE_2D);
-    
+
     light[0] = clight(
         0,
         {0.488164f, 3.054233f, 6.129874f, 0.0f}, // position
@@ -312,7 +312,6 @@ int main(int argc, char **argv)
     glutPassiveMotionFunc(motion);
 
     cam.center_camera_angle(mwindow);
-
     models["quarto"]      = obj_file("objs/quarto.obj");
     models["cama"]        = obj_file("objs/cama.obj");
     models["notebook"]    = obj_file("objs/notebook.obj");
