@@ -1,23 +1,15 @@
 #pragma once
 
-// #define READER_TEST
-// #define TEST
+#define READER_TEST
+#define TEST
 
 struct texture
 {
     texture() = default;
     texture(const char *path) { open(path); }
-    void operator=(texture &other)
-    {
-        m_init = other.m_init;
-        m_texture_id = other.m_texture_id;
-        m_local_buffer = other.m_local_buffer;
-        m_width = other.m_width;
-        m_height = other.m_height;
-        m_nr_channels = other.m_nr_channels;
-    }
-
+    
     void open(const char *path);
+    void open(std::string &path) { open(path.c_str()); }
     ~texture();
 
     void bind() const;
@@ -54,6 +46,7 @@ struct mtl_file
     mtl_file() = default;
     mtl_file(const char *path) { open(path); }
     void open(const char *path);
+    void open(std::string &path) { open(path.c_str()); }
 
     std::vector<material> materials;
     std::vector<std::string> mat_names;
@@ -84,9 +77,6 @@ struct obj_file
     void draw_mesh(const iter &begin, const iter &end);
     void draw_mat_mesh();
 
-    // ! Unused
-    iter get_iter(unsigned int index);
-
     bool m_initialized = false;
 
     std::vector<vec3> vcoords;
@@ -94,8 +84,6 @@ struct obj_file
     std::vector<vec2> vtexture;
 
     std::vector<index> indices;
-    // std::unordered_map<std::string_view, unsigned int> optrs;
-    std::vector<unsigned int> optrs; // ! Unused
 
     struct faces_group
     {
@@ -107,5 +95,5 @@ struct obj_file
 
     mtl_file mat_lib;
 private:
-    void get_faces_index(char *str);
+    void get_faces_index(std::string &str);
 };

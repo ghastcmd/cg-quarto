@@ -45,7 +45,7 @@ endif
 
 defines = $(addprefix -D,$(def_d))
 libs    = $(addprefix -l,$(libs_d))
-flags   = 
+flags   = -Wall -Wextra -Werror
 
 build: ; $(SS)$(MAKE) -s --no-print-directory -j 4 compile
 
@@ -77,7 +77,12 @@ $(dep_dir):
 	$(call fmt,Creating $@ directory)
 	$(SS)mkdir $@
 
-clean: ; $(SS)rm -f $(object) $(target)
+clean:
+ifeq ($(dos),Windows)
+	-$(SS)del /f /q $(subst /,\,$(object) $(target))
+else
+	$(SS)rm -f $(object) $(target)
+endif
 	$(call fmt,Cleaning the entire $(obj) folder)
 
 clean_pch: ; $(SS)rm -f $(gch)

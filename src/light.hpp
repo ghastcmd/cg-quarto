@@ -9,11 +9,11 @@ struct clight
         spot_light
     };
 
-    float position[3];
-    float direction[3];
-    float ambient[3];
-    float diffuse[3];
-    float specular[3];
+    float position[4];
+    float direction[4];
+    float ambient[4];
+    float diffuse[4];
+    float specular[4];
 
     int light;
 

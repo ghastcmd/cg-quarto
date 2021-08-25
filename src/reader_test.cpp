@@ -25,11 +25,11 @@ void * realloc_i(void *ptr, size_t size)
     return realloc(ptr, size);
 }
 
-void * operator new(size_t size)
-{
-    alloc_count += 1;
-    return malloc(size);
-}
+// void * operator new(size_t size)
+// {
+//     alloc_count += 1;
+//     return malloc(size);
+// }
 
 // void * operator new(size_t size, void *ptr)
 // {
@@ -151,8 +151,16 @@ int main(int argc, char **argv)
     glLightfv(GL_LIGHT0, GL_AMBIENT_AND_DIFFUSE, ambient_n_diffuse);
     glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
 
+    //! DEBUG
+    puts("this is before the thing");
+
     models.push_back(obj_file{"objs/cuboid.obj"});
+    //! DEBUG
+    puts("!!! this is after the pushback");
     obj_file &file = models[0];
+
+    //! DEBUG
+    puts("this is after the thing");
 
     unsigned int error_count = 0;
 
