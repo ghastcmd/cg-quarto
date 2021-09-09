@@ -75,7 +75,11 @@ $(obj): $(obj)
 
 $(dep_dir):
 	$(call fmt,Creating $@ directory)
+ifeq ($(dos),Windows)
 	$(SS)mkdir $@
+else
+	$(SS)mkdir -p $@
+endif
 
 clean:
 ifeq ($(dos),Windows)
