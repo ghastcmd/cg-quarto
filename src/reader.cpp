@@ -371,7 +371,18 @@ void texture::open(const char *path)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, m_width, m_height, 0, GL_RGB, GL_UNSIGNED_BYTE, m_local_buffer);
+    const auto not_div_by_four = m_width * m_height % 4 != 0;
+    if (not_div_by_four)
+    {
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_width, m_height, 0, GL_RGB, GL_UNSIGNED_BYTE, m_local_buffer);        
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+    }
+    else
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_width, m_height, 0, GL_RGB, GL_UNSIGNED_BYTE, m_local_buffer);
+    }
+
     glBindTexture(GL_TEXTURE_2D, 0);
 
     if (m_local_buffer)
