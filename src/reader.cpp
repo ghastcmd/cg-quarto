@@ -371,7 +371,8 @@ void texture::open(const char *path)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 
-    const auto not_div_by_four = m_width * m_height % 4 != 0;
+
+    const bool not_div_by_four = m_width * m_height % 4 != 0 || m_width % 4 != 0;
     if (not_div_by_four)
     {
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
