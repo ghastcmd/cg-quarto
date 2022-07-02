@@ -262,13 +262,14 @@ void obj_file::open(const char *path)
             break;
             case objtypes::usemtl:
             {
-                auto nuevo = indices.size();
+                size_t nuevo = indices.size();
                 size_t index = mat_lib.map_material[str];
                 const auto new_group = faces_group({nuevo, 0, index});
                 grouping.emplace_back(new_group);
-                if (auto pend = &grouping[grouping.size()-2]; pend != nullptr)
+                if (const int64_t index = grouping.size() - 2; index >= 0)
                 {
-                    pend->end = nuevo;
+                    auto &pend = grouping[index];
+                    pend.end = nuevo;
                 }
             }
             break;

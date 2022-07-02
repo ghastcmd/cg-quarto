@@ -15,7 +15,7 @@ else
 	dos = $(shell uname -s)
 endif
 
-CC = g++ -std=c++2a
+CC = g++ -std=c++20
 
 pch = include/pch.h
 gch = $(pch:.h=.h.gch)
@@ -59,12 +59,12 @@ $(gch): $(pch)
 
 $(target): $(object)
 	$(call fmt,Compiling $(target))
-	$(SS)$(CC) $^ -o $@ $(include_lib) $(libs) $(flags)
+	$(SS)$(CC) -g $^ -o $@ $(include_lib) $(libs) $(flags)
 
 vpath %.cpp $(src)
 $(obj)/%.o: %.cpp $(dep_dir)/%.d
 	$(call fmt,Compiling $< into $@)
-	$(SS)$(CC) $(make_dep) -c $< -o $@ $(defines) $(includes)
+	$(SS)$(CC) $(make_dep) -g -c $< -o $@ $(defines) $(includes)
 
 $(depend):
 include $(depend)
