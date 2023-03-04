@@ -89,5 +89,10 @@ else
 endif
 	$(call fmt,Cleaning the entire $(obj) folder)
 
-clean_pch: ; $(SS)rm -f $(gch)
+clean_pch:
+ifeq ($(dos),Windows)
+	-$(SS)del /f /q $(subst /,\,$(gch))
+else
+	$(SS)rm -f $(gch)
+endif
 	$(call fmt,Deleting the precompiled header)

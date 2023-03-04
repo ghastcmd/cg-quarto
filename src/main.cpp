@@ -4,6 +4,7 @@
 #include "reader.hpp"
 #include "light.hpp"
 
+
 static camera cam {
     {0.0f, 0.0f, 5.0f},
     {0.0f, 0.0f, -3.0f},
@@ -266,6 +267,11 @@ void mouse(int button, int state, int x, int y)
     }
 }
 
+struct test
+{
+    static void thing() { std::cout << "hello world\n"; }
+};
+
 #ifndef TEST
 
 int main(int argc, char **argv)
@@ -312,6 +318,7 @@ int main(int argc, char **argv)
     glutPassiveMotionFunc(motion);
 
     cam.center_camera_angle(mwindow);
+    auto start = std::chrono::high_resolution_clock::now();
     models["quarto"]      = obj_file("objs/quarto.obj");
     models["cama"]        = obj_file("objs/cama.obj");
     models["notebook"]    = obj_file("objs/notebook.obj");
@@ -328,6 +335,10 @@ int main(int argc, char **argv)
     models["janela"]      = obj_file("objs/janela.obj");
     models["porta"]       = obj_file("objs/porta.obj");
     models["quadro gato"] = obj_file("objs/quadro.obj");
+    auto end = std::chrono::high_resolution_clock::now();
+
+    std::chrono::duration<float> duration = end - start;
+    std::printf("%f s\n", duration.count());
 
     mwindow.run();
     return 0;

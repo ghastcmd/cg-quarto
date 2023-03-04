@@ -40,7 +40,7 @@ void print_ret(objtypes ret)
     puts(objtypes_str[(unsigned int)ret]);
 }
 
-static std::pair<const char*, objtypes> const objtypes_array[]
+static constexpr std::pair<const char*, objtypes> const objtypes_array[]
 {
     {"#", objtypes::comment},
     {"mtllib", objtypes::mtllib},
@@ -179,33 +179,28 @@ char * take_tuple(unsigned int &v, unsigned int &t, unsigned int &n, char *str)
     t = atoi(++str);
     while (*str != '/') str++;
     n = atoi(++str);
-    while (*str != ' ' && *str) str++;
+    while (*str && *str != ' ') str++;
 
-    return ++str;
+    return str;
 }
 
 void obj_file::get_faces_index(std::string &str)
 {
-    std::stringstream str_to_parse (str);
-    constexpr unsigned int buffer_size = 40;
+    constexpr size_t buffer_size = 40;
     unsigned int vindexes[buffer_size] = {0};
     unsigned int tindexes[buffer_size] = {0};
     unsigned int nindexes[buffer_size] = {0};
     int i = 0, j = 0;
-    for (i = 0; str_to_parse.peek() != -1; ++i)
+
+    for (char *stri = &str[0]; *stri; ++i)
     {
-        // str = take_tuple(vindexes[i], tindexes[i], nindexes[i], str)-1;
-        str_to_parse >> vindexes[i];
-        str_to_parse.get();
-        str_to_parse >> tindexes[i];
-        str_to_parse.get();
-        str_to_parse >> nindexes[i];
-        str_to_parse.get();
+        stri = take_tuple(vindexes[i], tindexes[i], nindexes[i], stri);
     }
+
     int len = i;
-    unsigned int fvertex [buffer_size * 3] = {0};
-    unsigned int ftexture[buffer_size * 3] = {0};
-    unsigned int fnormals[buffer_size * 3] = {0};
+    unsigned int fvertex [buffer_size * 4] = {0};
+    unsigned int ftexture[buffer_size * 4] = {0};
+    unsigned int fnormals[buffer_size * 4] = {0};
     fvertex[0] = vindexes[0];
     fvertex[1] = vindexes[1];
     fvertex[2] = vindexes[2];
@@ -219,6 +214,8 @@ void obj_file::get_faces_index(std::string &str)
     fnormals[2] = nindexes[2];
     for (i = 0, j = 3; i + 3 <= len; ++i, j+=3)
     { // Converting n edge faces to triangles
+      //! mostly it'll be a wrong triangulation, but
+      //! it makes opengl don't get errors
         fvertex[j]   = vindexes[i];
         fvertex[j+1] = vindexes[i+2];
         fvertex[j+2] = vindexes[i+3];
@@ -235,8 +232,7 @@ void obj_file::get_faces_index(std::string &str)
     indices.reserve(len);
     for (i = 0; i < len; ++i)
     {
-        const auto new_index = index({fnormals[i] - 1, ftexture[i] - 1, fvertex[i] - 1});
-        indices.emplace_back(new_index);
+        indices.emplace_back(index{fnormals[i] - 1, ftexture[i] - 1, fvertex[i] - 1});
     }
 }
 
@@ -372,7 +368,7 @@ void texture::open(const char *path)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 
 
-    const bool not_div_by_four = m_width * m_height % 4 != 0 || m_width % 4 != 0;
+    const bool not_div_by_four = m_width % 4 != 0;
     if (not_div_by_four)
     {
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -501,7 +497,7 @@ void print_ret(mtltypes ret)
     puts(objtypes_str[(unsigned int)ret]);
 }
 
-static std::pair<const char*, mtltypes> const mtltypes_array[]
+static constexpr std::pair<const char*, mtltypes> const mtltypes_array[]
 {
     {"#", mtltypes::comment},
     {"newmtl", mtltypes::new_material},
@@ -538,8 +534,8 @@ void mtl_file::open(const char *path)
         return;
     }
     // Here I use a dummy material, but is guaranteed that it is't used
-    material dummy_mat {{0}, {0}, {0}, {0}, 0};
-    material &current_mat = dummy_mat;
+    // material dummy_mat {{0}, {0}, {0}, {0}, 0};
+    // material &current_mat = dummy_mat;
     std::string str;
     while (file.peek() != -1)
     {
