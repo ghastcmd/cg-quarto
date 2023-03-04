@@ -3,7 +3,7 @@
 
 // * vec4 part of the object * //
 
-const float vec4::modulus(const vec4& vec)
+float vec4::modulus(const vec4& vec)
 {
     return sqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z + vec.w * vec.w);
 }
@@ -38,7 +38,7 @@ void vec4::vertex() const
 
 // * vec3 part of the object * //
 
-const float vec3::modulus(const vec3& vec)
+float vec3::modulus(const vec3& vec)
 {
     return sqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z);
 }
@@ -57,7 +57,7 @@ vec3 vec3::cross(const vec3& v1, const vec3& v2)
 
 // * vec2 part of the object * //
 
-const float vec2::modulus(const vec2& vec)
+float vec2::modulus(const vec2& vec)
 {
     return sqrt(vec.x * vec.x + vec.y * vec.y);
 }

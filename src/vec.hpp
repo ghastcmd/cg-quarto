@@ -4,7 +4,7 @@ struct vec4
 {
     float x, y, z, w;
 
-    static const float modulus(const vec4& vec);
+    static float modulus(const vec4& vec);
     static vec4 normalize(const vec4& vec); 
     static vec4 cross(const vec4& v1, const vec4& v2);
     static vec4 make(const float data[3]);
@@ -52,7 +52,7 @@ struct vec3
 {
     float x, y, z;
 
-    static const float modulus(const vec3& vec);
+    static float modulus(const vec3& vec);
 
     static vec3 normalize(const vec3& vec);
 
@@ -98,7 +98,7 @@ struct vec2
 {
     float x, y;
 
-    static const float modulus(const vec2& vec);
+    static float modulus(const vec2& vec);
 
     static vec2 normalize(const vec2& vec);
 
