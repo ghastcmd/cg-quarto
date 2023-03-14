@@ -238,9 +238,15 @@ void obj_file::get_faces_index(std::string &str)
 
 void obj_file::open(const char *path)
 {
-    if (m_initialized) return;
+    if (m_initialized)
+        return;
     std::cout << path << '\n';
     std::ifstream file(path, std::ios::in);
+    if (file.peek() == -1)
+    {
+        std::cerr << "Failed to locate file: " << path << '\n';
+        return;
+    }
     std::string str;
     while (file.peek() != -1)
     {
