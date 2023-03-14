@@ -79,7 +79,7 @@ static void display()
             models["quarto"].draw_mat_mesh();
         glPopMatrix();
     glPopMatrix();
-
+    
     glPushMatrix(); // left window (imovable)
         glTranslatef(-1.5f, 1.17f, 0.7f);
         glRotatef(-90.0f, 0.0f, 1.0f, 0.0f);
@@ -276,6 +276,18 @@ struct test
 
 int main(int argc, char **argv)
 {
+    if (argc >= 3 && argv[1][0] == '-' && std::strncmp(argv[1], "--workdir", 10) == 0)
+    {
+        std::filesystem::path path{argv[2]};
+        if (path.is_relative())
+        {
+            std::cerr << "Invalid path for work directory (must be absolute path)\n";
+            std::cerr << "\tPath given: " << path << '\n';
+            return 1;
+        }
+        std::filesystem::current_path(path);
+    }
+
     mwindow.init(argc, argv, "CG Work", 700, 700);
 
     glEnable(GL_DEPTH_TEST);
@@ -318,6 +330,7 @@ int main(int argc, char **argv)
     glutPassiveMotionFunc(motion);
 
     cam.center_camera_angle(mwindow);
+
     auto start = std::chrono::high_resolution_clock::now();
     models["quarto"]      = obj_file("objs/quarto.obj");
     models["cama"]        = obj_file("objs/cama.obj");
