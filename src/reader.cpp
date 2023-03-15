@@ -110,20 +110,54 @@ void dump_str(char *str)
 vec3 stovec3(char * str)
 {
     float x = atof(str);
-    while (!isspace(*str)) str++;
+    while (!isspace(*str++));
     float y = atof(str++);
-    while (!isspace(*str)) str++;
+    while (!isspace(*str++));
     float z = atof(str);
     return {x, y, z};
 }
 
 vec3 stovec3(std::string &str)
 {
+    char *end;
+    float x = std::strtof(str.c_str(), &end);
+    float y = std::strtof(end+1, &end);
+    float z = std::strtof(end+1, nullptr);
+
+    return {x, y, z};
+}
+
+// ! also deprecated (passes thru string 2x)
+vec3 stovec3__(std::string &str)
+{
+    const char *acstr = str.c_str();
+    const char *cstr = acstr;
+    uint_fast8_t count = 0;
+    uint_fast8_t indexes[1] {0};
+    for (uint_fast8_t i = 0; count < 2; ++i)
+    {
+        if (*++acstr == ' ')
+        {
+            indexes[count++] = i+1;
+        }
+    }
+
+    float x = atof(cstr);
+    float y = atof(cstr + indexes[0]);
+    float z = atof(cstr + indexes[1]);
+
+    return {x, y, z};
+}
+
+// ! Deprecated (was slow)
+vec3 stovec3_(std::string &str)
+{
     size_t size1 = str.find_first_of(" ");
     size_t size2 = str.find_first_of(" ", size1 + 1);
-    float x = atof(str.c_str());
-    float y = atof(str.c_str() + size1);
-    float z = atof(str.c_str() + size2);
+    const char *cstr = str.c_str();
+    float x = atof(cstr);
+    float y = atof(cstr + size1);
+    float z = atof(cstr + size2);
 
     return {x, y, z};
 }
@@ -136,6 +170,16 @@ void stovec2(vec2& vec, char * str)
 }
 
 vec2 stovec2(std::string &str)
+{
+    char *end;
+    float x = std::strtof(str.c_str(), &end);
+    float y = std::strtof(end+1, nullptr);
+
+    return {x, y};
+}
+
+// ! do not use this (slow)
+vec2 stovec2_(std::string &str)
 {
     size_t size = str.find_first_of(" ");
     float x = atof(str.c_str());
@@ -236,12 +280,18 @@ void obj_file::get_faces_index(std::string &str)
     }
 }
 
+std::ifstream get_file(const char *path)
+{
+    return std::ifstream{path, std::ios::in};
+}
+
 void obj_file::open(const char *path)
 {
     if (m_initialized)
         return;
     std::cout << path << '\n';
-    std::ifstream file(path, std::ios::in);
+    // std::ifstream file(path, std::ios::in);
+    auto file {get_file(path)};
     if (file.peek() == -1)
     {
         std::cerr << "Failed to locate file: " << path << '\n';
