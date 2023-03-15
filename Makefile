@@ -45,18 +45,26 @@ endif
 
 defines    = $(addprefix -D,$(def_d))
 libs       = $(addprefix -l,$(libs_d))
-# re add -Werror to flags
-flags      = -Wall -Wextra
+# re add -Wall -Wextra -Werror to flags
+flags      = -g
 dist_flags = -static-libgcc -static-libstdc++
 opt_flags  = -O3
 
-optimize: $(eval flags:=$(flags) $(opt_flags))
+test_flags = -DREADER_TEST
+
+test:
+	$(eval flags:=$(flags) $(test_flags))
+	$(call fmt,Added flags: $(test_flags))
+
+optimize:
+	$(eval flags:=$(flags) $(opt_flags))
 	$(call fmt,Added flags: $(opt_flags))
 
-dist: $(eval flags:=$(flags) $(dist_flags))
+dist:
+	$(eval flags:=$(flags) $(dist_flags))
 	$(call fmt,Added flags: $(dist_flags))
 
-build: ; $(SS)$(MAKE) -s --no-print-directory -j compile
+build: ; $(SS)$(MAKE) flags="$(flags)" -s --no-print-directory -j compile
 
 run: build ; $(SS)$(target)
 
