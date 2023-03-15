@@ -272,7 +272,7 @@ struct test
     static void thing() { std::cout << "hello world\n"; }
 };
 
-#ifndef TEST
+#ifndef READER_TEST
 
 int main(int argc, char **argv)
 {
