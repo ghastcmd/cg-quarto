@@ -46,7 +46,7 @@ endif
 defines    = $(addprefix -D,$(def_d))
 libs       = $(addprefix -l,$(libs_d))
 # re add -Wall -Wextra -Werror to flags
-flags      = -g
+flags      = -g3
 dist_flags = -static-libgcc -static-libstdc++
 opt_flags  = -O3
 
