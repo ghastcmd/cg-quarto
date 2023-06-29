@@ -216,7 +216,18 @@ obj_file::obj_file(const char *path)
     open(path);
 }
 
-char * take_tuple(unsigned int &v, unsigned int &t, unsigned int &n, char *str)
+char * take_tuple(uint32_t &v, uint32_t &t, uint32_t &n, char *str)
+{
+    char *end;
+    v = std::strtol(str, &end, 10);
+    t = std::strtol(end+1, &end, 10);
+    n = std::strtol(end+1, &end, 10);
+    
+    return end;
+}
+
+[[deprecated]]
+char * take_tuple_(unsigned int &v, unsigned int &t, unsigned int &n, char *str)
 {
     v = atoi(str);
     while (*str != '/') str++;
