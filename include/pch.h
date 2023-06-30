@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <fstream>
 #include <cstring>
+#include <array>
 #include <vector>
 #include <unordered_map>
 #include <functional>
@@ -17,4 +18,5 @@
 #include <chrono>
 #include <filesystem>
 
+#include <limits>
 #include <iostream>

@@ -75,6 +75,8 @@ std::string get_string_ret(objtypes ret)
     return std::string(objtypes_str[(uint32_t)ret]);
 }
 
+#ifdef OLD
+
 static constexpr std::pair<std::string_view, objtypes> const objtypes_array[]
 {
     {"#", objtypes::comment},
@@ -91,6 +93,81 @@ static constexpr std::pair<std::string_view, objtypes> const objtypes_array[]
 };
 
 static std::unordered_map<std::string_view, objtypes> objtypes_map (std::begin(objtypes_array), std::end(objtypes_array));
+
+#endif
+
+// static constexpr std::array<objtypes, std::numeric_limits<uint16_t>::max()> objtypes_array_map;
+
+// static constexpr std::array<objtypes, 30324> objtypes_array_map {objtypes::invalid};
+
+namespace array_map
+{
+
+static inline constexpr uint16_t convert(const char in_str[2]) noexcept
+{
+    return in_str[0] << 8 | in_str[1];
+}
+
+static constexpr std::size_t get_max_objtypes()
+{
+    using arr_type = typename std::uint16_t;
+    constexpr arr_type converted_values[] {
+        convert("#\0"),
+        convert("mt"),
+        convert("o\0"),
+        convert("v\0"),
+        convert("vn"),
+        convert("vt"),
+        convert("us"),
+        convert("f\0"),
+        convert("l\0"),
+        convert("s\0"),
+        convert("\n\0"),
+    };
+
+    std::size_t max = 0, value = 0, size = sizeof(converted_values) / sizeof(arr_type);
+    for (std::size_t i = 0; i < size; i++)
+    {
+        value = converted_values[i];
+        if (value > max)
+        {
+            max = value;
+        }
+    }
+
+    return max + 1;
+}
+
+struct init
+{
+    // static constexpr std::size_t upper_bound_objtypes = 30324 + 1;
+    static constexpr std::size_t upper_bound_objtypes = get_max_objtypes();
+
+    using array_type_objtypes = typename std::array<objtypes, upper_bound_objtypes>;
+
+    static constexpr array_type_objtypes init_array_map_objtypes()
+    {
+        array_type_objtypes ret_array {objtypes::invalid};
+
+        ret_array[convert("#\0")]  = objtypes::comment;
+        ret_array[convert("mt")]   = objtypes::mtllib;
+        ret_array[convert("o\0")]  = objtypes::object_name;
+        ret_array[convert("v\0")]  = objtypes::vertex_coord;
+        ret_array[convert("vn")]   = objtypes::vertex_normal;
+        ret_array[convert("vt")]   = objtypes::vertex_texture;
+        ret_array[convert("us")]   = objtypes::usemtl;
+        ret_array[convert("f\0")]  = objtypes::face;
+        ret_array[convert("l\0")]  = objtypes::line;
+        ret_array[convert("s\0")]  = objtypes::smooth_shading;
+        ret_array[convert("\n\0")] = objtypes::new_line;
+
+        return ret_array;
+    }
+};
+
+}
+
+static constexpr array_map::init::array_type_objtypes objtypes_array_map = array_map::init::init_array_map_objtypes();
 
 void strmvcnt(char *str, int str_len, int move_count)
 {
@@ -367,8 +444,16 @@ static objtypes get_type_from_buffer(std::vector<char> &buffer, std::size_t &ind
     {
         ++index;
     }
-    std::string_view sliced {&buffer[start], index++ - start};
+    const std::size_t size = index++ - start;
+    std::string_view sliced {&buffer[start], size};
+#ifdef OLD
     return { objtypes_map[sliced] };
+#else
+    char hash_key[2] {0};
+    hash_key[0] = buffer[start];
+    hash_key[1] = size == 1 ? '\0' : buffer[start + 1];
+    return { objtypes_array_map[array_map::convert(hash_key)] };
+#endif
 }
 
 static std::string_view get_line_from_buffer(std::vector<char> &buffer, std::size_t &index)
