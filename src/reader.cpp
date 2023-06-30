@@ -4,6 +4,21 @@
 #include "window.hpp"
 #include "stb_image.h"
 
+std::ofstream log_file("./logs/log.txt");
+
+// std::ofstream log_file;
+
+// struct unique_test 
+// {
+//     unique_test(const char *path)
+//     {
+//         log_file.rdbuf()->pubsetbuf(0, 0);
+//         log_file.open(path);
+//     }
+// };
+
+// unique_test ttt("./logs/log.txt");
+
 enum class objtypes : unsigned int
 {
     invalid,
@@ -40,7 +55,29 @@ void print_ret(objtypes ret)
     puts(objtypes_str[(unsigned int)ret]);
 }
 
-static std::pair<const char*, objtypes> const objtypes_array[]
+std::string get_string_ret(objtypes ret)
+{
+    const char *objtypes_str[] {
+        "invalid",
+        "comment",
+        "mtllib",
+        "object_name",
+        "vertex_coord",
+        "vertex_texture",
+        "vertex_normal",
+        "usemtl",
+        "smooth_shading",
+        "face",
+        "line",
+        "new_line"
+    };
+
+    return std::string(objtypes_str[(uint32_t)ret]);
+}
+
+#ifdef OLD
+
+static constexpr std::pair<std::string_view, objtypes> const objtypes_array[]
 {
     {"#", objtypes::comment},
     {"mtllib", objtypes::mtllib},
@@ -55,7 +92,82 @@ static std::pair<const char*, objtypes> const objtypes_array[]
     {"\n", objtypes::new_line}
 };
 
-static std::unordered_map<std::string, objtypes> objtypes_map (std::begin(objtypes_array), std::end(objtypes_array));
+static std::unordered_map<std::string_view, objtypes> objtypes_map (std::begin(objtypes_array), std::end(objtypes_array));
+
+#endif
+
+// static constexpr std::array<objtypes, std::numeric_limits<uint16_t>::max()> objtypes_array_map;
+
+// static constexpr std::array<objtypes, 30324> objtypes_array_map {objtypes::invalid};
+
+namespace array_map
+{
+
+static inline constexpr uint16_t convert(const char in_str[2]) noexcept
+{
+    return in_str[0] << 8 | in_str[1];
+}
+
+static constexpr std::size_t get_max_objtypes()
+{
+    using arr_type = typename std::uint16_t;
+    constexpr arr_type converted_values[] {
+        convert("#\0"),
+        convert("mt"),
+        convert("o\0"),
+        convert("v\0"),
+        convert("vn"),
+        convert("vt"),
+        convert("us"),
+        convert("f\0"),
+        convert("l\0"),
+        convert("s\0"),
+        convert("\n\0"),
+    };
+
+    std::size_t max = 0, value = 0, size = sizeof(converted_values) / sizeof(arr_type);
+    for (std::size_t i = 0; i < size; i++)
+    {
+        value = converted_values[i];
+        if (value > max)
+        {
+            max = value;
+        }
+    }
+
+    return max + 1;
+}
+
+struct init
+{
+    // static constexpr std::size_t upper_bound_objtypes = 30324 + 1;
+    static constexpr std::size_t upper_bound_objtypes = get_max_objtypes();
+
+    using array_type_objtypes = typename std::array<objtypes, upper_bound_objtypes>;
+
+    static constexpr array_type_objtypes init_array_map_objtypes()
+    {
+        array_type_objtypes ret_array {objtypes::invalid};
+
+        ret_array[convert("#\0")]  = objtypes::comment;
+        ret_array[convert("mt")]   = objtypes::mtllib;
+        ret_array[convert("o\0")]  = objtypes::object_name;
+        ret_array[convert("v\0")]  = objtypes::vertex_coord;
+        ret_array[convert("vn")]   = objtypes::vertex_normal;
+        ret_array[convert("vt")]   = objtypes::vertex_texture;
+        ret_array[convert("us")]   = objtypes::usemtl;
+        ret_array[convert("f\0")]  = objtypes::face;
+        ret_array[convert("l\0")]  = objtypes::line;
+        ret_array[convert("s\0")]  = objtypes::smooth_shading;
+        ret_array[convert("\n\0")] = objtypes::new_line;
+
+        return ret_array;
+    }
+};
+
+}
+
+static constexpr array_map::init::array_type_objtypes objtypes_array_map = array_map::init::init_array_map_objtypes();
 
 void strmvcnt(char *str, int str_len, int move_count)
 {
@@ -81,7 +193,7 @@ void merge_path_name(const char *path, char *name)
     strncpy(name, path, dir_len);
 }
 
-void merge_path_name(const char *path, std::string &str)
+std::string merge_path_name(const char *path, std::string_view str)
 {
     int path_size = -1;
     for (int i = strlen(path); i > 0; i--)
@@ -92,9 +204,16 @@ void merge_path_name(const char *path, std::string &str)
             break;
         }
     }
-    if (path_size == -1) perror("Could not find a '\\' or '/' in path");
+    if (path_size == -1)
+    {
+        perror("Could not find a '\\' or '/' in path");
+        return {""};
+    }
 
-    str.insert(0, path, path_size);
+    std::string ret_string {std::string_view{ path, (std::size_t)path_size }};
+    ret_string += str;
+    // str.insert(0, path, path_size);
+    return { ret_string };
 }
 
 void dump_str(char *str)
@@ -110,20 +229,56 @@ void dump_str(char *str)
 vec3 stovec3(char * str)
 {
     float x = atof(str);
-    while (!isspace(*str)) str++;
+    while (!isspace(*str++));
     float y = atof(str++);
-    while (!isspace(*str)) str++;
+    while (!isspace(*str++));
     float z = atof(str);
     return {x, y, z};
 }
 
-vec3 stovec3(std::string &str)
+vec3 stovec3(std::string_view str)
+{
+    char *end;
+    float x = std::strtof(str.data(), &end);
+    float y = std::strtof(end+1, &end);
+    float z = std::strtof(end+1, nullptr);
+
+    return {x, y, z};
+}
+
+// ! also deprecated (passes thru string 2x)
+[[deprecated]]
+vec3 stovec3__(std::string &str)
+{
+    const char *acstr = str.c_str();
+    const char *cstr = acstr;
+    uint_fast8_t count = 0;
+    uint_fast8_t indexes[1] {0};
+    for (uint_fast8_t i = 0; count < 2; ++i)
+    {
+        if (*++acstr == ' ')
+        {
+            indexes[count++] = i+1;
+        }
+    }
+
+    float x = atof(cstr);
+    float y = atof(cstr + indexes[0]);
+    float z = atof(cstr + indexes[1]);
+
+    return {x, y, z};
+}
+
+// ! Deprecated (was slow)
+[[deprecated]]
+vec3 stovec3_(std::string &str)
 {
     size_t size1 = str.find_first_of(" ");
     size_t size2 = str.find_first_of(" ", size1 + 1);
-    float x = atof(str.c_str());
-    float y = atof(str.c_str() + size1);
-    float z = atof(str.c_str() + size2);
+    const char *cstr = str.c_str();
+    float x = atof(cstr);
+    float y = atof(cstr + size1);
+    float z = atof(cstr + size2);
 
     return {x, y, z};
 }
@@ -135,7 +290,18 @@ void stovec2(vec2& vec, char * str)
     vec.y = atof(str);
 }
 
-vec2 stovec2(std::string &str)
+vec2 stovec2(std::string_view str)
+{
+    char *end;
+    float x = std::strtof(str.data(), &end);
+    float y = std::strtof(end+1, nullptr);
+
+    return {x, y};
+}
+
+// ! do not use this (slow)
+[[deprecated]]
+vec2 stovec2_(std::string &str)
 {
     size_t size = str.find_first_of(" ");
     float x = atof(str.c_str());
@@ -172,40 +338,64 @@ obj_file::obj_file(const char *path)
     open(path);
 }
 
-char * take_tuple(unsigned int &v, unsigned int &t, unsigned int &n, char *str)
+char * take_tuple(uint32_t &v, uint32_t &t, uint32_t &n, const char * str)
+{
+    char *end;
+    v = std::strtol(str, &end, 10);
+    t = std::strtol(end+1, &end, 10);
+    n = std::strtol(end+1, &end, 10);
+    
+    return end;
+}
+
+char * take_tuple_old(uint32_t &v, uint32_t &t, uint32_t &n, const char *str)
+{
+    char *end;
+    v = std::strtol(str, &end, 10);
+    t = std::strtol(end+1, &end, 10);
+    n = std::strtol(end+1, &end, 10);
+    
+    return end;
+}
+
+[[deprecated]]
+char * take_tuple_(unsigned int &v, unsigned int &t, unsigned int &n, char *str)
 {
     v = atoi(str);
     while (*str != '/') str++;
     t = atoi(++str);
     while (*str != '/') str++;
     n = atoi(++str);
-    while (*str != ' ' && *str) str++;
+    while (*str && *str != ' ') str++;
 
-    return ++str;
+    return str;
 }
 
-void obj_file::get_faces_index(std::string &str)
+void obj_file::get_faces_index(std::string_view str, std::size_t num_index)
 {
-    std::stringstream str_to_parse (str);
-    constexpr unsigned int buffer_size = 40;
+    constexpr size_t buffer_size = 40;
     unsigned int vindexes[buffer_size] = {0};
     unsigned int tindexes[buffer_size] = {0};
     unsigned int nindexes[buffer_size] = {0};
     int i = 0, j = 0;
-    for (i = 0; str_to_parse.peek() != -1; ++i)
+
+    // for (const char *stri = str.data(); *stri; ++i)
+    // {
+    //     printf("'%c'", *stri);
+    //     stri = take_tuple(vindexes[i], tindexes[i], nindexes[i], stri);
+    // }
+    // log_file << "index: " << num_index << '\n';
+    for (const char *stri = str.data(), *end = str.data() + (str.end() - str.begin()); stri < end; ++i)
     {
-        // str = take_tuple(vindexes[i], tindexes[i], nindexes[i], str)-1;
-        str_to_parse >> vindexes[i];
-        str_to_parse.get();
-        str_to_parse >> tindexes[i];
-        str_to_parse.get();
-        str_to_parse >> nindexes[i];
-        str_to_parse.get();
+        // log_file << '\'' << std::string_view{stri, (std::size_t)(end - stri)} << "'\n";
+        stri = take_tuple(vindexes[i], tindexes[i], nindexes[i], stri);
     }
+    // log_file << "end of first for\n";
+
     int len = i;
-    unsigned int fvertex [buffer_size * 3] = {0};
-    unsigned int ftexture[buffer_size * 3] = {0};
-    unsigned int fnormals[buffer_size * 3] = {0};
+    unsigned int fvertex [buffer_size * 4] = {0};
+    unsigned int ftexture[buffer_size * 4] = {0};
+    unsigned int fnormals[buffer_size * 4] = {0};
     fvertex[0] = vindexes[0];
     fvertex[1] = vindexes[1];
     fvertex[2] = vindexes[2];
@@ -219,6 +409,8 @@ void obj_file::get_faces_index(std::string &str)
     fnormals[2] = nindexes[2];
     for (i = 0, j = 3; i + 3 <= len; ++i, j+=3)
     { // Converting n edge faces to triangles
+      //! mostly it'll be a wrong triangulation, but
+      //! it makes opengl don't get errors
         fvertex[j]   = vindexes[i];
         fvertex[j+1] = vindexes[i+2];
         fvertex[j+2] = vindexes[i+3];
@@ -235,23 +427,80 @@ void obj_file::get_faces_index(std::string &str)
     indices.reserve(len);
     for (i = 0; i < len; ++i)
     {
-        const auto new_index = index({fnormals[i] - 1, ftexture[i] - 1, fvertex[i] - 1});
-        indices.emplace_back(new_index);
+        indices.emplace_back(index{fnormals[i] - 1, ftexture[i] - 1, fvertex[i] - 1});
     }
+    // log_file << "end of face index function\n";
+}
+
+std::ifstream get_file(const char *path)
+{
+    return std::ifstream{path, std::ios::in | std::ios::ate | std::ios::binary};
+}
+
+static objtypes get_type_from_buffer(std::vector<char> &buffer, std::size_t &index)
+{
+    std::size_t start = index;
+    while (buffer[index] != ' ')
+    {
+        ++index;
+    }
+    const std::size_t size = index++ - start;
+    std::string_view sliced {&buffer[start], size};
+#ifdef OLD
+    return { objtypes_map[sliced] };
+#else
+    char hash_key[2] {0};
+    hash_key[0] = buffer[start];
+    hash_key[1] = size == 1 ? '\0' : buffer[start + 1];
+    return { objtypes_array_map[array_map::convert(hash_key)] };
+#endif
+}
+
+static std::string_view get_line_from_buffer(std::vector<char> &buffer, std::size_t &index)
+{
+    std::size_t start = index;
+    while (buffer[index] != '\n')
+    {
+        ++index;
+    }
+    return {&buffer[start], index - start - 1};
 }
 
 void obj_file::open(const char *path)
 {
-    if (m_initialized) return;
+    if (m_initialized)
+        return;
     std::cout << path << '\n';
-    std::ifstream file(path, std::ios::in);
-    std::string str;
-    while (file.peek() != -1)
+    // log_file << path << '\n';
+    // std::ifstream file(path, std::ios::in);
+    auto file { get_file(path) };
+    std::streamsize size = file.tellg();
+    file.seekg(0, std::ios::beg);
+
+    if (size == 0)
     {
-        std::getline(file, str, ' ');
-        const auto ret = objtypes_map[str];
-        std::getline(file, str, '\n');
+        std::cerr << "Failed to locate file: " << path << '\n';
+        return;
+    }
+
+    std::vector<char> buffer(size);
+    file.read(buffer.data(), size); // reading file into buffer
+
+    std::size_t num_index = 0;
+
+    std::string_view str;
+    for (std::size_t i = 0; i < size;)
+    {
+        // log_file << "before parsing start -- index, size: " << i << ' ' << size << '\n';
+        // std::getline(file, str, ' ');
+        // const auto ret = objtypes_map[str];
+        // log_file << "before getting ret\n";
+        const objtypes ret { get_type_from_buffer(buffer, i) };
+        // log_file << "before getting line\n";
+        const std::string_view str { get_line_from_buffer(buffer, i) };
+        // std::getline(file, str, '\n');
         // char *str = &stri[0];
+        // log_file << get_string_ret(ret) << " '" << str << "'\n";
         switch (ret) {
             case objtypes::invalid:
             case objtypes::new_line:
@@ -262,8 +511,9 @@ void obj_file::open(const char *path)
             break;
             case objtypes::usemtl:
             {
-                size_t nuevo = indices.size();
-                size_t index = mat_lib.map_material[str];
+                // log_file << "start usemtl\n";
+                auto nuevo = indices.size();
+                size_t index = mat_lib.map_material[std::string(str)];
                 const auto new_group = faces_group({nuevo, 0, index});
                 grouping.emplace_back(new_group);
                 if (const int64_t index = grouping.size() - 2; index >= 0)
@@ -271,34 +521,53 @@ void obj_file::open(const char *path)
                     auto &pend = grouping[index];
                     pend.end = nuevo;
                 }
+                // log_file << "end usemtl\n";
             }
             break;
-            case objtypes::mtllib:
-                merge_path_name(path, str);
-                mat_lib.open(str);
-            break;
+            case objtypes::mtllib: {
+                // log_file << "start mtllib\n";
+                std::string path_str = merge_path_name(path, str);
+                mat_lib.open(path_str);
+                // log_file << "end mtllib\n";
+            } break;
             case objtypes::vertex_coord: {
                 // vec3 vec;
                 // stovec3(vec, str);
+                // log_file << "start vertex_coord\n";
                 vcoords.emplace_back(stovec3(str));
+                // log_file << "end vertex_coord\n";
             } break;
             case objtypes::vertex_texture: {
                 // vec2 vec;
                 // stovec2(vec, str);
+                // log_file << "start vertex_texture\n";
                 vtexture.emplace_back(stovec2(str));
+                // log_file << "end vertex_texture\n";
             } break;
             case objtypes::vertex_normal: {
                 // vec3 vec;
                 // stovec3(vec, str);
+                // log_file << "start vertex_normal\n";
                 vnormal.emplace_back(stovec3(str));
+                // log_file << "end vertex_normal\n";
             } break;
             case objtypes::face: {
-                get_faces_index(str);
+                // log_file << "start face\n";
+                get_faces_index(str, num_index++);
+                // log_file << "end face\n";
             } break;
         }
+
+        while (isspace(buffer[i]))
+        {
+            ++i;
+            if (i > size) break;
+        }
     }
+    // log_file << "ended file parsing\n";
     grouping[grouping.size()-1].end = indices.size();
     m_initialized = true;
+    // log_file << "end of obj_file::open function\n";
 }
 
 void obj_file::draw_mesh()
@@ -373,7 +642,7 @@ void texture::open(const char *path)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 
 
-    const bool not_div_by_four = m_width * m_height % 4 != 0 || m_width % 4 != 0;
+    const bool not_div_by_four = m_width % 4 != 0;
     if (not_div_by_four)
     {
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -502,7 +771,7 @@ void print_ret(mtltypes ret)
     puts(objtypes_str[(unsigned int)ret]);
 }
 
-static std::pair<const char*, mtltypes> const mtltypes_array[]
+static constexpr std::pair<const char*, mtltypes> const mtltypes_array[]
 {
     {"#", mtltypes::comment},
     {"newmtl", mtltypes::new_material},
@@ -538,9 +807,9 @@ void mtl_file::open(const char *path)
         file.close();
         return;
     }
-    // Here I use a dummy material, but is guaranteed that it is't used
-    material dummy_mat {{0}, {0}, {0}, {0}, 0};
-    material &current_mat = dummy_mat;
+    // Here I use a dummy material, but is guaranteed that it isn't used
+    // material dummy_mat {{0}, {0}, {0}, {0}, 0};
+    // material &current_mat = dummy_mat;
     std::string str;
     while (file.peek() != -1)
     {
@@ -597,8 +866,8 @@ void mtl_file::open(const char *path)
                 materials[m_ci].illum_model = stof(str);
             break;
             case mtltypes::map_diffuse: {
-                merge_path_name(path, str);
-                materials[m_ci].tex_diffuse.open(str);
+                std::string path_str = merge_path_name(path, str);
+                materials[m_ci].tex_diffuse.open(path_str);
             } break;
             case mtltypes::map_ambient:
             case mtltypes::map_specular:

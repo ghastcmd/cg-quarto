@@ -43,11 +43,28 @@ ifeq ($(dos),Linux)
 endif
 endif
 
-defines = $(addprefix -D,$(def_d))
-libs    = $(addprefix -l,$(libs_d))
-flags   = -Wall -Wextra -Werror
+defines    = $(addprefix -D,$(def_d))
+libs       = $(addprefix -l,$(libs_d))
+# re add -Wall -Wextra -Werror to flags
+flags      = -g3
+dist_flags = -static-libgcc -static-libstdc++
+opt_flags  = -O3
 
-build: ; $(SS)$(MAKE) -s --no-print-directory -j 4 compile
+test_flags = -DREADER_TEST
+
+test:
+	$(eval flags:=$(flags) $(test_flags))
+	$(call fmt,Added flags: $(test_flags))
+
+optimize:
+	$(eval flags:=$(flags) $(opt_flags))
+	$(call fmt,Added flags: $(opt_flags))
+
+dist:
+	$(eval flags:=$(flags) $(dist_flags))
+	$(call fmt,Added flags: $(dist_flags))
+
+build: ; $(SS)$(MAKE) flags="$(flags)" -s --no-print-directory -j compile
 
 run: build ; $(SS)$(target)
 
@@ -55,7 +72,7 @@ compile: $(dep_dir) $(gch) $(target)
 
 $(gch): $(pch)
 	$(call fmt,Compiling the precompiled header)
-	$(SS)$(CC) -c $< -o $@ $(includes)
+	$(SS)$(CC) -c $< -o $@ $(includes) $(flags)
 
 $(target): $(object)
 	$(call fmt,Compiling $(target))
@@ -64,7 +81,7 @@ $(target): $(object)
 vpath %.cpp $(src)
 $(obj)/%.o: %.cpp $(dep_dir)/%.d
 	$(call fmt,Compiling $< into $@)
-	$(SS)$(CC) $(make_dep) -g -c $< -o $@ $(defines) $(includes)
+	$(SS)$(CC) $(make_dep) -c $< -o $@ $(defines) $(includes) $(flags)
 
 $(depend):
 include $(depend)
@@ -89,5 +106,10 @@ else
 endif
 	$(call fmt,Cleaning the entire $(obj) folder)
 
-clean_pch: ; $(SS)rm -f $(gch)
+clean_pch:
+ifeq ($(dos),Windows)
+	-$(SS)del /f /q $(subst /,\,$(gch))
+else
+	$(SS)rm -f $(gch)
+endif
 	$(call fmt,Deleting the precompiled header)

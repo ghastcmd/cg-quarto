@@ -95,5 +95,5 @@ struct obj_file
 
     mtl_file mat_lib;
 private:
-    void get_faces_index(std::string &str);
+    void get_faces_index(std::string_view str, std::size_t num_index);
 };
