@@ -516,9 +516,10 @@ void obj_file::open(const char *path)
                 size_t index = mat_lib.map_material[std::string(str)];
                 const auto new_group = faces_group({nuevo, 0, index});
                 grouping.emplace_back(new_group);
-                if (auto pend = &grouping[grouping.size()-2]; pend != nullptr)
+                if (const int64_t index = grouping.size() - 2; index >= 0)
                 {
-                    pend->end = nuevo;
+                    auto &pend = grouping[index];
+                    pend.end = nuevo;
                 }
                 // log_file << "end usemtl\n";
             }
