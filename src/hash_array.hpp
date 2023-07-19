@@ -76,18 +76,21 @@ create_thing(const std::array<_pair_type<_enum>, _in_size> &arr)
 
 }
 
-
-
 /// MACRO for declaring the hash_array
 
 #define DECLARE_ARRAY_MAP(name, array_size, enum_type, hash_type, hash_class, ...) \
-static constexpr std::array<array_map::pair<enum_type>, array_size> name ## _arr { \
+namespace name { \
+static constexpr std::array<::array_map::pair<::enum_type>, array_size> name ## _arr { \
     __VA_ARGS__ \
 }; \
-constexpr std::size_t name ## _size = array_map::max_const_array<hash_type, hash_class>(name ## _arr); \
-constexpr array_map::wrapper<hash_type, hash_class, enum_type, name ## _size> name = create_thing<hash_type, hash_class, name ## _size, enum_type>(name ## _arr);
+static constexpr std::size_t name ## _size = array_map::max_const_array<hash_type, hash_class>(name ## _arr); \
+static constexpr array_map::wrapper<hash_type, hash_class, ::enum_type, name ## _size> name = create_thing<hash_type, hash_class, name ## _size, ::enum_type>(name ## _arr); \
+const ::enum_type get(const char *str) { \
+    return name[str]; \
+} \
+}
 
-#define GET_GLOBAL_ARRAY_MAP(name, enum_type, hash_type, hash_class)  \
-extern constexpr std::size_t name ## _size; \
-extern constexpr array_map::wrapper<hash_type, hash_class, enum_type, name ## _size> name;
-
+#define DECLARE_GLOBAL_ARRAY_MAP(name, enum_type) \
+namespace name { \
+extern const ::enum_type get(const char *str); \
+}

@@ -4,8 +4,7 @@
 #include "window.hpp"
 #include "stb_image.h"
 
-#include "enum_types.hpp"
-#include "hash_array.hpp"
+#include "array_maps.hpp"
 
 std::ofstream log_file("./logs/log.txt");
 
@@ -83,48 +82,6 @@ static std::unordered_map<std::string_view, objtypes> objtypes_map (std::begin(o
 
 #endif
 
-// static constexpr std::array<objtypes, std::numeric_limits<uint16_t>::max()> objtypes_array_map;
-
-// static constexpr std::array<objtypes, 30324> objtypes_array_map {objtypes::invalid};
-
-template <typename _ty>
-struct hash_func
-{
-    inline constexpr _ty operator()(const char *in_str) const noexcept
-    {
-        return in_str[0] << 8 | in_str[1];
-    }
-};
-
-DECLARE_ARRAY_MAP(objtypes_array_map, 11, objtypes, std::uint16_t, hash_func, 
-    array_map::pair{"mt", objtypes::mtllib},
-    array_map::pair{"#\0", objtypes::comment},
-    array_map::pair{"o\0", objtypes::object_name},
-    array_map::pair{"v\0", objtypes::vertex_coord},
-    array_map::pair{"vn", objtypes::vertex_normal},
-    array_map::pair{"vt", objtypes::vertex_texture},
-    array_map::pair{"us", objtypes::usemtl},
-    array_map::pair{"f\0", objtypes::face},
-    array_map::pair{"l\0", objtypes::line},
-    array_map::pair{"s\0", objtypes::smooth_shading},
-    array_map::pair{"\n\0", objtypes::new_line}
-)
-
-// constexpr array_map::hash_array<std::uint16_t, hash_func, 11, objtypes> objtypes_array_map(
-//     array_map::pair{"mt", objtypes::mtllib},
-//     array_map::pair{"#\0", objtypes::comment},
-//     array_map::pair{"o\0", objtypes::object_name},
-//     array_map::pair{"v\0", objtypes::vertex_coord},
-//     array_map::pair{"vn", objtypes::vertex_normal},
-//     array_map::pair{"vt", objtypes::vertex_texture},
-//     array_map::pair{"us", objtypes::usemtl},
-//     array_map::pair{"f\0", objtypes::face},
-//     array_map::pair{"l\0", objtypes::line},
-//     array_map::pair{"s\0", objtypes::smooth_shading},
-//     array_map::pair{"\n\0", objtypes::new_line}
-// );
-
-// static constexpr array_map::init::array_type_objtypes objtypes_array_map = array_map::init::init_array_map_objtypes();
 
 void strmvcnt(char *str, int str_len, int move_count)
 {
@@ -409,7 +366,7 @@ static objtypes get_type_from_buffer(std::vector<char> &buffer, std::size_t &ind
     char hash_key[2] {0};
     hash_key[0] = buffer[start];
     hash_key[1] = size == 1 ? '\0' : buffer[start + 1];
-    return { objtypes_array_map[hash_key] };
+    return { objtypes_array_map::get(hash_key) };
     return objtypes::comment;
 #endif
 }
