@@ -19,4 +19,6 @@
 #include <filesystem>
 
 #include <limits>
+#include <cassert>
+#include <initializer_list>
 #include <iostream>
