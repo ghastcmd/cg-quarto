@@ -352,7 +352,7 @@ int main(int argc, char **argv)
 
     std::chrono::duration<float> duration = end - start;
     std::printf("%f s\n", duration.count());
-    exit(0);
+    // exit(0);
 
     mwindow.run();
     return 0;
