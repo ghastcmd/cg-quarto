@@ -84,7 +84,7 @@ static constexpr std::array<::array_map::pair<::enum_type>, array_size> name ## 
     __VA_ARGS__ \
 }; \
 static constexpr std::size_t name ## _size = array_map::max_const_array<hash_type, hash_class>(name ## _arr); \
-static constexpr array_map::wrapper<hash_type, hash_class, ::enum_type, name ## _size> name = create_thing<hash_type, hash_class, name ## _size, ::enum_type>(name ## _arr); \
+static constexpr array_map::wrapper<hash_type, hash_class, ::enum_type, name ## _size> name = array_map::create_thing<hash_type, hash_class, name ## _size, ::enum_type>(name ## _arr); \
 const ::enum_type get(const char *str) { \
     return name[str]; \
 } \
