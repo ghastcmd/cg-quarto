@@ -12,6 +12,4 @@ Workspace 'MainFile'
 
 outputdir = '%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}'
 
-print(Configurations)
-
 Run()
