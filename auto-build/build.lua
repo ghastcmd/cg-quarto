@@ -1,4 +1,4 @@
-require 'build_system'
+require 'config_gen'
 
 Workspace 'MainFile'
     Architecture 'x86_64'

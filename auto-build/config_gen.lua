@@ -9,12 +9,23 @@ local g_allVariables = {
     end,
 }
 
+local function getOS()
+    local version = package.config:sub(1, 1)
+
+    if version == '/' then
+        version = 'Unix'
+    elseif version == '\\' then
+        version = 'Win32'
+    end
+
+    return tostring(version)
+end
 
 local function buildDefaultConfig()
     local retTable = {}
 
     retTable.buildcfg = ''
-    retTable.system = 'Win32'
+    retTable.system = getOS()
     retTable.architecture = ''
 
     return retTable
@@ -39,7 +50,7 @@ end
 
 function Configurations(random)
     local currentWorkstation = g_allVariables:getCurrentWorkspace()
-    
+
     currentWorkstation.cfg.configurations = random
     currentWorkstation.cfg.currentBuildCfg = '1'
 
