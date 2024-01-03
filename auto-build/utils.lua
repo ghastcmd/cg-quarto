@@ -1,7 +1,7 @@
 local function aux_prettyFormatTable(retString, inTable, spaces)
     local formatting = string.rep(' ', spaces)
     for key, value in pairs(inTable) do
-        if type(value) ~= 'string' then
+        if type(value) == 'table' or type(value) == 'function' then
             retString = retString .. string.format('%s%s {', formatting, key)
         else
             retString = retString .. string.format('%s%s = \"', formatting, key)
@@ -21,6 +21,8 @@ local function aux_prettyFormatTable(retString, inTable, spaces)
             retString = retString .. string.format('%s\"\n', value)
         elseif type(value) == 'function' then
             retString = retString .. '()}\n'
+        elseif type(value) == 'number' then
+            retString = retString .. string.format('%d\"\n', value)
         else
             retString = retString .. '}\n'
         end

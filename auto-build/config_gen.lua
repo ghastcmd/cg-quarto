@@ -1,4 +1,5 @@
 require 'utils'
+require 'gen_makefile'
 
 local g_allVariables = {
     workspaces = {},
@@ -80,10 +81,17 @@ end
 
 function Run()
     print('=== EXECUTING CODE ===')
+    
     local parsedString = parseString(outputdir)
     PrettyPrint({string_parsing = {
         toFormatString = outputdir,
         parsedString = parsedString,
     }})
     PrettyPrint({g_allVariables = g_allVariables})
+    
+    print('\n#####################')
+    print('### PRINTING CODE ###')
+    print('#####################\n')
+
+    GenerateAll(g_allVariables)
 end
