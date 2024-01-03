@@ -1,11 +1,5 @@
 require 'build_system'
 
-local anotherString = ''
-
-anotherString = anotherString .. string.format('%i', 123)
-
-print(anotherString)
-
 Workspace 'MainFile'
     Architecture 'x86_64'
 
@@ -16,9 +10,7 @@ Workspace 'MainFile'
         'Dist'
     }
 
-buildcfg '0'
-
-outputdir = '%{cfg.buildcfg}-%{cfg.System}-%{cfg.Architecture}'
+outputdir = '%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}'
 
 print(Configurations)
 
