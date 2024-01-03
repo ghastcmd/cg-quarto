@@ -56,18 +56,12 @@ function Configurations(random)
 
     local curBuildCfg = currentWorkstation.cfg.currentBuildCfg
     currentWorkstation.cfg.buildcfg = currentWorkstation.cfg.configurations[tonumber(curBuildCfg)]
-
-    PrettyPrint({Configurations = random})
 end
 
 local function parseString(inString)
-    local index = 0
-
     local currentWorkstation = g_allVariables:getCurrentWorkspace()
 
     local function replaceMatch(inMatch)
-        index = index + 1
-
         local value = currentWorkstation
 
         for key in inMatch:gmatch('[^.]+') do
