@@ -19,6 +19,8 @@ local function aux_prettyFormatTable(retString, inTable, spaces)
         elseif type(value) == 'string' then
             -- retString = retString .. '####STRING####'
             retString = retString .. string.format('%s\"\n', value)
+        elseif type(value) == 'function' then
+            retString = retString .. '()}\n'
         else
             retString = retString .. '}\n'
         end
