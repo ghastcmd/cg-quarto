@@ -113,3 +113,6 @@ else
 	$(SS)rm -f $(gch)
 endif
 	$(call fmt,Deleting the precompiled header)
+
+
+clean_all: clean clean_pch
