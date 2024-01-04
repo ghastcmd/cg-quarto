@@ -52,6 +52,10 @@ local function generateVariableEq(inVar)
     puts(string.format('%s = %s\n', inVar.variable_name, inVar.value))
 end
 
+local function generateVariableEval(inVar)
+    puts(string.format('%s := %s\n', inVar.variable_name, inVar.value))
+end
+
 local funcEnum = {
     FormatFunc        = 1,
     FormatConditional = 2,
@@ -87,6 +91,15 @@ local function generateConfigs(inConfigs)
                     value = 'Windows'
                 }
             },
+        },
+        second = {
+            [1] = {
+                genType = funcEnum.FormatVariableEq,
+                genInfo = {
+                    variable_name = 'dos',
+                    value = '$(shell uname -s)'
+                }
+            }
         }
     })
 end
