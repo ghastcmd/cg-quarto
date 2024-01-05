@@ -6,13 +6,25 @@ local g_allFuncs = {
         self.funcList[self.currentIndex] = {
             genType = genType,
             genInfo = genInfo,
+            index = self.currentIndex,
         }
 
         self.currentIndex = self.currentIndex + 1
     end,
 
-    getAll = function(self)
-        return self.funcList
+    getAll = function(self, sort)
+        local inFuncList = self.funcList
+
+        if sort or false then
+            print("runned")
+            local function greater(a, b)
+                return tonumber(a.index) <= tonumber(b.index)
+            end
+
+            table.sort(inFuncList, greater)
+        end
+
+        return inFuncList
     end,
 }
 
@@ -78,6 +90,10 @@ function dispatchAllGenFunc(inList)
     end
 end
 
+--!---------------------------------------------------!
+-- TODO: Write things so that the order is predictable!
+--!---------------------------------------------------!
+
 local function generateConfigs(inConfigs)
     g_allFuncs:insertFunc(funcEnum.FormatFunc, 'fmt')
     g_allFuncs:insertFunc(funcEnum.FormatConditional, {
@@ -102,12 +118,13 @@ local function generateConfigs(inConfigs)
             }
         }
     })
+    g_allFuncs:insertFunc(funcEnum.FormatFunc, 'debug')
 end
 
 function GenerateAll(inConfigs)
     generateConfigs(inConfigs)
 
-    local allFuncs = g_allFuncs:getAll()
+    local allFuncs = g_allFuncs:getAll(false)
 
     dispatchAllGenFunc(allFuncs)
 end
