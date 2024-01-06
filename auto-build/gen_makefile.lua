@@ -1,7 +1,16 @@
 local g_allFuncs = {
     funcList = {},
     currentIndex = 1,
-    
+
+    insertValue = function(self, value)
+        local newValue = value
+        newValue.index = self.currentIndex
+
+        self.funcList[self.currentIndex] = newValue
+
+        self.currentIndex = self.currentIndex + 1
+    end, 
+
     insertFunc = function(self, genType, genInfo)
         self.funcList[self.currentIndex] = {
             genType = genType,
@@ -87,8 +96,12 @@ local function dispatchGenFunc(genType, genInfo)
 end
 
 function dispatchAllGenFunc(inList)
-    for _, value in pairs(inList) do
-        dispatchGenFunc(value.genType, value.genInfo)
+    if #inList == 0 then
+        dispatchGenFunc(inList.genType, inList.genInfo)
+    else
+        for _, value in pairs(inList) do
+            dispatchGenFunc(value.genType, value.genInfo)
+        end
     end
 end
 
@@ -108,51 +121,62 @@ local function DeclareList(inTable)
     return retList
 end
 
-local function DeclareVariableEq(variableName, value)
+local function DeclareVariableEq(variableName, assignmentExpression)
     return {
         genType = funcEnum.FormatVariableEq,
         genInfo = {
             variable_name = variableName,
-            value = value
+            value = assignmentExpression
         }
     }
 end
 
-local function DeclareVariableEval(variableName, value)
+local function DeclareVariableEval(variableName, assignmentExpression)
     return {
         genType = funcEnum.FormatVariableEval,
         genInfo = {
             variable_name = variableName,
-            value = value
+            value = assignmentExpression
+        }
+    }
+end
+
+local function DeclareConditional(variableName, valueToCompare, insideIf, insideElse)
+    return {
+        genType = funcEnum.FormatConditional,
+        genInfo = {
+            variable_name = variableName,
+            value = valueToCompare,
+            inside = insideIf,
+            second = insideElse,
         }
     }
 end
 
 local function generateConfigs(inConfigs)
     g_allFuncs:insertFunc(funcEnum.FormatFunc, 'fmt')
-    g_allFuncs:insertFunc(funcEnum.FormatConditional, {
-        variable_name = 'OS',
-        value = 'Windows_NT',
-        inside = DeclareList({
+
+    g_allFuncs:insertValue(
+        DeclareConditional(
+            'OS',
+            'Windows_NT',
+            DeclareList({
+                DeclareVariableEq(
+                    'dos',
+                    'Windows'
+                ),
+                DeclareVariableEval(
+                    'deps_d',
+                    'bin'
+                )
+            }),
             DeclareVariableEq(
                 'dos',
-                'Windows'
-            ),
-            DeclareVariableEval(
-                'deps_d',
-                'bin'
-            ),
-        }),
-        second = DeclareList({
-            {
-                genType = funcEnum.FormatVariableEq,
-                genInfo = {
-                    variable_name = 'dos',
-                    value = '$(shell uname -s)'
-                }
-            }
-        })
-    })
+                '$(shell uname -s)'
+            )
+        )
+    )
+
     g_allFuncs:insertFunc(funcEnum.FormatFunc, 'debug')
 end
 
