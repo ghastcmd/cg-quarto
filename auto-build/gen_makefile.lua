@@ -2,23 +2,24 @@ local g_allFuncs = {
     funcList = {},
     currentIndex = 1,
 
+    assignUpdate = function(self, value)
+        self.funcList[self.currentIndex] = value
+        self.currentIndex = self.currentIndex + 1
+    end,
+
     insertValue = function(self, value)
         local newValue = value
         newValue.index = self.currentIndex
 
-        self.funcList[self.currentIndex] = newValue
-
-        self.currentIndex = self.currentIndex + 1
-    end, 
-
+        self:assignUpdate(newValue)
+    end,
+    
     insertFunc = function(self, genType, genInfo)
-        self.funcList[self.currentIndex] = {
+        self:assignUpdate({
             genType = genType,
             genInfo = genInfo,
             index = self.currentIndex,
-        }
-
-        self.currentIndex = self.currentIndex + 1
+        })
     end,
 
     getAll = function(self, sort)
@@ -45,11 +46,19 @@ local function puts(in_string)
 end
 
 local dispatchAllGenFunc
+local NotNone
+
+local function generateBreak()
+    puts('\n')
+end
+
+local function generateNone()
+end
 
 local function generateFormatPrint(inVar)
     puts('define ' .. inVar .. '\n')
     puts('\t$(SS)echo $(1)\n')
-    puts('endef\n\n')
+    puts('endef\n')
 end
 
 local function generateConditional(inVar)
@@ -57,16 +66,16 @@ local function generateConditional(inVar)
                                     inVar.variable_name, inVar.value)
     puts(fmt_string)
 
-    if inVar.inside ~= nil then
+    if NotNone(inVar.inside) then
         dispatchAllGenFunc(inVar.inside)
     end
 
-    if inVar.second ~= nil then
+    if NotNone(inVar.second) then
         puts('else\n')
         dispatchAllGenFunc(inVar.second)
     end
 
-    puts('endif\n\n')
+    puts('endif\n')
 end
 
 local function generateVariableEq(inVar)
@@ -78,18 +87,26 @@ local function generateVariableEval(inVar)
 end
 
 local funcEnum = {
-    FormatFunc          = 1,
-    FormatConditional   = 2,
-    FormatVariableEq    = 3,
-    FormatVariableEval  = 4,
+    FormatNone          = 0,
+    FormatBreak         = 1,
+    FormatFunc          = 2,
+    FormatConditional   = 3,
+    FormatVariableEq    = 4,
+    FormatVariableEval  = 5,
 }
 
 local translateTable = {
+    [funcEnum.FormatNone]          = generateNone,
+    [funcEnum.FormatBreak]         = generateBreak,
     [funcEnum.FormatFunc]          = generateFormatPrint,
     [funcEnum.FormatConditional]   = generateConditional,
     [funcEnum.FormatVariableEq]    = generateVariableEq,
     [funcEnum.FormatVariableEval]  = generateVariableEval,
 }
+
+function NotNone(inValue)
+    return inValue.genType ~= funcEnum.FormatNone
+end
 
 local function dispatchGenFunc(genType, genInfo)
     translateTable[genType](genInfo)
@@ -103,6 +120,20 @@ function dispatchAllGenFunc(inList)
             dispatchGenFunc(value.genType, value.genInfo)
         end
     end
+end
+
+local function DeclareBreak()
+    return {
+        genType = funcEnum.FormatBreak,
+        genInfo = {}
+    }
+end
+
+local function DeclareNone()
+    return {
+        genType = funcEnum.FormatNone,
+        genInfo = {},
+    }
 end
 
 local function DeclareList(inTable)
@@ -156,6 +187,8 @@ end
 local function generateConfigs(inConfigs)
     g_allFuncs:insertFunc(funcEnum.FormatFunc, 'fmt')
 
+    g_allFuncs:insertValue(DeclareBreak())
+
     g_allFuncs:insertValue(
         DeclareConditional(
             'OS',
@@ -168,6 +201,15 @@ local function generateConfigs(inConfigs)
                 DeclareVariableEval(
                     'deps_d',
                     'bin'
+                ),
+                DeclareConditional(
+                    'numa',
+                    'numa_ie',
+                    DeclareVariableEval(
+                        'numa',
+                        'numa_ie'
+                    ),
+                    DeclareNone()
                 )
             }),
             DeclareVariableEq(
@@ -177,13 +219,17 @@ local function generateConfigs(inConfigs)
         )
     )
 
+    g_allFuncs:insertValue(DeclareBreak())
+
     g_allFuncs:insertFunc(funcEnum.FormatFunc, 'debug')
 end
 
 function GenerateAll(inConfigs)
     generateConfigs(inConfigs)
 
+    print('before get all')
     local allFuncs = g_allFuncs:getAll(false)
+    print('after get all')
 
     dispatchAllGenFunc(allFuncs)
 end
