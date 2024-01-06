@@ -69,15 +69,17 @@ local function generateVariableEval(inVar)
 end
 
 local funcEnum = {
-    FormatFunc        = 1,
-    FormatConditional = 2,
-    FormatVariableEq  = 3,
+    FormatFunc          = 1,
+    FormatConditional   = 2,
+    FormatVariableEq    = 3,
+    FormatVariableEval  = 4,
 }
 
 local translateTable = {
-    [funcEnum.FormatFunc]        = generateFormatPrint,
-    [funcEnum.FormatConditional] = generateConditional,
-    [funcEnum.FormatVariableEq]  = generateVariableEq,
+    [funcEnum.FormatFunc]          = generateFormatPrint,
+    [funcEnum.FormatConditional]   = generateConditional,
+    [funcEnum.FormatVariableEq]    = generateVariableEq,
+    [funcEnum.FormatVariableEval]  = generateVariableEval,
 }
 
 local function dispatchGenFunc(genType, genInfo)
@@ -90,33 +92,52 @@ function dispatchAllGenFunc(inList)
     end
 end
 
---!---------------------------------------------------!
--- TODO: Write things so that the order is predictable!
---!---------------------------------------------------!
+local function DeclareList(inTable)
+    local retList = {}
+
+    local num = #inTable
+
+    for i = 1, num do
+        local retFromSelect = inTable[i]
+
+        retFromSelect.index = i
+
+        table.insert(retList, retFromSelect)
+    end
+
+    return retList
+end
 
 local function generateConfigs(inConfigs)
     g_allFuncs:insertFunc(funcEnum.FormatFunc, 'fmt')
     g_allFuncs:insertFunc(funcEnum.FormatConditional, {
         variable_name = 'OS',
         value = 'Windows_NT',
-        inside = {
-            [1] = {
+        inside = DeclareList({
+            {
                 genType = funcEnum.FormatVariableEq,
                 genInfo = {
                     variable_name = 'dos',
                     value = 'Windows'
                 }
             },
-        },
-        second = {
-            [1] = {
+            {
+                genType = funcEnum.FormatVariableEval,
+                genInfo = {
+                    variable_name = 'deps_d',
+                    value = 'bin'
+                }
+            }
+        }),
+        second = DeclareList({
+            {
                 genType = funcEnum.FormatVariableEq,
                 genInfo = {
                     variable_name = 'dos',
                     value = '$(shell uname -s)'
                 }
             }
-        }
+        })
     })
     g_allFuncs:insertFunc(funcEnum.FormatFunc, 'debug')
 end
