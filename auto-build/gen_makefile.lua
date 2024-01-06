@@ -108,26 +108,40 @@ local function DeclareList(inTable)
     return retList
 end
 
+local function DeclareConditionalEq(variableName, value)
+    return {
+        genType = funcEnum.FormatVariableEq,
+        genInfo = {
+            variable_name = variableName,
+            value = value
+        }
+    }
+end
+
+local function DeclareConditionalEval(variableName, value)
+    return {
+        genType = funcEnum.FormatVariableEval,
+        genInfo = {
+            variable_name = variableName,
+            value = value
+        }
+    }
+end
+
 local function generateConfigs(inConfigs)
     g_allFuncs:insertFunc(funcEnum.FormatFunc, 'fmt')
     g_allFuncs:insertFunc(funcEnum.FormatConditional, {
         variable_name = 'OS',
         value = 'Windows_NT',
         inside = DeclareList({
-            {
-                genType = funcEnum.FormatVariableEq,
-                genInfo = {
-                    variable_name = 'dos',
-                    value = 'Windows'
-                }
-            },
-            {
-                genType = funcEnum.FormatVariableEval,
-                genInfo = {
-                    variable_name = 'deps_d',
-                    value = 'bin'
-                }
-            }
+            DeclareConditionalEq(
+                'dos',
+                'Windows'
+            ),
+            DeclareConditionalEval(
+                'deps_d',
+                'bin'
+            ),
         }),
         second = DeclareList({
             {
