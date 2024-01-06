@@ -96,18 +96,24 @@ end
 
 local function generateVariableEq(inVar)
     puts(string.format(
-        getIdent() .. '%s = %s\n',
-        inVar.variableName,
-        inVar.value
+        getIdent() .. '%s = ',
+        inVar.variableName
     ))
+
+    dispatchAllGenFunc(inVar.expression)
+
+    puts('\n')
 end
 
 local function generateVariableEval(inVar)
     puts(string.format(
-        getIdent() .. '%s := %s\n',
-        inVar.variableName,
-        inVar.value
+        getIdent() .. '%s := ',
+        inVar.variableName
     ))
+
+    dispatchAllGenFunc(inVar.expression)
+
+    puts('\n')
 end
 
 local function generateVariableGet(inVar, ident)
@@ -118,6 +124,9 @@ local function generateVariableGet(inVar, ident)
 end
 
 local function generateName(inVar)
+    if (inVar.index or 0) > 1 then
+        puts(' ')
+    end
     puts(inVar.nameValue)
 end
 
@@ -186,6 +195,7 @@ local function DeclareList(inTable)
         local retFromSelect = inTable[i]
 
         retFromSelect.index = i
+        retFromSelect.genInfo.index = i
 
         table.insert(retList, retFromSelect)
     end
@@ -198,7 +208,7 @@ local function DeclareVariableEq(variableName, assignmentExpression)
         genType = funcEnum.FormatVariableEq,
         genInfo = {
             variableName = variableName,
-            value = assignmentExpression
+            expression = assignmentExpression
         }
     }
 end
@@ -208,12 +218,14 @@ local function DeclareVariableEval(variableName, assignmentExpression)
         genType = funcEnum.FormatVariableEval,
         genInfo = {
             variableName = variableName,
-            value = assignmentExpression
+            expression = assignmentExpression
         }
     }
 end
 
-local function DeclareConditional(valueLeft, valueRight, insideIf, insideElse)
+local function DeclareConditional(
+    valueLeft, valueRight, insideIf, insideElse
+)
     return {
         genType = funcEnum.FormatConditional,
         genInfo = {
@@ -255,30 +267,33 @@ local function generateConfigs(inConfigs)
             DeclareList({
                 DeclareVariableEq(
                     'dos',
-                    'Windows'
+                    DeclareName('Windows')
                 ),
                 DeclareVariableEval(
                     'deps_d',
-                    'bin'
+                    DeclareName('bin')
                 ),
                 DeclareConditional(
                     DeclareName('numa'),
                     DeclareVariableGet('numa_ie'),
                     DeclareVariableEval(
                         'numa',
-                        'numa_ie'
+                        DeclareName('numa_ie')
                     ),
                     DeclareConditional(
                         DeclareVariableGet('var'),
                         DeclareVariableGet('das'),
                         DeclareNone(),
-                        DeclareVariableEq('iop', 'ujk')
+                        DeclareVariableEq(
+                            'iop',
+                            DeclareName('ujk')
+                        )
                     )
                 )
             }),
             DeclareVariableEq(
                 'dos',
-                '$(shell uname -s)'
+                DeclareName('$(shell uname -s)')
             )
         )
     )
@@ -286,6 +301,16 @@ local function generateConfigs(inConfigs)
     g_allFuncs:insertValue(DeclareBreak())
 
     g_allFuncs:insertFunc(funcEnum.FormatFunc, 'debug')
+
+    g_allFuncs:insertValue(DeclareBreak())
+
+    g_allFuncs:insertValue(DeclareVariableEval(
+        'help-test',
+        DeclareList({
+            DeclareName('name'),
+            DeclareName('config'),
+        })
+))
 end
 
 function GenerateAll(inConfigs)
