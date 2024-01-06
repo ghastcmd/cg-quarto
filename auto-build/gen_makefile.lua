@@ -26,7 +26,6 @@ local g_allFuncs = {
         local inFuncList = self.funcList
 
         if sort or false then
-            print("runned")
             local function greater(a, b)
                 return tonumber(a.index) <= tonumber(b.index)
             end
@@ -39,6 +38,16 @@ local g_allFuncs = {
 }
 
 local g_outputString = ''
+
+local ident = 0
+
+local function updateIdent(value)
+    ident = ident + value
+end
+
+local function getIdent()
+    return string.rep(' ', ident)
+end
 
 local function puts(in_string)
     io.write(in_string)
@@ -66,16 +75,22 @@ local function generateConditional(inVar)
                                     inVar.variable_name, inVar.value)
     puts(fmt_string)
 
+    
+
     if NotNone(inVar.inside) then
+        updateIdent(4)
         dispatchAllGenFunc(inVar.inside)
+        updateIdent(-4)
     end
-
+    
     if NotNone(inVar.second) then
-        puts('else\n')
+        puts(getIdent() .. 'else\n')
+        updateIdent(4)
         dispatchAllGenFunc(inVar.second)
+        updateIdent(-4)
     end
 
-    puts('endif\n')
+    puts(getIdent() .. 'endif\n')
 end
 
 local function generateVariableEq(inVar)
@@ -112,15 +127,22 @@ local function dispatchGenFunc(genType, genInfo)
     translateTable[genType](genInfo)
 end
 
-function dispatchAllGenFunc(inList)
+local function aux_dispatchAllGenFunc(inList)
     if #inList == 0 then
+        puts(getIdent())
         dispatchGenFunc(inList.genType, inList.genInfo)
     else
         for _, value in pairs(inList) do
+            puts(getIdent())
             dispatchGenFunc(value.genType, value.genInfo)
         end
     end
 end
+
+function dispatchAllGenFunc(inList)
+    aux_dispatchAllGenFunc(inList, 0)
+end
+
 
 local function DeclareBreak()
     return {
@@ -209,7 +231,12 @@ local function generateConfigs(inConfigs)
                         'numa',
                         'numa_ie'
                     ),
-                    DeclareNone()
+                    DeclareConditional(
+                        'var',
+                        'das',
+                        DeclareVariableEq('asd', 'ewq'),
+                        DeclareVariableEq('iop', 'ujk')
+                    )
                 )
             }),
             DeclareVariableEq(
