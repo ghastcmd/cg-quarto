@@ -108,7 +108,7 @@ local function DeclareList(inTable)
     return retList
 end
 
-local function DeclareConditionalEq(variableName, value)
+local function DeclareVariableEq(variableName, value)
     return {
         genType = funcEnum.FormatVariableEq,
         genInfo = {
@@ -118,7 +118,7 @@ local function DeclareConditionalEq(variableName, value)
     }
 end
 
-local function DeclareConditionalEval(variableName, value)
+local function DeclareVariableEval(variableName, value)
     return {
         genType = funcEnum.FormatVariableEval,
         genInfo = {
@@ -134,11 +134,11 @@ local function generateConfigs(inConfigs)
         variable_name = 'OS',
         value = 'Windows_NT',
         inside = DeclareList({
-            DeclareConditionalEq(
+            DeclareVariableEq(
                 'dos',
                 'Windows'
             ),
-            DeclareConditionalEval(
+            DeclareVariableEval(
                 'deps_d',
                 'bin'
             ),
