@@ -37,23 +37,24 @@ local g_allFuncs = {
     end,
 }
 
-local g_outputString = ''
-
-local ident = 0
+local g_ident = 0
 
 local function updateIdent(value)
-    ident = ident + value
+    g_ident = g_ident + value
 end
 
 local function getIdent()
-    return string.rep(' ', ident)
+    return string.rep(' ', g_ident)
 end
+
+local g_outputString = ''
 
 local function puts(in_string)
     io.write(in_string)
     -- g_outputString = g_outputString .. in_string
 end
 
+local dispatchGenFunc
 local dispatchAllGenFunc
 local NotNone
 
@@ -71,18 +72,18 @@ local function generateFormatPrint(inVar)
 end
 
 local function generateConditional(inVar)
-    local fmt_string = string.format('ifeq ($(%s),%s)\n',
-                                    inVar.variable_name, inVar.value)
-    puts(fmt_string)
-
-    
+    puts(getIdent() .. 'ifeq (')
+    dispatchGenFunc(inVar.valueLeft)
+    puts(',')
+    dispatchGenFunc(inVar.valueRight)
+    puts(')\n')
 
     if NotNone(inVar.inside) then
         updateIdent(4)
         dispatchAllGenFunc(inVar.inside)
         updateIdent(-4)
     end
-    
+
     if NotNone(inVar.second) then
         puts(getIdent() .. 'else\n')
         updateIdent(4)
@@ -94,11 +95,30 @@ local function generateConditional(inVar)
 end
 
 local function generateVariableEq(inVar)
-    puts(string.format('%s = %s\n', inVar.variable_name, inVar.value))
+    puts(string.format(
+        getIdent() .. '%s = %s\n',
+        inVar.variableName,
+        inVar.value
+    ))
 end
 
 local function generateVariableEval(inVar)
-    puts(string.format('%s := %s\n', inVar.variable_name, inVar.value))
+    puts(string.format(
+        getIdent() .. '%s := %s\n',
+        inVar.variableName,
+        inVar.value
+    ))
+end
+
+local function generateVariableGet(inVar, ident)
+    puts(string.format(
+        '$(%s)',
+        inVar.variableName
+    ))
+end
+
+local function generateName(inVar)
+    puts(inVar.nameValue)
 end
 
 local funcEnum = {
@@ -108,6 +128,8 @@ local funcEnum = {
     FormatConditional   = 3,
     FormatVariableEq    = 4,
     FormatVariableEval  = 5,
+    FormatVariableGet   = 6,
+    FormatName          = 7,
 }
 
 local translateTable = {
@@ -117,32 +139,29 @@ local translateTable = {
     [funcEnum.FormatConditional]   = generateConditional,
     [funcEnum.FormatVariableEq]    = generateVariableEq,
     [funcEnum.FormatVariableEval]  = generateVariableEval,
+    [funcEnum.FormatVariableGet]   = generateVariableGet,
+    [funcEnum.FormatName]          = generateName,
 }
 
 function NotNone(inValue)
     return inValue.genType ~= funcEnum.FormatNone
 end
 
-local function dispatchGenFunc(genType, genInfo)
+function dispatchGenFunc(inValue)
+    local genType = inValue.genType
+    local genInfo = inValue.genInfo
     translateTable[genType](genInfo)
 end
 
-local function aux_dispatchAllGenFunc(inList)
+function dispatchAllGenFunc(inList)
     if #inList == 0 then
-        puts(getIdent())
-        dispatchGenFunc(inList.genType, inList.genInfo)
+        dispatchGenFunc(inList)
     else
         for _, value in pairs(inList) do
-            puts(getIdent())
-            dispatchGenFunc(value.genType, value.genInfo)
+            dispatchGenFunc(value)
         end
     end
 end
-
-function dispatchAllGenFunc(inList)
-    aux_dispatchAllGenFunc(inList, 0)
-end
-
 
 local function DeclareBreak()
     return {
@@ -178,7 +197,7 @@ local function DeclareVariableEq(variableName, assignmentExpression)
     return {
         genType = funcEnum.FormatVariableEq,
         genInfo = {
-            variable_name = variableName,
+            variableName = variableName,
             value = assignmentExpression
         }
     }
@@ -188,20 +207,38 @@ local function DeclareVariableEval(variableName, assignmentExpression)
     return {
         genType = funcEnum.FormatVariableEval,
         genInfo = {
-            variable_name = variableName,
+            variableName = variableName,
             value = assignmentExpression
         }
     }
 end
 
-local function DeclareConditional(variableName, valueToCompare, insideIf, insideElse)
+local function DeclareConditional(valueLeft, valueRight, insideIf, insideElse)
     return {
         genType = funcEnum.FormatConditional,
         genInfo = {
-            variable_name = variableName,
-            value = valueToCompare,
+            valueLeft = valueLeft,
+            valueRight = valueRight,
             inside = insideIf,
             second = insideElse,
+        }
+    }
+end
+
+local function DeclareVariableGet(variableName)
+    return {
+        genType = funcEnum.FormatVariableGet,
+        genInfo = {
+            variableName = variableName,
+        }
+    }
+end
+
+local function DeclareName(nameValue)
+    return {
+        genType = funcEnum.FormatName,
+        genInfo = {
+            nameValue = nameValue,
         }
     }
 end
@@ -213,8 +250,8 @@ local function generateConfigs(inConfigs)
 
     g_allFuncs:insertValue(
         DeclareConditional(
-            'OS',
-            'Windows_NT',
+            DeclareVariableGet('OS'),
+            DeclareName('Windows_NT'),
             DeclareList({
                 DeclareVariableEq(
                     'dos',
@@ -225,16 +262,16 @@ local function generateConfigs(inConfigs)
                     'bin'
                 ),
                 DeclareConditional(
-                    'numa',
-                    'numa_ie',
+                    DeclareName('numa'),
+                    DeclareVariableGet('numa_ie'),
                     DeclareVariableEval(
                         'numa',
                         'numa_ie'
                     ),
                     DeclareConditional(
-                        'var',
-                        'das',
-                        DeclareVariableEq('asd', 'ewq'),
+                        DeclareVariableGet('var'),
+                        DeclareVariableGet('das'),
+                        DeclareNone(),
                         DeclareVariableEq('iop', 'ujk')
                     )
                 )
@@ -254,9 +291,7 @@ end
 function GenerateAll(inConfigs)
     generateConfigs(inConfigs)
 
-    print('before get all')
     local allFuncs = g_allFuncs:getAll(false)
-    print('after get all')
 
     dispatchAllGenFunc(allFuncs)
 end
