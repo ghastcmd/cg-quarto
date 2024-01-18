@@ -1,3 +1,9 @@
+# -1. TODOs
+
+- [x] Create function definitions and emission
+- [ ] Create containerized (configurable/better iterface) emmit
+- [ ] Create Expression emission
+
 # 0. This is the plan for the build system revamp
 
 - [x] OS detection

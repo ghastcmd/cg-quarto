@@ -50,7 +50,9 @@ end
 local g_outputString = ''
 
 local function puts(in_string)
-    io.write(in_string)
+    if in_string ~= nil then
+        io.write(in_string)
+    end
     -- g_outputString = g_outputString .. in_string
 end
 
@@ -130,26 +132,43 @@ local function generateName(inVar)
     puts(inVar.nameValue)
 end
 
+local function generateFunction(inVar)
+    puts(inVar.nameValue)
+    puts(':')
+    puts(inVar.dependency)
+    puts('\n')
+
+    if inVar.declList ~= nil and NotNone(inVar.declList) then
+        updateIdent(4)
+        dispatchAllGenFunc(inVar.declList)
+        updateIdent(-4)
+    end
+
+    puts('\n')
+end
+
 local funcEnum = {
     FormatNone          = 0,
     FormatBreak         = 1,
-    FormatFunc          = 2,
+    FormatPrint         = 2,
     FormatConditional   = 3,
     FormatVariableEq    = 4,
     FormatVariableEval  = 5,
     FormatVariableGet   = 6,
     FormatName          = 7,
+    FormatFunction      = 8,
 }
 
 local translateTable = {
     [funcEnum.FormatNone]          = generateNone,
     [funcEnum.FormatBreak]         = generateBreak,
-    [funcEnum.FormatFunc]          = generateFormatPrint,
+    [funcEnum.FormatPrint]         = generateFormatPrint,
     [funcEnum.FormatConditional]   = generateConditional,
     [funcEnum.FormatVariableEq]    = generateVariableEq,
     [funcEnum.FormatVariableEval]  = generateVariableEval,
     [funcEnum.FormatVariableGet]   = generateVariableGet,
     [funcEnum.FormatName]          = generateName,
+    [funcEnum.FormatFunction]      = generateFunction,
 }
 
 function NotNone(inValue)
@@ -255,8 +274,19 @@ local function DeclareName(nameValue)
     }
 end
 
+local function DeclareFunction(nameValue, dependency, declList)
+    return {
+        genType = funcEnum.FormatFunction,
+        genInfo = {
+            nameValue = nameValue,
+            dependency = dependency,
+            declList = declList,
+        }
+    }
+end
+
 local function generateConfigs(inConfigs)
-    g_allFuncs:insertFunc(funcEnum.FormatFunc, 'fmt')
+    g_allFuncs:insertFunc(funcEnum.FormatPrint, 'fmt')
 
     g_allFuncs:insertValue(DeclareBreak())
 
@@ -300,7 +330,7 @@ local function generateConfigs(inConfigs)
 
     g_allFuncs:insertValue(DeclareBreak())
 
-    g_allFuncs:insertFunc(funcEnum.FormatFunc, 'debug')
+    g_allFuncs:insertFunc(funcEnum.FormatPrint, 'debug')
 
     g_allFuncs:insertValue(DeclareBreak())
 
@@ -310,7 +340,18 @@ local function generateConfigs(inConfigs)
             DeclareName('name'),
             DeclareName('config'),
         })
-))
+    ))
+
+    g_allFuncs:insertValue(DeclareFunction(
+        'simple_value',
+        '',
+        DeclareList({
+            DeclareVariableEq(
+                'name',
+                DeclareName('$(shell uname -s)')
+            ),
+        })
+    ))
 end
 
 function GenerateAll(inConfigs)
