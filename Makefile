@@ -15,7 +15,7 @@ else
 	dos = $(shell uname -s)
 endif
 
-CC = g++ -std=c++20
+CC = clang++ -std=c++20
 
 pch = include/pch.h
 gch = $(pch:.h=.h.gch)
@@ -38,7 +38,7 @@ ifeq ($(dos),Windows)
 	dep_dir := $(subst /,\,$(dep_dir))
 else
 ifeq ($(dos),Linux)
-	def_d  = 
+	def_d  =
 	libs_d = GL GLU glut
 endif
 endif
