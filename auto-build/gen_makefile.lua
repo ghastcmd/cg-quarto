@@ -13,7 +13,7 @@ local g_allFuncs = {
 
         self:assignUpdate(newValue)
     end,
-    
+
     insertFunc = function(self, genType, genInfo)
         self:assignUpdate({
             genType = genType,
@@ -148,27 +148,27 @@ local function generateFunction(inVar)
 end
 
 local funcEnum = {
-    FormatNone          = 0,
-    FormatBreak         = 1,
-    FormatPrint         = 2,
-    FormatConditional   = 3,
-    FormatVariableEq    = 4,
-    FormatVariableEval  = 5,
-    FormatVariableGet   = 6,
-    FormatName          = 7,
-    FormatFunction      = 8,
+    FormatNone         = 0,
+    FormatBreak        = 1,
+    FormatPrint        = 2,
+    FormatConditional  = 3,
+    FormatVariableEq   = 4,
+    FormatVariableEval = 5,
+    FormatVariableGet  = 6,
+    FormatName         = 7,
+    FormatFunction     = 8,
 }
 
 local translateTable = {
-    [funcEnum.FormatNone]          = generateNone,
-    [funcEnum.FormatBreak]         = generateBreak,
-    [funcEnum.FormatPrint]         = generateFormatPrint,
-    [funcEnum.FormatConditional]   = generateConditional,
-    [funcEnum.FormatVariableEq]    = generateVariableEq,
-    [funcEnum.FormatVariableEval]  = generateVariableEval,
-    [funcEnum.FormatVariableGet]   = generateVariableGet,
-    [funcEnum.FormatName]          = generateName,
-    [funcEnum.FormatFunction]      = generateFunction,
+    [funcEnum.FormatNone]         = generateNone,
+    [funcEnum.FormatBreak]        = generateBreak,
+    [funcEnum.FormatPrint]        = generateFormatPrint,
+    [funcEnum.FormatConditional]  = generateConditional,
+    [funcEnum.FormatVariableEq]   = generateVariableEq,
+    [funcEnum.FormatVariableEval] = generateVariableEval,
+    [funcEnum.FormatVariableGet]  = generateVariableGet,
+    [funcEnum.FormatName]         = generateName,
+    [funcEnum.FormatFunction]     = generateFunction,
 }
 
 function NotNone(inValue)

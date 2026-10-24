@@ -81,14 +81,16 @@ end
 
 function Run()
     print('=== EXECUTING CODE ===')
-    
+
     local parsedString = parseString(outputdir)
-    PrettyPrint({string_parsing = {
-        toFormatString = outputdir,
-        parsedString = parsedString,
-    }})
-    PrettyPrint({g_allVariables = g_allVariables})
-    
+    PrettyPrint({
+        string_parsing = {
+            toFormatString = outputdir,
+            parsedString = parsedString,
+        }
+    })
+    PrettyPrint({ g_allVariables = g_allVariables })
+
     print('\n#####################')
     print('### PRINTING CODE ###')
     print('#####################\n')
